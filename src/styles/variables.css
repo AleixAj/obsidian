@@ -1,0 +1,46 @@
+/* ===========================================
+   OBSIDIAN — Design tokens
+   -------------------------------------------
+   Single source of truth for colours, fonts,
+   timings and layout sizes. Touch a value here
+   to rebrand the whole site at once.
+   =========================================== */
+
+:root {
+  /* — Neutral palette (black on black) — */
+  --bg: #0a0a0a;
+  --bg-1: #111111;
+  --bg-2: #1a1818;
+  --fg: #f5efe2;
+  --fg-dim: #8a847a;
+  --fg-mute: #4a463f;
+  --line: #221f1a;
+  --line-2: #2e2a23;
+
+  /* — Brand gold (Obsidian aurum) — */
+  --gold: #d4af37;
+  --gold-hi: #e8c87a;
+  --gold-soft: #806331;
+
+  /* — Semantic accents — */
+  --accent-warn: #d96446;
+  --accent-ok: #6fb38b;
+
+  /* — Typography (Syne ✦ Space Grotesk) — */
+  --font-display: "Syne", "Archivo Black", sans-serif;
+  --font-body: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* — Borders & radii — */
+  --radius: 2px;
+  --radius-lg: 4px;
+
+  /* — Easing curves — */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* — Layout — */
+  --header-h: 73px;
+  --announce-h: 32px;
+  --section-pad: 100px;
+}
