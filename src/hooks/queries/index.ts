@@ -17,3 +17,11 @@ export {
   useOrders,
   useUpdateAddress,
 } from "./useAccount";
+export {
+  useAddCartItem,
+  useCartQuery,
+  useClearCart,
+  useDeleteCartItem,
+  useMergeCart,
+  useUpdateCartItem,
+} from "./useCartSync";

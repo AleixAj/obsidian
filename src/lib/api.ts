@@ -151,6 +151,32 @@ export interface ApiAccountDTO {
 
 export type AddressPayload = Omit<ApiAddressDTO, "id" | "created_at" | "updated_at">;
 
+export interface ApiCartItemDTO {
+  id: number;
+  product: ApiProductDTO;
+  size_label: string | null;
+  color_hex: string | null;
+  quantity: number;
+  unit_price_cents: number;
+  line_total_cents: number;
+}
+
+export interface ApiCartDTO {
+  id: number;
+  currency: string;
+  items: ApiCartItemDTO[];
+  total_count: number;
+  subtotal_cents: number;
+  updated_at: string | null;
+}
+
+export interface CartLinePayload {
+  product_slug: string;
+  size_label?: string | null;
+  color_hex?: string | null;
+  quantity: number;
+}
+
 interface ApiListEnvelope<T> {
   data: T[];
 }
@@ -334,6 +360,51 @@ export const deleteAddress = async (id: number): Promise<void> => {
   await request<void>(`/api/addresses/${id}`, {
     method: "DELETE",
   });
+};
+
+export const fetchCart = async (): Promise<ApiCartDTO> => {
+  const { data } = await request<ApiItemEnvelope<ApiCartDTO>>("/api/cart");
+  return data;
+};
+
+export const addCartItem = async (payload: CartLinePayload): Promise<ApiCartDTO> => {
+  await csrfCookie();
+  const { data } = await jsonRequest<ApiItemEnvelope<ApiCartDTO>>("/api/cart/items", payload);
+  return data;
+};
+
+export const updateCartItem = async (id: number, quantity: number): Promise<ApiCartDTO> => {
+  await csrfCookie();
+  const { data } = await request<ApiItemEnvelope<ApiCartDTO>>(`/api/cart/items/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ quantity }),
+  });
+  return data;
+};
+
+export const deleteCartItem = async (id: number): Promise<ApiCartDTO> => {
+  await csrfCookie();
+  const { data } = await request<ApiItemEnvelope<ApiCartDTO>>(`/api/cart/items/${id}`, {
+    method: "DELETE",
+  });
+  return data;
+};
+
+export const clearCart = async (): Promise<ApiCartDTO> => {
+  await csrfCookie();
+  const { data } = await request<ApiItemEnvelope<ApiCartDTO>>("/api/cart/items", {
+    method: "DELETE",
+  });
+  return data;
+};
+
+export const mergeCart = async (items: CartLinePayload[]): Promise<ApiCartDTO> => {
+  await csrfCookie();
+  const { data } = await jsonRequest<ApiItemEnvelope<ApiCartDTO>>("/api/cart/merge", { items });
+  return data;
 };
 
 export const login = async (payload: AuthCredentials): Promise<ApiUserDTO> => {

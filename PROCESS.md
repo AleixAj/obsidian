@@ -17,9 +17,12 @@
 4. [Etapa 0 — Decisiones de arquitectura](#etapa-0--decisiones-de-arquitectura)
 5. [Etapa 1 — Backend operativo](#etapa-1--backend-operativo)
 6. [Etapa 2 — Frontend hablando con el backend](#etapa-2--frontend-hablando-con-el-backend)
-7. [Comandos diarios](#-comandos-diarios)
-8. [FAQ "si te preguntan en una entrevista…"](#faq-si-te-preguntan-en-una-entrevista)
-9. [Roadmap restante](#roadmap-restante)
+7. [Etapa 3 — Autenticación real](#etapa-3--autenticación-real)
+8. [Etapa 4 — Account dashboard conectado](#etapa-4--account-dashboard-conectado)
+9. [Etapa 5 — Cart sync guest ↔ user](#etapa-5--cart-sync-guest--user)
+10. [Comandos diarios](#-comandos-diarios)
+11. [FAQ "si te preguntan en una entrevista…"](#faq-si-te-preguntan-en-una-entrevista)
+12. [Roadmap restante](#roadmap-restante)
 
 ---
 
@@ -53,8 +56,8 @@ Navegador  ── HTTP/JSON ──► Laravel 11
 
 - El SPA pide JSON a `http://localhost:8000/api/*`.
 - React Query cachea las respuestas y pinta skeletons mientras espera.
-- Carrito y wishlist siguen viviendo en `localStorage` (no necesitan
-  backend hasta que haya cuentas de usuario).
+- El carrito vive en `localStorage` como invitado y se sincroniza con
+  backend cuando hay sesión. Wishlist sigue local por ahora.
 
 ---
 
@@ -69,7 +72,7 @@ Navegador  ── HTTP/JSON ──► Laravel 11
 | **TypeScript** | Tipado encima de JavaScript | Detecta errores antes de ejecutar (faltó un campo, te equivocaste de tipo, una función no devuelve lo que dices). En entrevistas vale doble: implica que sabes el "lenguaje + sistema de tipos". |
 | **React Router 7** | Navegación SPA (URLs sin recargar) | Es el de toda la vida; cualquier dev React lo lee a la primera. Alternativa moderna: TanStack Router — descartada para no introducir dos librerías de TanStack y mantener la curva baja. |
 | **@tanstack/react-query** | Capa de datos del servidor (fetch + cache + loading/error/refetch) | Cambia totalmente cómo escribes peticiones: en vez de `useEffect + useState + try/catch` (5-7 líneas por pantalla), pones `useQuery(...)` (1 línea). Se ha vuelto estándar en empresas — pregunta esperable en entrevistas. Alternativa: SWR (Vercel) — similar pero con ecosistema más pequeño. Otra: Redux Toolkit Query — descartado, demasiada ceremonia para un catálogo de 11 productos. |
-| **localStorage** | Persistencia local (cart, wishlist) | Cero infraestructura, sobrevive al refresh. Cuando exista login, Etapa 5 sincroniza con el backend. |
+| **localStorage** | Persistencia local (guest cart, wishlist) | Cero infraestructura, sobrevive al refresh. El carrito invitado se sube al backend al iniciar sesión; wishlist queda para Etapa 7. |
 | **CSS plano + variables CSS** | Estilos | Sin Tailwind ni styled-components a propósito: queríamos demostrar que sabemos escribir CSS desde cero, con tokens (`--gold`, `--bg`) y BEM-ligero. |
 
 ### Backend (`obsidian-api`)
@@ -500,6 +503,57 @@ Account ahora:
 
 ---
 
+## Etapa 5 — Cart sync guest ↔ user
+
+**Objetivo**: que el usuario no pierda el carrito al iniciar sesión. Si
+añade productos como invitado, luego hace login/register y abre el
+drawer, esos productos ya viven en `/api/cart`.
+
+### Paso 5.1 — API de carrito autenticado
+
+Backend:
+
+- `GET /api/cart`
+- `POST /api/cart/items`
+- `PATCH /api/cart/items/{id}`
+- `DELETE /api/cart/items/{id}`
+- `DELETE /api/cart/items`
+- `POST /api/cart/merge`
+
+**Por qué un endpoint `merge`**: login/register no debe reemplazar el
+carrito del usuario a ciegas. El merge suma cantidades cuando coincide
+producto + talla + color, y conserva líneas previas si el usuario ya
+tenía carrito server-side.
+
+### Paso 5.2 — Resources y dinero seguro
+
+`CartResource` y `CartItemResource` devuelven productos con el mismo
+`ProductResource` que usa el catálogo. Así el drawer no necesita saber
+si un producto viene de `/api/products` o de `/api/cart`.
+
+El backend guarda `unit_price_cents` en cada línea para congelar el
+precio del momento en que se añadió al carrito. Si mañana cambia el
+precio del producto, una línea existente no cambia silenciosamente.
+
+### Paso 5.3 — Frontend híbrido
+
+`CartContext` sigue siendo la única API que leen los componentes:
+`add`, `updateQty`, `remove`, `clear`.
+
+Por debajo:
+
+- invitado: usa `localStorage` (`obsidian:cart`);
+- autenticado: usa React Query + `/api/cart`;
+- al detectar sesión y carrito guest, llama a `/api/cart/merge` y limpia
+  `localStorage` solo si el merge sale bien.
+
+**Por qué no meter todo el carrito directamente en React Query**:
+porque el carrito de invitado es estado local, no estado de servidor.
+Mantener `CartContext` como fachada permite que `CartDrawer`,
+`ProductCard` y PDP no cambien.
+
+---
+
 ## 🟢 Comandos diarios
 
 Abrir Cursor con **`obsidian.code-workspace`** (ambos repos a la vez).
@@ -583,7 +637,7 @@ de react-query en la esquina inferior-izquierda del SPA en modo dev.
 | 2 | SPA consume `/api/products` con react-query | UI viva contra el backend | ✅ |
 | 3 | Auth real (email/password + OAuth preparado) | Login funcional, sesión persistente | ✅ |
 | 4 | Account dashboard conectado | Pedidos/direcciones/ajustes reales | ✅ |
-| 5 | Cart sync (guest ↔ user) | El carrito sobrevive al login | ⏳ |
+| 5 | Cart sync (guest ↔ user) | El carrito sobrevive al login | ✅ |
 | 6 | Checkout + Stripe sandbox | Pagar de verdad en modo test | ⏸ |
 | 7 | Wishlist sincronizada | Wishlist multi-dispositivo | ⏸ |
 | 8 | Deploy (Cloudflare Pages + Railway) + demo user + OAuth real | Proyecto navegable desde internet | ⏸ |

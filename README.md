@@ -14,9 +14,9 @@ real commerce app: browsable catalogue, product detail pages, cart,
 wishlist, account area, API integration, and a roadmap toward auth,
 checkout and deployment.
 
-> Status: Etapa 4 complete. The SPA consumes the Laravel catalogue,
-> authenticates with Sanctum, and the account dashboard reads/writes
-> backend data. Cart sync and checkout are next.
+> Status: Etapa 5 complete. The SPA consumes the Laravel catalogue,
+> authenticates with Sanctum, reads/writes account data, and syncs the
+> guest cart into the authenticated backend cart. Checkout is next.
 
 ## Live Scope
 
@@ -28,7 +28,7 @@ Current user-facing features:
 - Catalogue pages powered by `/api/products` and `/api/categories`.
 - Product listing pages with category filtering, size/color filters and sorting.
 - Product detail page with gallery, size/color selectors and "complete the look".
-- Cart drawer with quantities, totals and free-shipping progress.
+- Cart drawer with quantities, totals, free-shipping progress and authenticated backend sync.
 - Wishlist persisted in `localStorage`.
 - Account dashboard with backend-backed overview, orders, address CRUD and profile settings.
 - Responsive layout down to mobile widths.
@@ -45,7 +45,7 @@ Current user-facing features:
 | Routing | React Router 7 | URL-driven pages and account sections. |
 | Server state | TanStack React Query 5 | Cache, loading/error states, retries and request dedupe. |
 | Client state | React Context | Cart, wishlist and toast state without Redux overhead. |
-| Persistence | `localStorage` | Guest cart/wishlist survive refresh before auth exists. |
+| Persistence | `localStorage` + backend cart | Guest cart/wishlist survive refresh; cart syncs to Laravel after login. |
 | Styling | Plain CSS + tokens | Demonstrates CSS fundamentals without framework lock-in. |
 | Backend | Laravel 11 API | Separate repo, REST endpoints, SQLite dev DB, Sanctum-ready. |
 
@@ -88,9 +88,10 @@ changes in one place.
 
 ### Local vs server state
 
-React Query owns server data (`products`, `categories`, later `user`).
-React Context owns local UI state (`cart`, `wishlist`, `toasts`). This
-keeps the app small while still separating the two kinds of state cleanly.
+React Query owns server data (`products`, `categories`, `user`, `account`,
+authenticated `cart`). React Context owns local UI state (`wishlist`,
+`toasts`) and exposes the cart API to components, switching between
+`localStorage` for guests and `/api/cart` for logged-in users.
 
 ## Project Structure
 
@@ -117,7 +118,7 @@ src/
 Docs worth reading:
 
 - [`PROCESS.md`](./PROCESS.md) - step-by-step "why we chose this" notes.
-- [`.notes/etapa-4-checkpoint.md`](./.notes/etapa-4-checkpoint.md) - current checkpoint and Etapa 5 plan.
+- [`.notes/etapa-5-checkpoint.md`](./.notes/etapa-5-checkpoint.md) - current checkpoint and Etapa 6 plan.
 
 ## Full-Stack Local Setup
 
@@ -164,11 +165,11 @@ npm run preview    # preview dist locally
 npm run lint       # ESLint
 ```
 
-Verified after Etapa 2:
+Verified after Etapa 5:
 
 - `npm run typecheck` passes.
 - `npm run build` passes.
-- API smoke checks pass against local Laravel (`/health`, `/products`, `/categories`, `/products/p1`).
+- API smoke checks pass against local Laravel, including Sanctum cart merge.
 
 ## Backend Contract
 
@@ -192,6 +193,12 @@ The frontend currently consumes:
 | `POST` | `/api/addresses` | Create address |
 | `PATCH` | `/api/addresses/{id}` | Update address / set default |
 | `DELETE` | `/api/addresses/{id}` | Delete address |
+| `GET` | `/api/cart` | Authenticated cart |
+| `POST` | `/api/cart/items` | Add product to authenticated cart |
+| `PATCH` | `/api/cart/items/{id}` | Update cart line quantity |
+| `DELETE` | `/api/cart/items/{id}` | Remove cart line |
+| `DELETE` | `/api/cart/items` | Clear authenticated cart |
+| `POST` | `/api/cart/merge` | Merge guest cart after login/register |
 
 Money is stored in the API as integer cents (`price_cents`). The adapter
 maps that to the existing UI `Product.price` number before components
@@ -225,7 +232,7 @@ with a clear "not configured" error instead of failing with a server error.
 - [x] Etapa 2 - React SPA consumes the backend via React Query.
 - [x] Etapa 3 - Real auth: email/password + prepared OAuth routes.
 - [x] Etapa 4 - Account dashboard connected to real user data.
-- [ ] Etapa 5 - Guest cart syncs into user cart on login.
+- [x] Etapa 5 - Guest cart syncs into user cart on login.
 - [ ] Etapa 6 - Stripe checkout in sandbox mode.
 - [ ] Etapa 7 - Wishlist sync across devices.
 - [ ] Etapa 8 - Deploy: Cloudflare Pages + Railway/Render + activate OAuth callbacks.

@@ -2,11 +2,23 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
+import { useUser } from "../hooks/queries";
+import {
+  useAddCartItem,
+  useCartQuery,
+  useClearCart,
+  useDeleteCartItem,
+  useMergeCart,
+  useUpdateCartItem,
+} from "../hooks/queries/useCartSync";
 import { useLocalStorage } from "../hooks/useLocalStorage";
+import { toProduct, type ApiCartDTO, type CartLinePayload } from "../lib/api";
 import type { CartItem, Product } from "../types";
 
 /**
@@ -46,13 +58,57 @@ const CartContext = createContext<CartContextValue | undefined>(undefined);
  * `App.tsx`) and access the API anywhere via `useCart()`.
  */
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useLocalStorage<CartItem[]>("obsidian:cart", []);
+  const [guestItems, setGuestItems] = useLocalStorage<CartItem[]>("obsidian:cart", []);
   const [isOpen, setIsOpen] = useState(false);
+  const { data: user } = useUser();
+  const isAuthenticated = Boolean(user);
+  const cartQuery = useCartQuery(isAuthenticated);
+  const addCartItem = useAddCartItem();
+  const updateCartItem = useUpdateCartItem();
+  const deleteCartItem = useDeleteCartItem();
+  const clearCart = useClearCart();
+  const mergeCart = useMergeCart();
+  const mergedGuestCartForUser = useRef<number | null>(null);
+
+  const serverItems = useMemo(
+    () => (cartQuery.data ? toCartItems(cartQuery.data) : []),
+    [cartQuery.data],
+  );
+  const items = isAuthenticated ? serverItems : guestItems;
+
+  useEffect(() => {
+    if (!user) {
+      mergedGuestCartForUser.current = null;
+      return;
+    }
+
+    if (guestItems.length === 0 || mergeCart.isPending) return;
+    if (mergedGuestCartForUser.current === user.id) return;
+
+    mergedGuestCartForUser.current = user.id;
+    mergeCart.mutate(toCartPayload(guestItems), {
+      onSuccess: () => setGuestItems([]),
+      onError: () => {
+        mergedGuestCartForUser.current = null;
+      },
+    });
+  }, [guestItems, mergeCart, setGuestItems, user]);
 
   const add = useCallback<CartContextValue["add"]>(
     (product) => {
       const size = product.size || product.sizes?.[0] || "M";
-      setItems((prev) => {
+      if (isAuthenticated) {
+        addCartItem.mutate({
+          product_slug: product.id,
+          size_label: size,
+          color_hex: product.colors?.[0] ?? null,
+          quantity: 1,
+        });
+        setIsOpen(true);
+        return;
+      }
+
+      setGuestItems((prev) => {
         const existing = prev.findIndex(
           (line) => line.id === product.id && line.size === size,
         );
@@ -65,12 +121,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
       });
       setIsOpen(true);
     },
-    [setItems],
+    [addCartItem, isAuthenticated, setGuestItems],
   );
 
   const updateQty = useCallback<CartContextValue["updateQty"]>(
     (index, delta) => {
-      setItems((prev) => {
+      if (isAuthenticated) {
+        const line = serverItems[index];
+        const serverLine = cartQuery.data?.items[index];
+        if (!line || !serverLine) return;
+        updateCartItem.mutate({
+          id: serverLine.id,
+          quantity: Math.max(1, line.qty + delta),
+        });
+        return;
+      }
+
+      setGuestItems((prev) => {
         const copy = [...prev];
         if (!copy[index]) return prev;
         copy[index] = {
@@ -80,15 +147,31 @@ export function CartProvider({ children }: { children: ReactNode }) {
         return copy;
       });
     },
-    [setItems],
+    [cartQuery.data?.items, isAuthenticated, serverItems, setGuestItems, updateCartItem],
   );
 
   const remove = useCallback<CartContextValue["remove"]>(
-    (index) => setItems((prev) => prev.filter((_, i) => i !== index)),
-    [setItems],
+    (index) => {
+      if (isAuthenticated) {
+        const serverLine = cartQuery.data?.items[index];
+        if (!serverLine) return;
+        deleteCartItem.mutate(serverLine.id);
+        return;
+      }
+
+      setGuestItems((prev) => prev.filter((_, i) => i !== index));
+    },
+    [cartQuery.data?.items, deleteCartItem, isAuthenticated, setGuestItems],
   );
 
-  const clear = useCallback(() => setItems([]), [setItems]);
+  const clear = useCallback(() => {
+    if (isAuthenticated) {
+      clearCart.mutate();
+      return;
+    }
+
+    setGuestItems([]);
+  }, [clearCart, isAuthenticated, setGuestItems]);
   const open = useCallback(() => setIsOpen(true), []);
   const close = useCallback(() => setIsOpen(false), []);
 
@@ -116,6 +199,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+}
+
+function toCartItems(cart: ApiCartDTO): CartItem[] {
+  return cart.items.map((line) => ({
+    ...toProduct(line.product),
+    size: line.size_label || line.product.sizes?.[0]?.label || "M",
+    colorName: line.color_hex || undefined,
+    qty: line.quantity,
+  }));
+}
+
+function toCartPayload(items: CartItem[]): CartLinePayload[] {
+  return items.map((line) => ({
+    product_slug: line.id,
+    size_label: line.size,
+    color_hex: line.colors?.[0] ?? null,
+    quantity: line.qty,
+  }));
 }
 
 /**

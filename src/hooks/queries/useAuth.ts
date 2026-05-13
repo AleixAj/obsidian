@@ -20,6 +20,7 @@ import {
   type UpdateUserPayload,
 } from "../../lib/api";
 import { accountKeys } from "./useAccount";
+import { cartKeys } from "./useCartSync";
 
 export const authKeys = {
   user: ["user"] as const,
@@ -62,6 +63,7 @@ export function useLogout() {
     mutationFn: logout,
     onSuccess: () => {
       queryClient.setQueryData(authKeys.user, null);
+      queryClient.removeQueries({ queryKey: cartKeys.cart });
       queryClient.invalidateQueries({ queryKey: authKeys.user });
     },
   });
