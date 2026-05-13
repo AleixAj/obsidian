@@ -1598,6 +1598,22 @@
   background: var(--gold-hi);
 }
 
+.btn-submit:disabled {
+  cursor: progress;
+  opacity: 0.75;
+}
+
+.auth-error {
+  padding: 12px 14px;
+  border: 1px solid rgba(217, 100, 70, 0.45);
+  color: var(--accent-warn);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
 .divider {
   display: flex;
   align-items: center;

@@ -3,6 +3,8 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Icon } from "../components/ui/Icon";
 import { Placeholder } from "../components/ui/Placeholder";
 import { BRAND } from "../data/products";
+import { useLogin, useRegister } from "../hooks/queries";
+import { ApiError, oauthRedirectUrl } from "../lib/api";
 
 /**
  * Sign-in / Sign-up page (UI mock).
@@ -21,14 +23,58 @@ export function Auth() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const initial = (params.get("mode") as AuthMode) || "signin";
+  const oauthError = params.get("error");
 
   const [tab, setTab] = useState<AuthMode>(initial);
   const [agree, setAgree] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const loginMutation = useLogin();
+  const registerMutation = useRegister();
+  const isSubmitting = loginMutation.isPending || registerMutation.isPending;
+
+  const authError =
+    formError ??
+    (oauthError
+      ? "Social login is not configured yet. Add provider credentials in the Laravel .env."
+      : null);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // TODO: wire to real auth API. For now we just open the account.
-    navigate("/account");
+    setFormError(null);
+
+    const form = new FormData(e.currentTarget);
+    const email = String(form.get("email") ?? "");
+    const password = String(form.get("password") ?? "");
+
+    try {
+      if (tab === "signin") {
+        await loginMutation.mutateAsync({ email, password });
+      } else {
+        if (!agree) {
+          setFormError("Please accept the terms before creating an account.");
+          return;
+        }
+
+        const firstName = String(form.get("firstName") ?? "").trim();
+        const lastName = String(form.get("lastName") ?? "").trim();
+        const name = [firstName, lastName].filter(Boolean).join(" ");
+
+        await registerMutation.mutateAsync({
+          name: name || email,
+          email,
+          password,
+        });
+      }
+
+      navigate("/account");
+    } catch (error) {
+      setFormError(error instanceof ApiError ? "Invalid credentials or email already in use." : "Auth failed. Try again.");
+    }
+  };
+
+  const startOAuth = (provider: "google" | "github") => {
+    window.location.href = oauthRedirectUrl(provider);
   };
 
   return (
@@ -112,18 +158,18 @@ export function Auth() {
             <div className="field-row">
               <div className="field">
                 <label htmlFor="firstName">First name</label>
-                <input id="firstName" type="text" placeholder="First name" />
+                <input id="firstName" name="firstName" type="text" placeholder="First name" />
               </div>
               <div className="field">
                 <label htmlFor="lastName">Last name</label>
-                <input id="lastName" type="text" placeholder="Last name" />
+                <input id="lastName" name="lastName" type="text" placeholder="Last name" />
               </div>
             </div>
           )}
 
           <div className="field">
             <label htmlFor="email">Email</label>
-            <input id="email" type="email" placeholder="you@email.com" required />
+            <input id="email" name="email" type="email" placeholder="you@email.com" required />
           </div>
 
           <div className="field">
@@ -131,7 +177,7 @@ export function Auth() {
               Password
               {tab === "signin" && <span className="hint">Forgot?</span>}
             </label>
-            <input id="password" type="password" placeholder="Min. 8 characters" required minLength={8} />
+            <input id="password" name="password" type="password" placeholder="Min. 8 characters" required minLength={8} />
           </div>
 
           {tab === "signup" && (
@@ -147,18 +193,24 @@ export function Auth() {
             </div>
           )}
 
-          <button type="submit" className="btn-submit">
-            {tab === "signin" ? "Sign in" : "Create account"} <Icon.Arrow />
+          {authError && (
+            <div className="auth-error" role="alert">
+              {authError}
+            </div>
+          )}
+
+          <button type="submit" className="btn-submit" disabled={isSubmitting}>
+            {isSubmitting ? "Working..." : tab === "signin" ? "Sign in" : "Create account"} <Icon.Arrow />
           </button>
 
           <div className="divider">Or continue with</div>
 
           <div className="social-row">
-            <button type="button" className="social-btn">
+            <button type="button" className="social-btn" onClick={() => startOAuth("google")}>
               Google
             </button>
-            <button type="button" className="social-btn">
-              Apple
+            <button type="button" className="social-btn" onClick={() => startOAuth("github")}>
+              GitHub
             </button>
           </div>
 

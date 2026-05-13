@@ -70,6 +70,24 @@ export interface ApiHealth {
   db: boolean;
 }
 
+export interface ApiUserDTO {
+  id: number;
+  name: string;
+  email: string;
+  avatar_url: string | null;
+  oauth_provider: string | null;
+  created_at: string | null;
+}
+
+export interface AuthCredentials {
+  email: string;
+  password: string;
+}
+
+export interface RegisterPayload extends AuthCredentials {
+  name: string;
+}
+
 interface ApiListEnvelope<T> {
   data: T[];
 }
@@ -104,15 +122,35 @@ export class ApiError extends Error {
   }
 }
 
+function getCookie(name: string): string | null {
+  const match = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith(`${name}=`));
+
+  return match ? decodeURIComponent(match.split("=").slice(1).join("=")) : null;
+}
+
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const url = `${API_URL}${path}`;
+  const method = (init.method ?? "GET").toUpperCase();
+  const headers = new Headers(init.headers);
+
+  headers.set("Accept", "application/json");
+
+  // Sanctum sets an `XSRF-TOKEN` cookie. Axios mirrors that cookie into
+  // this header automatically; the Fetch API doesn't, so we do it here
+  // for POST/PUT/PATCH/DELETE requests.
+  if (method !== "GET" && method !== "HEAD") {
+    const xsrfToken = getCookie("XSRF-TOKEN");
+    if (xsrfToken) {
+      headers.set("X-XSRF-TOKEN", xsrfToken);
+    }
+  }
+
   const res = await fetch(url, {
     credentials: "include",
-    headers: {
-      Accept: "application/json",
-      ...(init.headers ?? {}),
-    },
     ...init,
+    headers,
   });
 
   if (!res.ok) {
@@ -125,8 +163,31 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     throw new ApiError(res.status, url, payload);
   }
 
-  return res.json() as Promise<T>;
+  if (res.status === 204) {
+    return undefined as T;
+  }
+
+  const text = await res.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }
+
+const csrfCookie = (): Promise<void> =>
+  fetch(`${API_URL}/sanctum/csrf-cookie`, {
+    credentials: "include",
+  }).then((res) => {
+    if (!res.ok) {
+      throw new ApiError(res.status, `${API_URL}/sanctum/csrf-cookie`);
+    }
+  });
+
+const jsonRequest = <T>(path: string, payload: unknown): Promise<T> =>
+  request<T>(path, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
 
 // ──────────────────────────────────────────────────────────────────────
 // Public endpoints (Etapa 1)
@@ -151,6 +212,33 @@ export const fetchCategories = async (): Promise<ApiCategoryDTO[]> => {
   const { data } = await request<ApiListEnvelope<ApiCategoryDTO>>("/api/categories");
   return data;
 };
+
+export const fetchUser = async (): Promise<ApiUserDTO> => {
+  const { data } = await request<ApiItemEnvelope<ApiUserDTO>>("/api/user");
+  return data;
+};
+
+export const login = async (payload: AuthCredentials): Promise<ApiUserDTO> => {
+  await csrfCookie();
+  const { data } = await jsonRequest<ApiItemEnvelope<ApiUserDTO>>("/api/auth/login", payload);
+  return data;
+};
+
+export const register = async (payload: RegisterPayload): Promise<ApiUserDTO> => {
+  await csrfCookie();
+  const { data } = await jsonRequest<ApiItemEnvelope<ApiUserDTO>>("/api/auth/register", payload);
+  return data;
+};
+
+export const logout = async (): Promise<void> => {
+  await csrfCookie();
+  await request<{ message: string }>("/api/auth/logout", {
+    method: "POST",
+  });
+};
+
+export const oauthRedirectUrl = (provider: "google" | "github"): string =>
+  `${API_URL}/auth/${provider}/redirect`;
 
 // ──────────────────────────────────────────────────────────────────────
 // Adapter: ApiProductDTO → Product (the UI's domain model)

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
+import { useUser } from "../../hooks/queries";
 import { Icon } from "../ui/Icon";
 import { Logo } from "../ui/Logo";
 
@@ -27,6 +28,7 @@ function scrollTop() {
 export function Header() {
   const { totalCount, open: openCart } = useCart();
   const { count: wishlistCount } = useWishlist();
+  const { data: user } = useUser();
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -84,8 +86,8 @@ export function Header() {
               <Icon.Heart />
               {wishlistCount > 0 && <span className="wishlist-count">{wishlistCount}</span>}
             </button>
-            <button type="button" aria-label="Account" onClick={() => navigate("/auth")}>
-              <Icon.User /> <span className="tool-label">Sign in</span>
+            <button type="button" aria-label="Account" onClick={() => navigate(user ? "/account" : "/auth")}>
+              <Icon.User /> <span className="tool-label">{user ? "Account" : "Sign in"}</span>
             </button>
             <button type="button" aria-label="Bag" onClick={openCart}>
               <Icon.Bag /> <span className="tool-label">Bag</span>
@@ -108,8 +110,8 @@ export function Header() {
           </NavLink>
         ))}
         <div className="tools">
-          <button type="button" onClick={() => navigate("/auth")}>
-            Sign in / Create account
+          <button type="button" onClick={() => navigate(user ? "/account" : "/auth")}>
+            {user ? "Account" : "Sign in / Create account"}
           </button>
           <button type="button" onClick={() => navigate("/account")}>
             Account

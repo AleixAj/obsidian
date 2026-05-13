@@ -4,7 +4,7 @@ import { Icon } from "../components/ui/Icon";
 import { Placeholder } from "../components/ui/Placeholder";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
-import { useProducts } from "../hooks/queries";
+import { useLogout, useProducts, useUser } from "../hooks/queries";
 import type { Product } from "../types";
 import { formatPrice } from "../utils/format";
 
@@ -140,9 +140,11 @@ function OrderRow({ order, productMap }: { order: Order; productMap: ProductMap 
 function Overview({
   goTo,
   productMap,
+  userName,
 }: {
   goTo: (section: Section) => void;
   productMap: ProductMap;
+  userName: string;
 }) {
   const { ids: wishlist } = useWishlist();
   return (
@@ -155,7 +157,7 @@ function Overview({
           </div>
           <h1>
             <span>Welcome back, </span>
-            <span className="gold">Aleix</span>
+            <span className="gold">{userName.split(" ")[0] || "Member"}</span>
             <span>.</span>
           </h1>
         </div>
@@ -671,6 +673,8 @@ function Rewards() {
 export function Account() {
   const { section } = useParams<{ section?: Section }>();
   const navigate = useNavigate();
+  const { data: user } = useUser();
+  const logoutMutation = useLogout();
 
   const current: Section =
     section && SECTIONS.includes(section as Section) ? (section as Section) : "overview";
@@ -693,6 +697,19 @@ export function Account() {
     [products],
   );
 
+  const displayName = user?.name ?? "Aleix Auqué";
+  const initials = displayName
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("") || "AA";
+
+  const handleSignOut = async () => {
+    await logoutMutation.mutateAsync();
+    navigate("/");
+  };
+
   const items: { id: Section; label: string; ct?: number | string }[] = [
     { id: "overview", label: "Overview" },
     { id: "orders", label: "Orders", ct: MOCK_ORDERS.length },
@@ -706,9 +723,9 @@ export function Account() {
     <main className="fade-in account">
       <aside className="account-side">
         <div className="user">
-          <div className="avatar">AA</div>
+          <div className="avatar">{initials}</div>
           <div>
-            <div className="name">Aleix Auqué</div>
+            <div className="name">{displayName}</div>
             <div className="tier">
               <span className="dot" />
               Inner Circle · Gold
@@ -731,16 +748,17 @@ export function Account() {
           <li className="signout">
             <button
               type="button"
-              onClick={() => navigate("/")}
+              onClick={handleSignOut}
+              disabled={logoutMutation.isPending}
               style={{ color: "var(--fg-mute)" }}
             >
-              Sign out
+              {logoutMutation.isPending ? "Signing out..." : "Sign out"}
             </button>
           </li>
         </ul>
       </aside>
       <div className="account-main">
-        {current === "overview" && <Overview goTo={goTo} productMap={productMap} />}
+        {current === "overview" && <Overview goTo={goTo} productMap={productMap} userName={displayName} />}
         {current === "orders" && <Orders productMap={productMap} />}
         {current === "wishlist" && <WishlistView productMap={productMap} />}
         {current === "addresses" && <Addresses />}
