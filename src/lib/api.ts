@@ -189,11 +189,13 @@ interface ApiItemEnvelope<T> {
 // Fetch helpers
 // ──────────────────────────────────────────────────────────────────────
 
+const configuredApiUrl = import.meta.env.VITE_API_URL as string | undefined;
+const productionApiUrl = "https://obsidian-api-production-8b5e.up.railway.app";
+
 const API_URL = (
-  (import.meta.env.VITE_API_URL as string | undefined) ??
-  (import.meta.env.PROD
-    ? "https://obsidian-api-production-8b5e.up.railway.app"
-    : "http://localhost:8000")
+  import.meta.env.PROD && configuredApiUrl?.includes("localhost")
+    ? productionApiUrl
+    : configuredApiUrl ?? (import.meta.env.PROD ? productionApiUrl : "http://localhost:8000")
 ).replace(/\/+$/, "");
 
 export class ApiError extends Error {
