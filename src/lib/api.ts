@@ -88,6 +88,11 @@ export interface RegisterPayload extends AuthCredentials {
   name: string;
 }
 
+export interface UpdateUserPayload {
+  name: string;
+  email: string;
+}
+
 export interface ApiAccountStatsDTO {
   orders_count: number;
   lifetime_spend_cents: number;
@@ -273,6 +278,18 @@ export const fetchCategories = async (): Promise<ApiCategoryDTO[]> => {
 
 export const fetchUser = async (): Promise<ApiUserDTO> => {
   const { data } = await request<ApiItemEnvelope<ApiUserDTO>>("/api/user");
+  return data;
+};
+
+export const updateUser = async (payload: UpdateUserPayload): Promise<ApiUserDTO> => {
+  await csrfCookie();
+  const { data } = await request<ApiItemEnvelope<ApiUserDTO>>("/api/user", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
   return data;
 };
 

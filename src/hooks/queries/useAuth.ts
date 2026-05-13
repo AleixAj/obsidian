@@ -13,10 +13,13 @@ import {
   login,
   logout,
   register,
+  updateUser,
   type ApiUserDTO,
   type AuthCredentials,
   type RegisterPayload,
+  type UpdateUserPayload,
 } from "../../lib/api";
+import { accountKeys } from "./useAccount";
 
 export const authKeys = {
   user: ["user"] as const,
@@ -60,6 +63,18 @@ export function useLogout() {
     onSuccess: () => {
       queryClient.setQueryData(authKeys.user, null);
       queryClient.invalidateQueries({ queryKey: authKeys.user });
+    },
+  });
+}
+
+export function useUpdateUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: UpdateUserPayload) => updateUser(payload),
+    onSuccess: (user: ApiUserDTO) => {
+      queryClient.setQueryData(authKeys.user, user);
+      queryClient.invalidateQueries({ queryKey: accountKeys.account });
     },
   });
 }

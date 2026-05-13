@@ -11,6 +11,7 @@ import {
   useLogout,
   useOrders,
   useProducts,
+  useUpdateUser,
   useUpdateAddress,
   useUser,
 } from "../hooks/queries";
@@ -598,6 +599,11 @@ function Addresses() {
 }
 
 function Settings() {
+  const { data: user } = useUser();
+  const updateUser = useUpdateUser();
+  const [name, setName] = useState(user?.name ?? "");
+  const [email, setEmail] = useState(user?.email ?? "");
+  const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [toggles, setToggles] = useState<Record<string, boolean>>({
     drops: true,
     updates: true,
@@ -614,6 +620,23 @@ function Settings() {
     { key: "birthday", title: "Birthday gift reminder", channels: "Email" },
   ];
 
+  useEffect(() => {
+    if (user) {
+      setName(user.name);
+      setEmail(user.email);
+    }
+  }, [user]);
+
+  const [firstName, ...lastNameParts] = name.split(" ");
+  const lastName = lastNameParts.join(" ");
+
+  const submitProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setProfileMessage(null);
+    await updateUser.mutateAsync({ name: name.trim() || "Obsidian Member", email });
+    setProfileMessage("Profile saved.");
+  };
+
   return (
     <>
       <div className="account-hello">
@@ -627,7 +650,7 @@ function Settings() {
         </div>
       </div>
 
-      <div className="settings-section">
+      <form className="settings-section" onSubmit={submitProfile}>
         <div className="head">
           <h4>Profile</h4>
           <p>This is the name printed on shipping documents and used for sizing recommendations.</p>
@@ -636,23 +659,39 @@ function Settings() {
           <div className="field-row">
             <div className="field">
               <label>First name</label>
-              <input type="text" defaultValue="Aleix" />
+              <input
+                type="text"
+                value={firstName}
+                onChange={(e) => setName([e.target.value, lastName].filter(Boolean).join(" "))}
+                required
+              />
             </div>
             <div className="field">
               <label>Last name</label>
-              <input type="text" defaultValue="Auqué" />
+              <input
+                type="text"
+                value={lastName}
+                onChange={(e) => setName([firstName, e.target.value].filter(Boolean).join(" "))}
+              />
             </div>
           </div>
           <div className="field">
             <label>Email</label>
-            <input type="email" defaultValue="aleix@obsidian.com" />
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
           <div className="field">
             <label>Phone</label>
-            <input type="tel" defaultValue="+34 612 345 678" />
+            <input type="tel" placeholder="+34 612 345 678" disabled />
+          </div>
+          {profileMessage && <div className="auth-error" style={{ color: "var(--gold)" }}>{profileMessage}</div>}
+          {updateUser.isError && <div className="auth-error">Couldn't save profile. Email may already be in use.</div>}
+          <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
+            <button type="submit" className="btn btn-primary" disabled={updateUser.isPending}>
+              {updateUser.isPending ? "Saving..." : "Save profile"} <Icon.Arrow />
+            </button>
           </div>
         </div>
-      </div>
+      </form>
 
       <div className="settings-section">
         <div className="head">
@@ -698,9 +737,6 @@ function Settings() {
       </div>
 
       <div style={{ display: "flex", gap: 12, marginTop: 32 }}>
-        <button type="button" className="btn btn-primary">
-          Save changes
-        </button>
         <button
           type="button"
           className="btn"
