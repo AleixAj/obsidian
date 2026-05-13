@@ -88,6 +88,64 @@ export interface RegisterPayload extends AuthCredentials {
   name: string;
 }
 
+export interface ApiAccountStatsDTO {
+  orders_count: number;
+  lifetime_spend_cents: number;
+  reward_points: number;
+  tier: "Silver" | "Gold" | string;
+}
+
+export interface ApiAddressDTO {
+  id: number;
+  label: string | null;
+  full_name: string;
+  line1: string;
+  line2: string | null;
+  city: string;
+  region: string | null;
+  postal_code: string;
+  country: string;
+  phone: string | null;
+  is_default: boolean;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+export interface ApiOrderItemDTO {
+  id: number;
+  product_slug: string;
+  product_name: string;
+  size_label: string | null;
+  color_hex: string | null;
+  quantity: number;
+  unit_price_cents: number;
+  line_total_cents: number;
+}
+
+export interface ApiOrderDTO {
+  id: number;
+  number: string;
+  email: string;
+  status: "pending" | "transit" | "delivered" | "cancelled" | string;
+  subtotal_cents: number;
+  shipping_cents: number;
+  tax_cents: number;
+  total_cents: number;
+  currency: string;
+  paid_at: string | null;
+  created_at: string | null;
+  items: ApiOrderItemDTO[];
+}
+
+export interface ApiAccountDTO {
+  user: ApiUserDTO;
+  stats: ApiAccountStatsDTO;
+  addresses: ApiAddressDTO[];
+  orders: ApiOrderDTO[];
+}
+
+export type AddressPayload = Omit<ApiAddressDTO, "id" | "created_at" | "updated_at">;
+
 interface ApiListEnvelope<T> {
   data: T[];
 }
@@ -216,6 +274,49 @@ export const fetchCategories = async (): Promise<ApiCategoryDTO[]> => {
 export const fetchUser = async (): Promise<ApiUserDTO> => {
   const { data } = await request<ApiItemEnvelope<ApiUserDTO>>("/api/user");
   return data;
+};
+
+export const fetchAccount = async (): Promise<ApiAccountDTO> => {
+  const { data } = await request<ApiItemEnvelope<ApiAccountDTO>>("/api/account");
+  return data;
+};
+
+export const fetchOrders = async (): Promise<ApiOrderDTO[]> => {
+  const { data } = await request<ApiListEnvelope<ApiOrderDTO>>("/api/orders");
+  return data;
+};
+
+export const fetchAddresses = async (): Promise<ApiAddressDTO[]> => {
+  const { data } = await request<ApiListEnvelope<ApiAddressDTO>>("/api/addresses");
+  return data;
+};
+
+export const createAddress = async (payload: AddressPayload): Promise<ApiAddressDTO> => {
+  await csrfCookie();
+  const { data } = await jsonRequest<ApiItemEnvelope<ApiAddressDTO>>("/api/addresses", payload);
+  return data;
+};
+
+export const updateAddress = async (
+  id: number,
+  payload: Partial<AddressPayload>,
+): Promise<ApiAddressDTO> => {
+  await csrfCookie();
+  const { data } = await request<ApiItemEnvelope<ApiAddressDTO>>(`/api/addresses/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  return data;
+};
+
+export const deleteAddress = async (id: number): Promise<void> => {
+  await csrfCookie();
+  await request<void>(`/api/addresses/${id}`, {
+    method: "DELETE",
+  });
 };
 
 export const login = async (payload: AuthCredentials): Promise<ApiUserDTO> => {

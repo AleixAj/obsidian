@@ -4,96 +4,55 @@ import { Icon } from "../components/ui/Icon";
 import { Placeholder } from "../components/ui/Placeholder";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
-import { useLogout, useProducts, useUser } from "../hooks/queries";
+import {
+  useAccount,
+  useCreateAddress,
+  useDeleteAddress,
+  useLogout,
+  useOrders,
+  useProducts,
+  useUpdateAddress,
+  useUser,
+} from "../hooks/queries";
+import type { AddressPayload, ApiAddressDTO, ApiOrderDTO } from "../lib/api";
 import type { Product } from "../types";
 import { formatPrice } from "../utils/format";
 
-/* ===========================================
-   Mock data — kept inline to keep the account
-   page self-contained. Easy to replace with
-   real API calls when auth is wired up.
-   =========================================== */
-/**
- * Mock order data. `products` holds product slugs (`p1`, `p7`, …) so
- * the rows can survive the move from the static catalogue to the live
- * backend without depending on array positions. The slug is the same
- * id the PDP route uses, so click-through stays consistent.
- */
-const MOCK_ORDERS = [
-  {
-    id: "OBS-2641-OBS",
-    date: "Nov 18, 2026",
-    status: "transit",
-    statusLabel: "In transit",
-    total: 820,
-    items: 2,
-    products: ["p1", "p2"],
-    eta: "2 days · DHL Express",
-  },
-  {
-    id: "OBS-2588-AUR",
-    date: "Nov 02, 2026",
-    status: "delivered",
-    statusLabel: "Delivered",
-    total: 420,
-    items: 1,
-    products: ["p7"],
-    eta: "Delivered Nov 04",
-  },
-  {
-    id: "OBS-2511-CRE",
-    date: "Oct 14, 2026",
-    status: "delivered",
-    statusLabel: "Delivered",
-    total: 605,
-    items: 2,
-    products: ["p6", "p11"],
-    eta: "Delivered Oct 17",
-  },
-  {
-    id: "OBS-2402-VES",
-    date: "Sep 28, 2026",
-    status: "delivered",
-    statusLabel: "Delivered",
-    total: 890,
-    items: 1,
-    products: ["p4"],
-    eta: "Delivered Oct 01",
-  },
-  {
-    id: "OBS-2380-HAL",
-    date: "Sep 12, 2026",
-    status: "cancelled",
-    statusLabel: "Refunded",
-    total: 285,
-    items: 1,
-    products: ["p6"],
-    eta: "Refunded Sep 15",
-  },
-] as const;
-
-type Order = (typeof MOCK_ORDERS)[number];
+type Order = ApiOrderDTO;
 type ProductMap = Map<string, Product>;
-
-const MOCK_ADDRESSES = [
-  {
-    id: 1,
-    label: "Home",
-    name: "Aleix Auqué",
-    lines: ["Carrer d'Aragó 234, 4º 2ª", "08007 Barcelona", "Spain", "+34 612 345 678"],
-    default: true,
-  },
-  {
-    id: 2,
-    label: "Studio",
-    name: "Aleix Auqué",
-    lines: ["1245 Sunset Blvd", "Los Angeles, CA 90026", "United States", "+1 (323) 555-0147"],
-    default: false,
-  },
-];
 
 type Section = "overview" | "orders" | "wishlist" | "addresses" | "settings" | "rewards";
 const SECTIONS: Section[] = ["overview", "orders", "wishlist", "addresses", "settings", "rewards"];
+
+function euroFromCents(cents: number): number {
+  return Math.round(cents / 100);
+}
+
+function statusLabel(status: string): string {
+  return (
+    {
+      pending: "Pending",
+      transit: "In transit",
+      delivered: "Delivered",
+      cancelled: "Refunded",
+    }[status] ?? status
+  );
+}
+
+function formatDate(value: string | null): string {
+  if (!value) return "Pending";
+  return new Intl.DateTimeFormat("en", { month: "short", day: "2-digit", year: "numeric" }).format(new Date(value));
+}
+
+function addressLines(address: ApiAddressDTO): string[] {
+  return [
+    address.line1,
+    address.line2,
+    `${address.postal_code} ${address.city}${address.region ? `, ${address.region}` : ""}`,
+    address.country,
+    address.phone,
+  ].filter(Boolean) as string[];
+}
 
 /* ===========================================
    Section components
@@ -103,8 +62,8 @@ function OrderRow({ order, productMap }: { order: Order; productMap: ProductMap 
   return (
     <div className="order-card">
       <div className="stack">
-        {order.products.slice(0, 3).map((slug, i) => {
-          const p = productMap.get(slug);
+        {order.items.slice(0, 3).map((item, i) => {
+          const p = productMap.get(item.product_slug);
           return p ? (
             <div key={i} className="thumb">
               <Placeholder palette={p.palette} corner={false} img={p.img} />
@@ -118,19 +77,19 @@ function OrderRow({ order, productMap }: { order: Order; productMap: ProductMap 
       </div>
       <div>
         <div className="id">
-          Order <span className="num">#{order.id}</span>
+          Order <span className="num">#{order.number}</span>
         </div>
         <div className="name">
-          {order.items} {order.items > 1 ? "pieces" : "piece"} · {order.date}
+          {order.items.length} {order.items.length > 1 ? "pieces" : "piece"} · {formatDate(order.created_at)}
         </div>
-        <div className="info">{order.eta}</div>
+        <div className="info">{order.status === "transit" ? "2 days · DHL Express" : formatDate(order.paid_at)}</div>
       </div>
       <div className={`status-pill ${order.status}`}>
         <span className="dot" />
-        {order.statusLabel}
+        {statusLabel(order.status)}
       </div>
-      <div className="total">{formatPrice(order.total)}</div>
-      <button type="button" className="arrow-btn" aria-label={`View order ${order.id}`}>
+      <div className="total">{formatPrice(euroFromCents(order.total_cents))}</div>
+      <button type="button" className="arrow-btn" aria-label={`View order ${order.number}`}>
         <Icon.Arrow />
       </button>
     </div>
@@ -141,19 +100,25 @@ function Overview({
   goTo,
   productMap,
   userName,
+  orders,
+  stats,
 }: {
   goTo: (section: Section) => void;
   productMap: ProductMap;
   userName: string;
+  orders: Order[];
+  stats: { orders_count: number; lifetime_spend_cents: number; reward_points: number; tier: string };
 }) {
   const { ids: wishlist } = useWishlist();
+  const lifetimeSpend = euroFromCents(stats.lifetime_spend_cents);
+  const nextTierSpend = Math.max(0, 7000 - lifetimeSpend);
   return (
     <>
       <div className="account-hello">
         <div>
           <div className="eyebrow">
             <span className="dot" />
-            Member since 2024 ✦ Gold Tier
+            Member since 2024 ✦ {stats.tier} Tier
           </div>
           <h1>
             <span>Welcome back, </span>
@@ -171,17 +136,17 @@ function Overview({
       <div className="stats-row">
         <div className="stat-card">
           <span className="lbl">Total orders</span>
-          <span className="val">14</span>
-          <span className="delta">+2 this season</span>
+          <span className="val">{stats.orders_count}</span>
+          <span className="delta">Synced from backend</span>
         </div>
         <div className="stat-card gold">
           <span className="lbl">Lifetime spend</span>
-          <span className="val">€6,420</span>
-          <span className="delta">Gold tier unlocked</span>
+          <span className="val">{formatPrice(lifetimeSpend)}</span>
+          <span className="delta">{stats.tier} tier unlocked</span>
         </div>
         <div className="stat-card">
           <span className="lbl">Reward points</span>
-          <span className="val">2,180</span>
+          <span className="val">{stats.reward_points}</span>
           <span className="delta">+€48 credit available</span>
         </div>
         <div className="stat-card">
@@ -197,7 +162,7 @@ function Overview({
             <span className="dot" />
             Inner Circle ✦ Gold
           </span>
-          <h3>You're €580 from Onyx tier.</h3>
+          <h3>You're {formatPrice(nextTierSpend)} from Onyx tier.</h3>
           <p>
             Onyx unlocks 24h early access to every drop, a personal stylist via WhatsApp, and the
             FW26 archive jacket as a welcome gift. Limited to 200 members worldwide.
@@ -205,12 +170,12 @@ function Overview({
         </div>
         <div className="progress">
           <div className="meta">
-            <span className="gold">€6,420</span> / €7,000
+            <span className="gold">{formatPrice(lifetimeSpend)}</span> / €7,000
           </div>
           <div className="bar">
             <div />
           </div>
-          <div className="meta">68% to Onyx</div>
+          <div className="meta">{Math.min(100, Math.round((lifetimeSpend / 7000) * 100))}% to Onyx</div>
         </div>
       </div>
 
@@ -223,7 +188,7 @@ function Overview({
         </button>
       </div>
       <div className="orders-list">
-        {MOCK_ORDERS.slice(0, 3).map((o) => (
+        {orders.slice(0, 3).map((o) => (
           <OrderRow key={o.id} order={o} productMap={productMap} />
         ))}
       </div>
@@ -232,16 +197,22 @@ function Overview({
 }
 
 function Orders({ productMap }: { productMap: ProductMap }) {
+  const { data: orders = [], isPending, isError } = useOrders();
   const [filter, setFilter] = useState<"all" | "transit" | "delivered" | "cancelled">("all");
   const filtered =
-    filter === "all" ? MOCK_ORDERS : MOCK_ORDERS.filter((o) => o.status === filter);
+    filter === "all" ? orders : orders.filter((o) => o.status === filter);
+  const deliveredCount = orders.filter((o) => o.status === "delivered").length;
+  const transitCount = orders.filter((o) => o.status === "transit").length;
+  const cancelledCount = orders.filter((o) => o.status === "cancelled").length;
+  const total = euroFromCents(orders.reduce((sum, order) => sum + order.total_cents, 0));
+
   return (
     <>
       <div className="account-hello">
         <div>
           <div className="eyebrow">
             <span className="dot" />
-            ✦ {MOCK_ORDERS.length} orders · €3,020 total
+            ✦ {orders.length} orders · {formatPrice(total)} total
           </div>
           <h1>
             Your <span className="gold">orders</span>
@@ -253,10 +224,10 @@ function Orders({ productMap }: { productMap: ProductMap }) {
         <div className="left">
           {(
             [
-              ["all", `All (${MOCK_ORDERS.length})`],
-              ["transit", "In transit (1)"],
-              ["delivered", "Delivered (3)"],
-              ["cancelled", "Refunded (1)"],
+              ["all", `All (${orders.length})`],
+              ["transit", `In transit (${transitCount})`],
+              ["delivered", `Delivered (${deliveredCount})`],
+              ["cancelled", `Refunded (${cancelledCount})`],
             ] as const
           ).map(([k, l]) => (
             <button
@@ -276,9 +247,11 @@ function Orders({ productMap }: { productMap: ProductMap }) {
       </div>
 
       <div className="orders-list">
-        {filtered.map((o) => (
-          <OrderRow key={o.id} order={o} productMap={productMap} />
-        ))}
+        {isPending && <div className="data-error">Loading your orders…</div>}
+        {isError && <div className="data-error">Couldn't load your orders.</div>}
+        {!isPending &&
+          !isError &&
+          filtered.map((o) => <OrderRow key={o.id} order={o} productMap={productMap} />)}
       </div>
     </>
   );
@@ -393,6 +366,26 @@ function WishlistView({ productMap }: { productMap: ProductMap }) {
 }
 
 function Addresses() {
+  const { data: account, isPending, isError } = useAccount();
+  const createAddress = useCreateAddress();
+  const updateAddress = useUpdateAddress();
+  const deleteAddress = useDeleteAddress();
+
+  const accountAddresses = account?.addresses ?? [];
+
+  const sampleAddress = (): AddressPayload => ({
+    label: "New address",
+    full_name: account?.user.name ?? "Obsidian Member",
+    line1: "Carrer de Mallorca 401",
+    line2: null,
+    city: "Barcelona",
+    region: null,
+    postal_code: "08013",
+    country: "ES",
+    phone: "+34 600 000 000",
+    is_default: accountAddresses.length === 0,
+  });
+
   return (
     <>
       <div className="account-hello">
@@ -407,26 +400,32 @@ function Addresses() {
       </div>
 
       <div className="addr-grid">
-        {MOCK_ADDRESSES.map((a) => (
-          <div key={a.id} className={`addr-card ${a.default ? "default" : ""}`}>
-            {a.default && <span className="badge">Default</span>}
-            <h4>{a.label}</h4>
-            <div className="name">{a.name}</div>
+        {isPending && <div className="data-error">Loading your addresses…</div>}
+        {isError && <div className="data-error">Couldn't load your addresses.</div>}
+        {accountAddresses.map((a) => (
+          <div key={a.id} className={`addr-card ${a.is_default ? "default" : ""}`}>
+            {a.is_default && <span className="badge">Default</span>}
+            <h4>{a.label ?? "Address"}</h4>
+            <div className="name">{a.full_name}</div>
             <div className="lines">
-              {a.lines.map((l, i) => (
+              {addressLines(a).map((l, i) => (
                 <div key={i}>{l}</div>
               ))}
             </div>
             <div className="actions">
-              <a>Edit</a>
-              {!a.default && <a>Set default</a>}
-              <a style={{ color: "var(--accent-warn)" }}>Remove</a>
+              <a onClick={() => updateAddress.mutate({ id: a.id, payload: { label: `${a.label ?? "Address"} ✦` } })}>Edit</a>
+              {!a.is_default && (
+                <a onClick={() => updateAddress.mutate({ id: a.id, payload: { is_default: true } })}>
+                  Set default
+                </a>
+              )}
+              <a style={{ color: "var(--accent-warn)" }} onClick={() => deleteAddress.mutate(a.id)}>Remove</a>
             </div>
           </div>
         ))}
-        <div className="addr-card add-new">
+        <div className="addr-card add-new" onClick={() => createAddress.mutate(sampleAddress())}>
           <span className="plus-big">+</span>
-          <span>Add new address</span>
+          <span>{createAddress.isPending ? "Adding…" : "Add new address"}</span>
         </div>
       </div>
     </>
@@ -674,6 +673,7 @@ export function Account() {
   const { section } = useParams<{ section?: Section }>();
   const navigate = useNavigate();
   const { data: user } = useUser();
+  const { data: account } = useAccount();
   const logoutMutation = useLogout();
 
   if (!user) {
@@ -714,11 +714,20 @@ export function Account() {
     navigate("/");
   };
 
+  const orders = account?.orders ?? [];
+  const stats = account?.stats ?? {
+    orders_count: 0,
+    lifetime_spend_cents: 0,
+    reward_points: 0,
+    tier: "Silver",
+  };
+  const addressCount = account?.addresses.length ?? 0;
+
   const items: { id: Section; label: string; ct?: number | string }[] = [
     { id: "overview", label: "Overview" },
-    { id: "orders", label: "Orders", ct: MOCK_ORDERS.length },
+    { id: "orders", label: "Orders", ct: orders.length },
     { id: "wishlist", label: "Wishlist", ct: wishlist.length },
-    { id: "addresses", label: "Addresses", ct: MOCK_ADDRESSES.length },
+    { id: "addresses", label: "Addresses", ct: addressCount },
     { id: "settings", label: "Settings" },
     { id: "rewards", label: "Inner Circle", ct: "✦" },
   ];
@@ -762,7 +771,15 @@ export function Account() {
         </ul>
       </aside>
       <div className="account-main">
-        {current === "overview" && <Overview goTo={goTo} productMap={productMap} userName={displayName} />}
+        {current === "overview" && (
+          <Overview
+            goTo={goTo}
+            productMap={productMap}
+            userName={displayName}
+            orders={orders}
+            stats={stats}
+          />
+        )}
         {current === "orders" && <Orders productMap={productMap} />}
         {current === "wishlist" && <WishlistView productMap={productMap} />}
         {current === "addresses" && <Addresses />}
