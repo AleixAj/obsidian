@@ -22,9 +22,10 @@
 9. [Etapa 5 — Cart sync guest ↔ user](#etapa-5--cart-sync-guest--user)
 10. [Etapa 6 — Checkout básico sin Stripe](#etapa-6--checkout-básico-sin-stripe)
 11. [Etapa 7 — Wishlist sincronizada](#etapa-7--wishlist-sincronizada)
-12. [Comandos diarios](#-comandos-diarios)
-13. [FAQ "si te preguntan en una entrevista…"](#faq-si-te-preguntan-en-una-entrevista)
-14. [Roadmap restante](#roadmap-restante)
+12. [Etapa 8 — Deploy Cloudflare + Railway](#etapa-8--deploy-cloudflare--railway)
+13. [Comandos diarios](#-comandos-diarios)
+14. [FAQ "si te preguntan en una entrevista…"](#faq-si-te-preguntan-en-una-entrevista)
+15. [Roadmap restante](#roadmap-restante)
 
 ---
 
@@ -651,6 +652,63 @@ Esto mantiene intactos Header, PDP y Account: todos siguen consumiendo
 
 ---
 
+## Etapa 8 — Deploy Cloudflare + Railway
+
+**Objetivo**: que el proyecto sea navegable desde internet, con frontend
+en CDN y backend Laravel usando base de datos gestionada.
+
+### Paso 8.1 — Backend en Railway
+
+Backend público:
+
+- `https://obsidian-api-production-8b5e.up.railway.app`
+- health: `/api/health`
+
+Se creó proyecto Railway `obsidian-api`, servicio Laravel y MySQL
+gestionado. El `Procfile` ejecuta migraciones/seed antes de arrancar el
+servidor para que una instancia nueva tenga catálogo y usuario demo.
+
+Variables clave:
+
+- `APP_ENV=production`
+- `APP_DEBUG=false`
+- `APP_URL=https://obsidian-api-production-8b5e.up.railway.app`
+- `FRONTEND_URL=https://obsidian.aleixaj.com`
+- `SANCTUM_STATEFUL_DOMAINS=obsidian.aleixaj.com`
+- `SESSION_SECURE_COOKIE=true`
+- `SESSION_SAME_SITE=none`
+
+### Paso 8.2 — Frontend en Cloudflare Pages
+
+Frontend público:
+
+- `https://obsidian.aleixaj.com`
+
+Cloudflare Pages:
+
+- repo `AleixAj/obsidian`;
+- branch `main`;
+- build command `npm run build`;
+- output `dist`;
+- `VITE_API_URL=https://obsidian-api-production-8b5e.up.railway.app`.
+
+### Paso 8.3 — Demo user
+
+Usuario demo:
+
+- email: `demo@obsidian.test`
+- password: configurada como variable `DEMO_USER_PASSWORD` en Railway.
+
+`DemoUserSeeder` crea el usuario y `DemoAccountService` le añade datos
+reales mínimos: direcciones y pedidos.
+
+### Paso 8.4 — Qué queda pendiente
+
+OAuth y Stripe ya tienen URLs definitivas, pero siguen pendientes de
+crear credenciales reales en Google/GitHub/Stripe y añadirlas a Railway.
+
+---
+
 ## 🟢 Comandos diarios
 
 Abrir Cursor con **`obsidian.code-workspace`** (ambos repos a la vez).
@@ -737,7 +795,8 @@ de react-query en la esquina inferior-izquierda del SPA en modo dev.
 | 5 | Cart sync (guest ↔ user) | El carrito sobrevive al login | ✅ |
 | 6 | Checkout básico sin Stripe | Carrito → pedido real | ✅ |
 | 7 | Wishlist sincronizada | Wishlist multi-dispositivo | ✅ |
-| 8 | Deploy + Stripe sandbox + demo user + OAuth real | Proyecto navegable desde internet | ⏸ |
+| 8 | Deploy Cloudflare + Railway + demo user | Proyecto navegable desde internet | ✅ |
+| 9 | Stripe + OAuth real | Pagos y login social con credenciales reales | ⏸ |
 
 ---
 

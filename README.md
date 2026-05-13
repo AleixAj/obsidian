@@ -14,10 +14,9 @@ real commerce app: browsable catalogue, product detail pages, cart,
 wishlist, account area, API integration, and a roadmap toward auth,
 checkout and deployment.
 
-> Status: Etapa 7 complete. The SPA consumes the Laravel catalogue,
-> authenticates with Sanctum, reads/writes account data, syncs carts and
-> wishlists, and turns authenticated carts into real orders. Stripe is
-> deferred to deploy.
+> Status: Etapa 8 complete. Deployed at
+> [`obsidian.aleixaj.com`](https://obsidian.aleixaj.com), backed by a
+> Railway Laravel API with production database and demo user.
 
 ## Live Scope
 
@@ -26,6 +25,7 @@ This repository is the frontend. The backend lives in
 
 Current user-facing features:
 
+- Production deployment: [`obsidian.aleixaj.com`](https://obsidian.aleixaj.com).
 - Catalogue pages powered by `/api/products` and `/api/categories`.
 - Product listing pages with category filtering, size/color filters and sorting.
 - Product detail page with gallery, size/color selectors and "complete the look".
@@ -49,6 +49,7 @@ Current user-facing features:
 | Persistence | `localStorage` + backend cart/wishlist | Guest cart/wishlist survive refresh; both sync to Laravel after login. |
 | Styling | Plain CSS + tokens | Demonstrates CSS fundamentals without framework lock-in. |
 | Backend | Laravel 11 API | Separate repo, REST endpoints, SQLite dev DB, Sanctum-ready. |
+| Deploy | Cloudflare Pages + Railway | Static SPA on CDN, Laravel API with managed MySQL. |
 
 ## Architecture
 
@@ -119,7 +120,7 @@ src/
 Docs worth reading:
 
 - [`PROCESS.md`](./PROCESS.md) - step-by-step "why we chose this" notes.
-- [`.notes/etapa-7-checkpoint.md`](./.notes/etapa-7-checkpoint.md) - current checkpoint and deploy plan.
+- [`.notes/etapa-8-checkpoint.md`](./.notes/etapa-8-checkpoint.md) - deploy checkpoint.
 
 ## Full-Stack Local Setup
 
@@ -156,6 +157,12 @@ The frontend reads the API base URL from:
 VITE_API_URL=http://localhost:8000
 ```
 
+Production frontend uses:
+
+```env
+VITE_API_URL=https://obsidian-api-production-8b5e.up.railway.app
+```
+
 ## Scripts
 
 ```bash
@@ -166,11 +173,18 @@ npm run preview    # preview dist locally
 npm run lint       # ESLint
 ```
 
-Verified after Etapa 7:
+Verified after Etapa 8:
 
 - `npm run typecheck` passes.
 - `npm run build` passes.
-- API smoke checks pass against local Laravel, including Sanctum cart, checkout and wishlist sync.
+- Production smoke checks pass against Railway/Cloudflare, including Sanctum auth from `obsidian.aleixaj.com`.
+
+## Production
+
+- Frontend: [`https://obsidian.aleixaj.com`](https://obsidian.aleixaj.com)
+- Backend API: [`https://obsidian-api-production-8b5e.up.railway.app`](https://obsidian-api-production-8b5e.up.railway.app)
+- Health check: [`/api/health`](https://obsidian-api-production-8b5e.up.railway.app/api/health)
+- Demo user: `demo@obsidian.test`
 
 ## Backend Contract
 
@@ -214,19 +228,17 @@ render it.
 ## OAuth Setup (Deferred)
 
 Google and GitHub OAuth routes are wired through the Laravel API, but
-provider credentials are intentionally not committed. We keep this as a
-final deployment task so callback URLs only need to be configured once,
-after Cloudflare/Railway domains exist. To enable it later, create OAuth
-apps and fill the backend `.env`:
+provider credentials are intentionally not committed. To enable it, create
+OAuth apps with these production callbacks and set Railway variables:
 
 ```env
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
-GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google/callback
+GOOGLE_REDIRECT_URI=https://obsidian-api-production-8b5e.up.railway.app/auth/google/callback
 
 GITHUB_CLIENT_ID=
 GITHUB_CLIENT_SECRET=
-GITHUB_REDIRECT_URI=http://localhost:8000/auth/github/callback
+GITHUB_REDIRECT_URI=https://obsidian-api-production-8b5e.up.railway.app/auth/github/callback
 ```
 
 Until those values exist, the social buttons redirect back to `/auth`
@@ -235,9 +247,8 @@ with a clear "not configured" error instead of failing with a server error.
 ## Stripe Setup (Deferred)
 
 Stripe/Cashier dependencies and env placeholders exist, but real payment
-collection is intentionally deferred to the deployment stage. Etapa 6 uses
-a basic authenticated checkout so the cart-to-order flow is already real
-before adding payment webhooks.
+collection is intentionally deferred until Stripe keys/webhook are created.
+The checkout flow already creates real orders without charging cards.
 
 ## Roadmap
 
@@ -249,7 +260,8 @@ before adding payment webhooks.
 - [x] Etapa 5 - Guest cart syncs into user cart on login.
 - [x] Etapa 6 - Basic checkout: authenticated cart becomes an order.
 - [x] Etapa 7 - Wishlist sync across devices.
-- [ ] Etapa 8 - Deploy: Cloudflare Pages + Railway/Render + activate Stripe/OAuth callbacks.
+- [x] Etapa 8 - Deploy: Cloudflare Pages + Railway + production demo user.
+- [ ] Final polish - Activate Stripe and OAuth provider credentials.
 
 ## Why This Project Matters
 
