@@ -1,168 +1,219 @@
-# OBSIDIAN — FW26 Aurum
+# OBSIDIAN - FW26 Aurum
 
-An urban streetwear e-commerce front-end. Heavyweight aesthetic, gold-cast hardware, designed in black-on-black with `#d4af37` accents. Built as a portfolio piece to showcase production-grade React architecture.
+![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=111)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?logo=typescript&logoColor=fff)
+![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=fff)
+![TanStack Query](https://img.shields.io/badge/TanStack_Query-v5-ff4154?logo=reactquery&logoColor=fff)
+![Laravel API](https://img.shields.io/badge/API-Laravel_11-ff2d20?logo=laravel&logoColor=fff)
 
-> **Status** — Storefront fully functional (browse, filter, PDP, cart, wishlist). Auth & account exist as UI mocks. Real auth/backend are next.
+Urban streetwear e-commerce built as a portfolio project: a dark,
+gold-accented React storefront backed by a Laravel 11 API.
 
----
+The goal is to show the full product journey an employer expects in a
+real commerce app: browsable catalogue, product detail pages, cart,
+wishlist, account area, API integration, and a roadmap toward auth,
+checkout and deployment.
 
-## Stack
+> Status: Etapa 2 complete. The SPA now consumes the Laravel catalogue
+> through `@tanstack/react-query`. Auth and checkout are the next stages.
 
-| Layer        | Tool                                                      |
-| ------------ | --------------------------------------------------------- |
-| Build / Dev  | [Vite 8](https://vitejs.dev) + native ES modules          |
-| UI           | [React 19](https://react.dev)                             |
-| Language     | [TypeScript 6](https://www.typescriptlang.org)            |
-| Routing      | [React Router 7](https://reactrouter.com) (`BrowserRouter`) |
-| State        | React Context (`Cart`, `Wishlist`, `Toast`)               |
-| Persistence  | `localStorage` (cart + wishlist survive refresh)          |
-| Linting      | ESLint + `typescript-eslint`                              |
-| Styling      | Plain CSS with design tokens (`variables.css`)            |
-| Fonts        | Syne (display) ✦ Space Grotesk (body) ✦ JetBrains Mono    |
+## Live Scope
 
-No CSS framework. No state library. The goal is to demonstrate that strong **fundamentals** can carry a polished UI without piling on dependencies.
+This repository is the frontend. The backend lives in
+[`AleixAj/obsidian-api`](https://github.com/AleixAj/obsidian-api).
 
----
+Current user-facing features:
 
-## Features
+- Catalogue pages powered by `/api/products` and `/api/categories`.
+- Product listing pages with category filtering, size/color filters and sorting.
+- Product detail page with gallery, size/color selectors and "complete the look".
+- Cart drawer with quantities, totals and free-shipping progress.
+- Wishlist persisted in `localStorage`.
+- Account dashboard UI with overview, orders, wishlist, addresses, settings and rewards.
+- Responsive layout down to mobile widths.
+- Loading skeletons and retryable API error states.
+- React Query Devtools in development.
 
-- **Catalogue** — 11 demo products, multiple categories, sizes & colours.
-- **Listing page** — sort + filter by size, colour, price range.
-- **Detail page** — image gallery, colour & size selectors, accordion, "complete the look".
-- **Cart drawer** — quantity controls, free-shipping progress bar, totals.
-- **Wishlist** — toggleable from the PDP, persisted across reloads.
-- **Toast system** — non-blocking confirmations for small actions.
-- **Responsive** — tested down to ~360 px; hamburger menu, filter drawer, single-column grids.
-- **Persistence** — cart & wishlist survive a hard refresh via `localStorage`.
-- **Page transitions** — subtle fade-in, scroll-up on route change.
-- **Reveal-on-scroll** — `IntersectionObserver` staggers cards into view.
-- **Cursor blob** — gold light follows the cursor on pointer-fine devices.
-- **Live countdown** — drop release timer recomputed every second.
+## Tech Stack
 
----
+| Layer | Choice | Why |
+|---|---|---|
+| Build | Vite 8 | Fast SPA development, simple static deployment. |
+| UI | React 19 | Component model, hooks, broad hiring-market relevance. |
+| Language | TypeScript 6 | Safer refactors and shared domain models. |
+| Routing | React Router 7 | URL-driven pages and account sections. |
+| Server state | TanStack React Query 5 | Cache, loading/error states, retries and request dedupe. |
+| Client state | React Context | Cart, wishlist and toast state without Redux overhead. |
+| Persistence | `localStorage` | Guest cart/wishlist survive refresh before auth exists. |
+| Styling | Plain CSS + tokens | Demonstrates CSS fundamentals without framework lock-in. |
+| Backend | Laravel 11 API | Separate repo, REST endpoints, SQLite dev DB, Sanctum-ready. |
 
-## Project structure
+## Architecture
 
+The frontend keeps the API boundary explicit:
+
+```txt
+Laravel API DTOs
+      |
+      v
+src/lib/api.ts
+  - fetchProducts()
+  - fetchProduct()
+  - fetchCategories()
+  - toProduct()
+  - toCategoryMap()
+      |
+      v
+src/hooks/queries/
+  - useProducts()
+  - useProduct()
+  - useCategories()
+      |
+      v
+Pages and components receive UI-ready Product objects
 ```
+
+This means the UI never renders directly from backend fields like
+`price_cents` or `img_alt`. If the API shape changes later, the adapter
+changes in one place.
+
+### QueryClient defaults
+
+`src/lib/queryClient.ts` defines one shared client:
+
+- `staleTime: 60_000` because catalogue data rarely changes during a session.
+- `retry: 1` to recover from a transient backend hiccup without delaying users.
+- `refetchOnWindowFocus: false` to avoid noisy refetches on every tab switch.
+
+### Local vs server state
+
+React Query owns server data (`products`, `categories`, later `user`).
+React Context owns local UI state (`cart`, `wishlist`, `toasts`). This
+keeps the app small while still separating the two kinds of state cleanly.
+
+## Project Structure
+
+```txt
 src/
 ├── components/
-│   ├── cart/        → CartDrawer
-│   ├── layout/      → Header, Footer, AnnounceBar, Layout (site shell)
-│   ├── product/     → ProductCard
-│   └── ui/          → Logo, Icon, Marquee, Placeholder, Reveal, CursorBlob
-├── context/         → CartContext, WishlistContext, ToastContext
-├── data/            → products.ts (static catalogue + IMAGES + CATEGORY_META)
-├── hooks/           → useLocalStorage, useReveal
-├── pages/           → Home, Shop, Product, Lookbook, Auth, Account, NotFound
-├── styles/          → variables.css, globals.css, pages.css
-├── types/           → Domain models (Product, CartItem, Category)
-├── utils/           → format.ts (formatPrice, pad)
-├── App.tsx          → Providers + Router + Layout composition
-└── main.tsx         → Mount + style imports
+│   ├── cart/          # CartDrawer
+│   ├── layout/        # Header, Footer, AnnounceBar, Layout
+│   ├── product/       # ProductCard, ProductCardSkeleton
+│   └── ui/            # Logo, Icon, Marquee, Placeholder, Reveal
+├── context/           # CartContext, WishlistContext, ToastContext
+├── data/              # Brand/editorial assets only
+├── hooks/
+│   ├── queries/       # React Query hooks
+│   ├── useLocalStorage.ts
+│   └── useReveal.ts
+├── lib/               # API client + QueryClient
+├── pages/             # Home, Shop, Product, Lookbook, Auth, Account
+├── styles/            # CSS tokens, globals, page styles
+├── types/             # Product, CartItem, Category
+└── utils/             # formatPrice, pad
 ```
 
-Two folders sit next to `src/` for reference and history:
+Docs worth reading:
 
-- `public/` — `obsidian-logo.png`, `favicon.png` (the brand mark).
-- `_prototype/` — the original Claude Design HTML/JSX prototype this project was rebuilt from. Useful side-by-side to show the "before → after" upgrade.
+- [`PROCESS.md`](./PROCESS.md) - step-by-step "why we chose this" notes.
+- [`.notes/etapa-2-checkpoint.md`](./.notes/etapa-2-checkpoint.md) - current project state and Etapa 3 plan.
 
----
+## Full-Stack Local Setup
 
-## Architecture highlights
+### 1. Start the backend
 
-### 1. Strong typing across the boundary
-
-A single `Product` interface in `src/types/index.ts` flows through the catalogue, cart, wishlist and pages. Refactor a field once and TypeScript catches every dependent.
-
-### 2. State lives in context, not props
-
-Cart and wishlist are global. Pages and components consume them via `useCart()` / `useWishlist()`, never via prop drilling. The contexts internally use a `useLocalStorage` hook so the persistence is invisible to the rest of the app.
-
-### 3. Derived values are memoised
-
-`totalCount`, `subtotal`, filtered product lists — anything that's a function of state — uses `useMemo` so unrelated state updates don't trigger heavy recomputations.
-
-### 4. Routing-driven UI state
-
-The active account section lives in the URL (`/account/orders`, `/account/wishlist`, …) instead of in component state. Means the user can refresh, share, or bookmark a section.
-
-### 5. CSS tokens, not magic numbers
-
-Every colour, font and spacing value comes from CSS custom properties declared in `variables.css`. Changing the brand colour is a one-line edit.
-
-```css
-:root {
-  --gold: #d4af37;
-  --font-display: "Syne", sans-serif;
-  --font-body: "Space Grotesk", sans-serif;
-}
+```powershell
+cd C:\Users\Kylen\Desktop\Projects\obsidian-api
+php artisan serve
 ```
 
-### 6. Accessibility-aware
+Laravel should be available at `http://localhost:8000`.
 
-- `aria-label` on icon-only buttons.
-- `aria-pressed` for toggle buttons (e.g. wishlist).
-- `Escape` closes the cart drawer.
-- Mobile menu is focus-aware and locks body scroll when open.
-- Color contrast and font sizes respect WCAG AA on dark backgrounds.
+Useful endpoint checks:
 
----
+```powershell
+Invoke-RestMethod http://localhost:8000/api/health
+Invoke-RestMethod http://localhost:8000/api/products
+Invoke-RestMethod http://localhost:8000/api/categories
+```
 
-## Getting started
+### 2. Start the frontend
+
+```powershell
+cd C:\Users\Kylen\Desktop\Projects\obsidian
+npm install
+npm run dev
+```
+
+Vite should be available at `http://localhost:5173`.
+
+The frontend reads the API base URL from:
+
+```env
+VITE_API_URL=http://localhost:8000
+```
+
+## Scripts
 
 ```bash
-# install dependencies
-npm install
-
-# start the dev server (default: http://localhost:5173)
-npm run dev
-
-# type-check without emitting
-npm run typecheck
-
-# production build
-npm run build
-
-# preview the production bundle locally
-npm run preview
-
-# lint
-npm run lint
+npm run dev        # start Vite dev server
+npm run typecheck  # TypeScript check, no emit
+npm run build      # production build
+npm run preview    # preview dist locally
+npm run lint       # ESLint
 ```
 
-Requires Node ≥ 20.
+Verified after Etapa 2:
 
----
+- `npm run typecheck` passes.
+- `npm run build` passes.
+- API smoke checks pass against local Laravel (`/health`, `/products`, `/categories`, `/products/p1`).
 
-## Backend
+## Backend Contract
 
-A companion **Laravel 11** API lives in [**AleixAj/obsidian-api**](https://github.com/AleixAj/obsidian-api) (separate repo). The frontend talks to it via `src/lib/api.ts`, configured with `VITE_API_URL`. See `.env.example`.
+The frontend currently consumes:
 
-Etapa 1 (current): the SPA still ships with the static catalogue in `src/data/products.ts`; the backend is live but the screens have not been wired to it yet. Etapa 2 swaps the static array for `fetchProducts()`.
+| Method | Endpoint | Used by |
+|---|---|---|
+| `GET` | `/api/products` | Home, Product related rail, Account |
+| `GET` | `/api/products?category={slug}` | Shop category pages |
+| `GET` | `/api/products/{slug}` | Product detail page |
+| `GET` | `/api/categories` | Shop page header metadata |
+| `GET` | `/api/health` | Manual smoke checks / future monitoring |
+
+Money is stored in the API as integer cents (`price_cents`). The adapter
+maps that to the existing UI `Product.price` number before components
+render it.
 
 ## Roadmap
 
-- [x] Production-grade UI, cart, wishlist, persistence.
-- [x] Laravel 11 backend (`obsidian-api`) with `/api/products`, `/api/categories`, Sanctum.
-- [ ] Wire the SPA to `/api/products` (Etapa 2).
-- [ ] Real authentication — email/password + OAuth Google/GitHub (Etapa 3).
-- [ ] Account dashboard wired to the backend (Etapa 4).
-- [ ] Cart sync — guest cart merges into the user cart on login (Etapa 5).
-- [ ] Checkout flow with Stripe (Etapa 6).
-- [ ] Wishlist sync (Etapa 7).
-- [ ] Deploy: Cloudflare Pages (frontend) + Railway/Render (backend) (Etapa 8).
-- [ ] Search modal with keyboard shortcuts.
-- [ ] Internationalisation (es, en).
-- [ ] Unit tests (Vitest + Testing Library).
+- [x] Etapa 0 - Architecture decisions.
+- [x] Etapa 1 - Laravel 11 backend, schema, seeders and public API.
+- [x] Etapa 2 - React SPA consumes the backend via React Query.
+- [ ] Etapa 3 - Real auth: email/password + Google/GitHub OAuth.
+- [ ] Etapa 4 - Account dashboard connected to real user data.
+- [ ] Etapa 5 - Guest cart syncs into user cart on login.
+- [ ] Etapa 6 - Stripe checkout in sandbox mode.
+- [ ] Etapa 7 - Wishlist sync across devices.
+- [ ] Etapa 8 - Deploy: Cloudflare Pages + Railway/Render.
 
----
+## Why This Project Matters
+
+Obsidian is deliberately not just a static mockup. It is structured like
+a real client project:
+
+- The UI is polished enough to judge product taste.
+- The backend boundary is real, typed and isolated.
+- Data fetching has production concerns: cache, retries, loading states and errors.
+- Decisions are documented in `PROCESS.md`, including trade-offs and rejected alternatives.
+- The roadmap is incremental, so every stage can be reviewed and shipped cleanly.
 
 ## Credits
 
-- Imagery — [Unsplash](https://unsplash.com) (placeholder only, not for commercial use).
-- Logo — designed by the brand owner.
-- Type — [Syne](https://gitlab.com/bonjour-monde/fonderie/syne-typeface) + [Space Grotesk](https://github.com/floriankarsten/space-grotesk) via Google Fonts.
+- Imagery: Unsplash placeholders and local brand/editorial assets.
+- Typography: Syne, Space Grotesk and JetBrains Mono via Google Fonts.
+- Logo and visual direction: Obsidian Studio concept.
 
 ---
 
-© 2026 Obsidian Studio. Portfolio project — not a real storefront.
+Portfolio project. Not a real storefront.
