@@ -14,8 +14,9 @@ real commerce app: browsable catalogue, product detail pages, cart,
 wishlist, account area, API integration, and a roadmap toward auth,
 checkout and deployment.
 
-> Status: Etapa 2 complete. The SPA now consumes the Laravel catalogue
-> through `@tanstack/react-query`. Auth and checkout are the next stages.
+> Status: Etapa 4 complete. The SPA consumes the Laravel catalogue,
+> authenticates with Sanctum, and the account dashboard reads/writes
+> backend data. Cart sync and checkout are next.
 
 ## Live Scope
 
@@ -29,7 +30,7 @@ Current user-facing features:
 - Product detail page with gallery, size/color selectors and "complete the look".
 - Cart drawer with quantities, totals and free-shipping progress.
 - Wishlist persisted in `localStorage`.
-- Account dashboard UI with overview, orders, wishlist, addresses, settings and rewards.
+- Account dashboard with backend-backed overview, orders, address CRUD and profile settings.
 - Responsive layout down to mobile widths.
 - Loading skeletons and retryable API error states.
 - React Query Devtools in development.
@@ -116,7 +117,7 @@ src/
 Docs worth reading:
 
 - [`PROCESS.md`](./PROCESS.md) - step-by-step "why we chose this" notes.
-- [`.notes/etapa-2-checkpoint.md`](./.notes/etapa-2-checkpoint.md) - latest checkpoint before auth work started.
+- [`.notes/etapa-4-checkpoint.md`](./.notes/etapa-4-checkpoint.md) - current checkpoint and Etapa 5 plan.
 
 ## Full-Stack Local Setup
 
@@ -181,9 +182,16 @@ The frontend currently consumes:
 | `GET` | `/api/categories` | Shop page header metadata |
 | `GET` | `/api/health` | Manual smoke checks / future monitoring |
 | `GET` | `/api/user` | Current authenticated user |
+| `PATCH` | `/api/user` | Update name/email |
 | `POST` | `/api/auth/register` | Create account and start session |
 | `POST` | `/api/auth/login` | Email/password login |
 | `POST` | `/api/auth/logout` | Server-side logout |
+| `GET` | `/api/account` | Account dashboard summary |
+| `GET` | `/api/orders` | User orders |
+| `GET` | `/api/addresses` | User addresses |
+| `POST` | `/api/addresses` | Create address |
+| `PATCH` | `/api/addresses/{id}` | Update address / set default |
+| `DELETE` | `/api/addresses/{id}` | Delete address |
 
 Money is stored in the API as integer cents (`price_cents`). The adapter
 maps that to the existing UI `Product.price` number before components
@@ -216,7 +224,7 @@ with a clear "not configured" error instead of failing with a server error.
 - [x] Etapa 1 - Laravel 11 backend, schema, seeders and public API.
 - [x] Etapa 2 - React SPA consumes the backend via React Query.
 - [x] Etapa 3 - Real auth: email/password + prepared OAuth routes.
-- [ ] Etapa 4 - Account dashboard connected to real user data.
+- [x] Etapa 4 - Account dashboard connected to real user data.
 - [ ] Etapa 5 - Guest cart syncs into user cart on login.
 - [ ] Etapa 6 - Stripe checkout in sandbox mode.
 - [ ] Etapa 7 - Wishlist sync across devices.

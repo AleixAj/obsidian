@@ -437,6 +437,69 @@ Si faltan credenciales, el backend redirige a
 
 ---
 
+## Etapa 4 — Account dashboard conectado
+
+**Objetivo**: dejar de enseñar una cuenta mock y hacer que Account lea
+y escriba datos reales asociados al usuario autenticado.
+
+### Paso 4.1 — Account API
+
+Backend:
+
+- `GET /api/account`
+- `GET /api/orders`
+- `GET /api/addresses`
+- `POST /api/addresses`
+- `PATCH /api/addresses/{id}`
+- `DELETE /api/addresses/{id}`
+- `PATCH /api/user`
+
+**Por qué un endpoint `/api/account` además de endpoints separados**:
+la pantalla overview necesita un paquete compacto con user, stats,
+orders recientes y addresses. Así evitamos que el primer render de
+Account dispare 4 requests solo para pintar la cabecera. Los endpoints
+separados siguen existiendo para pantallas específicas y mutations.
+
+### Paso 4.2 — DemoAccountService
+
+Cada usuario nuevo recibe datos backend reales mínimos:
+
+- 2 direcciones;
+- 3 pedidos ligados a productos reales.
+
+Esto no es "mock de frontend": vive en la base de datos, pasa por los
+models/resources/controladores y prueba el flujo real. Se eliminará o
+se cambiará por seed/demo user cuando llegue el deploy.
+
+### Paso 4.3 — React Query en Account
+
+Frontend:
+
+- `useAccount()`
+- `useOrders()`
+- `useAddresses()`
+- `useCreateAddress()`
+- `useUpdateAddress()`
+- `useDeleteAddress()`
+- `useUpdateUser()`
+
+Account ahora:
+
+- muestra stats reales;
+- lista orders reales;
+- permite crear/editar/borrar direcciones;
+- marca una dirección como default;
+- permite actualizar nombre/email desde Settings.
+
+### Paso 4.4 — Qué sigue mock/local
+
+- Cart: sigue `localStorage` → Etapa 5.
+- Wishlist: sigue `localStorage` → Etapa 7.
+- Rewards/notification toggles: visual/local por ahora.
+- OAuth social: activación final en deploy.
+
+---
+
 ## 🟢 Comandos diarios
 
 Abrir Cursor con **`obsidian.code-workspace`** (ambos repos a la vez).
@@ -519,8 +582,8 @@ de react-query en la esquina inferior-izquierda del SPA en modo dev.
 | 1 | Setup Laravel + schema + seed + endpoints públicos | Backend operativo | ✅ |
 | 2 | SPA consume `/api/products` con react-query | UI viva contra el backend | ✅ |
 | 3 | Auth real (email/password + OAuth preparado) | Login funcional, sesión persistente | ✅ |
-| 4 | Account dashboard conectado | Pedidos/direcciones/ajustes reales | ⏸ |
-| 5 | Cart sync (guest ↔ user) | El carrito sobrevive al login | ⏸ |
+| 4 | Account dashboard conectado | Pedidos/direcciones/ajustes reales | ✅ |
+| 5 | Cart sync (guest ↔ user) | El carrito sobrevive al login | ⏳ |
 | 6 | Checkout + Stripe sandbox | Pagar de verdad en modo test | ⏸ |
 | 7 | Wishlist sincronizada | Wishlist multi-dispositivo | ⏸ |
 | 8 | Deploy (Cloudflare Pages + Railway) + demo user + OAuth real | Proyecto navegable desde internet | ⏸ |
