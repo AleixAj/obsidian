@@ -407,6 +407,12 @@ export const mergeCart = async (items: CartLinePayload[]): Promise<ApiCartDTO> =
   return data;
 };
 
+export const checkout = async (): Promise<ApiOrderDTO> => {
+  await csrfCookie();
+  const { data } = await jsonRequest<ApiItemEnvelope<ApiOrderDTO>>("/api/checkout", {});
+  return data;
+};
+
 export const login = async (payload: AuthCredentials): Promise<ApiUserDTO> => {
   await csrfCookie();
   const { data } = await jsonRequest<ApiItemEnvelope<ApiUserDTO>>("/api/auth/login", payload);

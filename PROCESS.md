@@ -20,9 +20,10 @@
 7. [Etapa 3 — Autenticación real](#etapa-3--autenticación-real)
 8. [Etapa 4 — Account dashboard conectado](#etapa-4--account-dashboard-conectado)
 9. [Etapa 5 — Cart sync guest ↔ user](#etapa-5--cart-sync-guest--user)
-10. [Comandos diarios](#-comandos-diarios)
-11. [FAQ "si te preguntan en una entrevista…"](#faq-si-te-preguntan-en-una-entrevista)
-12. [Roadmap restante](#roadmap-restante)
+10. [Etapa 6 — Checkout básico sin Stripe](#etapa-6--checkout-básico-sin-stripe)
+11. [Comandos diarios](#-comandos-diarios)
+12. [FAQ "si te preguntan en una entrevista…"](#faq-si-te-preguntan-en-una-entrevista)
+13. [Roadmap restante](#roadmap-restante)
 
 ---
 
@@ -554,6 +555,59 @@ Mantener `CartContext` como fachada permite que `CartDrawer`,
 
 ---
 
+## Etapa 6 — Checkout básico sin Stripe
+
+**Objetivo**: cerrar el ciclo e-commerce sin depender todavía de una
+pasarela externa. El usuario autenticado convierte su carrito backend en
+un pedido real, el carrito queda vacío y el pedido aparece en Account.
+
+### Paso 6.1 — Por qué aplazamos Stripe
+
+Stripe sigue siendo el objetivo para pagos reales, pero ahora lo dejamos
+junto a OAuth para la etapa final/deploy:
+
+- no hay claves test configuradas todavía;
+- no hay dominio definitivo para callbacks/webhooks;
+- para portfolio conviene enseñar primero el flujo de negocio completo.
+
+Esto evita meter complejidad de webhooks antes de que la app tenga el
+pedido, el carrito y la cuenta bien conectados.
+
+### Paso 6.2 — Endpoint de checkout básico
+
+Backend:
+
+- `POST /api/checkout`
+
+El endpoint hace una transacción:
+
+- lee el carrito autenticado;
+- exige que haya items;
+- usa la dirección default del usuario como shipping snapshot;
+- crea `orders`;
+- copia líneas a `order_items`;
+- vacía `cart_items` solo si todo ha ido bien;
+- devuelve `OrderResource`.
+
+**Por qué snapshot de dirección**: si el usuario cambia su dirección
+mañana, el pedido antiguo debe conservar la dirección con la que se hizo.
+Por eso copiamos a `order_addresses` en vez de leer siempre `addresses`.
+
+### Paso 6.3 — Frontend
+
+El botón `Checkout` del drawer:
+
+- pide login si el usuario es invitado;
+- llama a `useCheckout()` si hay sesión;
+- invalida `cart`, `orders` y `account`;
+- muestra toast con el número de pedido;
+- navega a `/account/orders`.
+
+No creamos todavía una página de checkout completa porque no hay datos
+de pago reales. La experiencia queda simple y verificable.
+
+---
+
 ## 🟢 Comandos diarios
 
 Abrir Cursor con **`obsidian.code-workspace`** (ambos repos a la vez).
@@ -638,9 +692,9 @@ de react-query en la esquina inferior-izquierda del SPA en modo dev.
 | 3 | Auth real (email/password + OAuth preparado) | Login funcional, sesión persistente | ✅ |
 | 4 | Account dashboard conectado | Pedidos/direcciones/ajustes reales | ✅ |
 | 5 | Cart sync (guest ↔ user) | El carrito sobrevive al login | ✅ |
-| 6 | Checkout + Stripe sandbox | Pagar de verdad en modo test | ⏸ |
+| 6 | Checkout básico sin Stripe | Carrito → pedido real | ✅ |
 | 7 | Wishlist sincronizada | Wishlist multi-dispositivo | ⏸ |
-| 8 | Deploy (Cloudflare Pages + Railway) + demo user + OAuth real | Proyecto navegable desde internet | ⏸ |
+| 8 | Deploy + Stripe sandbox + demo user + OAuth real | Proyecto navegable desde internet | ⏸ |
 
 ---
 

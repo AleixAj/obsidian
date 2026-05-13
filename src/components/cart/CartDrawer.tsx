@@ -1,5 +1,9 @@
 import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
+import { useToast } from "../../context/ToastContext";
+import { useCheckout, useUser } from "../../hooks/queries";
+import { ApiError } from "../../lib/api";
 import { formatPrice } from "../../utils/format";
 import { Icon } from "../ui/Icon";
 import { Placeholder } from "../ui/Placeholder";
@@ -18,6 +22,11 @@ const FLAT_SHIPPING = 8;
  */
 export function CartDrawer() {
   const { items, isOpen, close, subtotal, updateQty, remove } = useCart();
+  const { data: user, isPending: isUserPending } = useUser();
+  const checkout = useCheckout();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { push } = useToast();
 
   // Close on `Escape` for accessibility.
   useEffect(() => {
@@ -32,6 +41,26 @@ export function CartDrawer() {
   const remaining = Math.max(0, FREE_SHIP_AT - subtotal);
   const pct = Math.min(100, (subtotal / FREE_SHIP_AT) * 100);
   const total = remaining > 0 ? subtotal + FLAT_SHIPPING : subtotal;
+
+  const handleCheckout = () => {
+    if (!user) {
+      push("Sign in to finish checkout");
+      close();
+      navigate(`/auth?returnTo=${encodeURIComponent(location.pathname)}`);
+      return;
+    }
+
+    checkout.mutate(undefined, {
+      onSuccess: (order) => {
+        push(`Order ${order.number} placed`);
+        close();
+        navigate("/account/orders");
+      },
+      onError: (error) => {
+        push(checkoutErrorMessage(error), "warn");
+      },
+    });
+  };
 
   return (
     <>
@@ -112,15 +141,35 @@ export function CartDrawer() {
               <span>Total</span>
               <span className="val">{formatPrice(total)}</span>
             </div>
-            <button type="button" className="btn-checkout">
-              Checkout <Icon.Arrow />
+            <button
+              type="button"
+              className="btn-checkout"
+              onClick={handleCheckout}
+              disabled={checkout.isPending || isUserPending}
+            >
+              {checkout.isPending ? "Placing order..." : "Checkout"} <Icon.Arrow />
             </button>
             <div className="free-ship">
-              Secure payment · <span className="gold">30-day returns</span>
+              Basic checkout · <span className="gold">Stripe later</span>
             </div>
           </div>
         )}
       </aside>
     </>
   );
+}
+
+function checkoutErrorMessage(error: unknown): string {
+  if (error instanceof ApiError && isApiErrorPayload(error.payload)) {
+    const firstError = Object.values(error.payload.errors ?? {})[0]?.[0];
+    return firstError ?? error.payload.message ?? "Checkout failed. Try again.";
+  }
+
+  return "Checkout failed. Try again.";
+}
+
+function isApiErrorPayload(
+  payload: unknown,
+): payload is { message?: string; errors?: Record<string, string[]> } {
+  return typeof payload === "object" && payload !== null;
 }

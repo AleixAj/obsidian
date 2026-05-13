@@ -14,9 +14,9 @@ real commerce app: browsable catalogue, product detail pages, cart,
 wishlist, account area, API integration, and a roadmap toward auth,
 checkout and deployment.
 
-> Status: Etapa 5 complete. The SPA consumes the Laravel catalogue,
-> authenticates with Sanctum, reads/writes account data, and syncs the
-> guest cart into the authenticated backend cart. Checkout is next.
+> Status: Etapa 6 complete. The SPA consumes the Laravel catalogue,
+> authenticates with Sanctum, reads/writes account data, syncs carts and
+> turns authenticated carts into real orders. Stripe is deferred to deploy.
 
 ## Live Scope
 
@@ -28,7 +28,7 @@ Current user-facing features:
 - Catalogue pages powered by `/api/products` and `/api/categories`.
 - Product listing pages with category filtering, size/color filters and sorting.
 - Product detail page with gallery, size/color selectors and "complete the look".
-- Cart drawer with quantities, totals, free-shipping progress and authenticated backend sync.
+- Cart drawer with quantities, totals, free-shipping progress, authenticated backend sync and basic checkout.
 - Wishlist persisted in `localStorage`.
 - Account dashboard with backend-backed overview, orders, address CRUD and profile settings.
 - Responsive layout down to mobile widths.
@@ -118,7 +118,7 @@ src/
 Docs worth reading:
 
 - [`PROCESS.md`](./PROCESS.md) - step-by-step "why we chose this" notes.
-- [`.notes/etapa-5-checkpoint.md`](./.notes/etapa-5-checkpoint.md) - current checkpoint and Etapa 6 plan.
+- [`.notes/etapa-6-checkpoint.md`](./.notes/etapa-6-checkpoint.md) - current checkpoint and next step.
 
 ## Full-Stack Local Setup
 
@@ -165,11 +165,11 @@ npm run preview    # preview dist locally
 npm run lint       # ESLint
 ```
 
-Verified after Etapa 5:
+Verified after Etapa 6:
 
 - `npm run typecheck` passes.
 - `npm run build` passes.
-- API smoke checks pass against local Laravel, including Sanctum cart merge.
+- API smoke checks pass against local Laravel, including Sanctum cart merge and checkout.
 
 ## Backend Contract
 
@@ -199,6 +199,7 @@ The frontend currently consumes:
 | `DELETE` | `/api/cart/items/{id}` | Remove cart line |
 | `DELETE` | `/api/cart/items` | Clear authenticated cart |
 | `POST` | `/api/cart/merge` | Merge guest cart after login/register |
+| `POST` | `/api/checkout` | Convert authenticated cart into an order |
 
 Money is stored in the API as integer cents (`price_cents`). The adapter
 maps that to the existing UI `Product.price` number before components
@@ -225,6 +226,13 @@ GITHUB_REDIRECT_URI=http://localhost:8000/auth/github/callback
 Until those values exist, the social buttons redirect back to `/auth`
 with a clear "not configured" error instead of failing with a server error.
 
+## Stripe Setup (Deferred)
+
+Stripe/Cashier dependencies and env placeholders exist, but real payment
+collection is intentionally deferred to the deployment stage. Etapa 6 uses
+a basic authenticated checkout so the cart-to-order flow is already real
+before adding payment webhooks.
+
 ## Roadmap
 
 - [x] Etapa 0 - Architecture decisions.
@@ -233,9 +241,9 @@ with a clear "not configured" error instead of failing with a server error.
 - [x] Etapa 3 - Real auth: email/password + prepared OAuth routes.
 - [x] Etapa 4 - Account dashboard connected to real user data.
 - [x] Etapa 5 - Guest cart syncs into user cart on login.
-- [ ] Etapa 6 - Stripe checkout in sandbox mode.
+- [x] Etapa 6 - Basic checkout: authenticated cart becomes an order.
 - [ ] Etapa 7 - Wishlist sync across devices.
-- [ ] Etapa 8 - Deploy: Cloudflare Pages + Railway/Render + activate OAuth callbacks.
+- [ ] Etapa 8 - Deploy: Cloudflare Pages + Railway/Render + activate Stripe/OAuth callbacks.
 
 ## Why This Project Matters
 

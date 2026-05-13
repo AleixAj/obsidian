@@ -25,3 +25,4 @@ export {
   useMergeCart,
   useUpdateCartItem,
 } from "./useCartSync";
+export { useCheckout } from "./useCheckout";

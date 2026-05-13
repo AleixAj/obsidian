@@ -784,6 +784,11 @@ ul {
   background: var(--gold-hi);
 }
 
+.btn-checkout:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
 .drawer-foot .free-ship {
   font-family: var(--font-mono);
   font-size: 10px;
