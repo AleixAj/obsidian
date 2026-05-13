@@ -21,6 +21,7 @@ import {
 } from "../../lib/api";
 import { accountKeys } from "./useAccount";
 import { cartKeys } from "./useCartSync";
+import { wishlistKeys } from "./useWishlistSync";
 
 export const authKeys = {
   user: ["user"] as const,
@@ -64,6 +65,7 @@ export function useLogout() {
     onSuccess: () => {
       queryClient.setQueryData(authKeys.user, null);
       queryClient.removeQueries({ queryKey: cartKeys.cart });
+      queryClient.removeQueries({ queryKey: wishlistKeys.wishlist });
       queryClient.invalidateQueries({ queryKey: authKeys.user });
     },
   });

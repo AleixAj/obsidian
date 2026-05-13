@@ -21,9 +21,10 @@
 8. [Etapa 4 — Account dashboard conectado](#etapa-4--account-dashboard-conectado)
 9. [Etapa 5 — Cart sync guest ↔ user](#etapa-5--cart-sync-guest--user)
 10. [Etapa 6 — Checkout básico sin Stripe](#etapa-6--checkout-básico-sin-stripe)
-11. [Comandos diarios](#-comandos-diarios)
-12. [FAQ "si te preguntan en una entrevista…"](#faq-si-te-preguntan-en-una-entrevista)
-13. [Roadmap restante](#roadmap-restante)
+11. [Etapa 7 — Wishlist sincronizada](#etapa-7--wishlist-sincronizada)
+12. [Comandos diarios](#-comandos-diarios)
+13. [FAQ "si te preguntan en una entrevista…"](#faq-si-te-preguntan-en-una-entrevista)
+14. [Roadmap restante](#roadmap-restante)
 
 ---
 
@@ -608,6 +609,48 @@ de pago reales. La experiencia queda simple y verificable.
 
 ---
 
+## Etapa 7 — Wishlist sincronizada
+
+**Objetivo**: que los favoritos del invitado no se pierdan al iniciar
+sesión y que el usuario autenticado tenga wishlist server-side.
+
+### Paso 7.1 — API de wishlist
+
+Backend:
+
+- `GET /api/wishlist`
+- `POST /api/wishlist/items`
+- `DELETE /api/wishlist/items/{slug}`
+- `DELETE /api/wishlist/items`
+- `POST /api/wishlist/merge`
+
+La respuesta es una lista simple de slugs (`["p2", "p4"]`) porque la UI
+ya puede reconstruir nombre, imagen y precio desde el catálogo.
+
+### Paso 7.2 — Por qué no guardamos productos completos
+
+La wishlist no necesita precio, imagen ni nombre duplicados. Guardar solo
+`user_id + product_id` evita datos obsoletos: si mañana cambia el precio
+o la foto del producto, la wishlist mostrará la versión actual del
+catálogo.
+
+### Paso 7.3 — Frontend híbrido
+
+`WishlistContext` sigue exponiendo la misma API:
+`ids`, `count`, `has`, `toggle`, `remove`, `clear`.
+
+Por debajo:
+
+- invitado: usa `localStorage` (`obsidian:wishlist`);
+- autenticado: usa React Query + `/api/wishlist`;
+- al detectar sesión + ids guest, llama a `/api/wishlist/merge`;
+- limpia `localStorage` solo si el merge funciona.
+
+Esto mantiene intactos Header, PDP y Account: todos siguen consumiendo
+`useWishlist()` sin saber si los datos vienen de localStorage o backend.
+
+---
+
 ## 🟢 Comandos diarios
 
 Abrir Cursor con **`obsidian.code-workspace`** (ambos repos a la vez).
@@ -693,7 +736,7 @@ de react-query en la esquina inferior-izquierda del SPA en modo dev.
 | 4 | Account dashboard conectado | Pedidos/direcciones/ajustes reales | ✅ |
 | 5 | Cart sync (guest ↔ user) | El carrito sobrevive al login | ✅ |
 | 6 | Checkout básico sin Stripe | Carrito → pedido real | ✅ |
-| 7 | Wishlist sincronizada | Wishlist multi-dispositivo | ⏸ |
+| 7 | Wishlist sincronizada | Wishlist multi-dispositivo | ✅ |
 | 8 | Deploy + Stripe sandbox + demo user + OAuth real | Proyecto navegable desde internet | ⏸ |
 
 ---

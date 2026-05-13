@@ -413,6 +413,46 @@ export const checkout = async (): Promise<ApiOrderDTO> => {
   return data;
 };
 
+export const fetchWishlist = async (): Promise<string[]> => {
+  const { data } = await request<ApiListEnvelope<string>>("/api/wishlist");
+  return data;
+};
+
+export const addWishlistItem = async (productSlug: string): Promise<string[]> => {
+  await csrfCookie();
+  const { data } = await jsonRequest<ApiListEnvelope<string>>("/api/wishlist/items", {
+    product_slug: productSlug,
+  });
+  return data;
+};
+
+export const deleteWishlistItem = async (productSlug: string): Promise<string[]> => {
+  await csrfCookie();
+  const { data } = await request<ApiListEnvelope<string>>(
+    `/api/wishlist/items/${encodeURIComponent(productSlug)}`,
+    {
+      method: "DELETE",
+    },
+  );
+  return data;
+};
+
+export const clearWishlist = async (): Promise<string[]> => {
+  await csrfCookie();
+  const { data } = await request<ApiListEnvelope<string>>("/api/wishlist/items", {
+    method: "DELETE",
+  });
+  return data;
+};
+
+export const mergeWishlist = async (productSlugs: string[]): Promise<string[]> => {
+  await csrfCookie();
+  const { data } = await jsonRequest<ApiListEnvelope<string>>("/api/wishlist/merge", {
+    product_slugs: productSlugs,
+  });
+  return data;
+};
+
 export const login = async (payload: AuthCredentials): Promise<ApiUserDTO> => {
   await csrfCookie();
   const { data } = await jsonRequest<ApiItemEnvelope<ApiUserDTO>>("/api/auth/login", payload);

@@ -26,3 +26,10 @@ export {
   useUpdateCartItem,
 } from "./useCartSync";
 export { useCheckout } from "./useCheckout";
+export {
+  useAddWishlistItem,
+  useClearWishlist,
+  useDeleteWishlistItem,
+  useMergeWishlist,
+  useWishlistQuery,
+} from "./useWishlistSync";

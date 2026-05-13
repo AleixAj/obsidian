@@ -14,9 +14,10 @@ real commerce app: browsable catalogue, product detail pages, cart,
 wishlist, account area, API integration, and a roadmap toward auth,
 checkout and deployment.
 
-> Status: Etapa 6 complete. The SPA consumes the Laravel catalogue,
+> Status: Etapa 7 complete. The SPA consumes the Laravel catalogue,
 > authenticates with Sanctum, reads/writes account data, syncs carts and
-> turns authenticated carts into real orders. Stripe is deferred to deploy.
+> wishlists, and turns authenticated carts into real orders. Stripe is
+> deferred to deploy.
 
 ## Live Scope
 
@@ -29,7 +30,7 @@ Current user-facing features:
 - Product listing pages with category filtering, size/color filters and sorting.
 - Product detail page with gallery, size/color selectors and "complete the look".
 - Cart drawer with quantities, totals, free-shipping progress, authenticated backend sync and basic checkout.
-- Wishlist persisted in `localStorage`.
+- Wishlist persisted for guests and synced to backend for authenticated users.
 - Account dashboard with backend-backed overview, orders, address CRUD and profile settings.
 - Responsive layout down to mobile widths.
 - Loading skeletons and retryable API error states.
@@ -45,7 +46,7 @@ Current user-facing features:
 | Routing | React Router 7 | URL-driven pages and account sections. |
 | Server state | TanStack React Query 5 | Cache, loading/error states, retries and request dedupe. |
 | Client state | React Context | Cart, wishlist and toast state without Redux overhead. |
-| Persistence | `localStorage` + backend cart | Guest cart/wishlist survive refresh; cart syncs to Laravel after login. |
+| Persistence | `localStorage` + backend cart/wishlist | Guest cart/wishlist survive refresh; both sync to Laravel after login. |
 | Styling | Plain CSS + tokens | Demonstrates CSS fundamentals without framework lock-in. |
 | Backend | Laravel 11 API | Separate repo, REST endpoints, SQLite dev DB, Sanctum-ready. |
 
@@ -89,9 +90,9 @@ changes in one place.
 ### Local vs server state
 
 React Query owns server data (`products`, `categories`, `user`, `account`,
-authenticated `cart`). React Context owns local UI state (`wishlist`,
-`toasts`) and exposes the cart API to components, switching between
-`localStorage` for guests and `/api/cart` for logged-in users.
+authenticated `cart`, authenticated `wishlist`). React Context owns local
+UI state (`toasts`) and exposes cart/wishlist APIs to components,
+switching between `localStorage` for guests and `/api/*` for logged-in users.
 
 ## Project Structure
 
@@ -118,7 +119,7 @@ src/
 Docs worth reading:
 
 - [`PROCESS.md`](./PROCESS.md) - step-by-step "why we chose this" notes.
-- [`.notes/etapa-6-checkpoint.md`](./.notes/etapa-6-checkpoint.md) - current checkpoint and next step.
+- [`.notes/etapa-7-checkpoint.md`](./.notes/etapa-7-checkpoint.md) - current checkpoint and deploy plan.
 
 ## Full-Stack Local Setup
 
@@ -165,11 +166,11 @@ npm run preview    # preview dist locally
 npm run lint       # ESLint
 ```
 
-Verified after Etapa 6:
+Verified after Etapa 7:
 
 - `npm run typecheck` passes.
 - `npm run build` passes.
-- API smoke checks pass against local Laravel, including Sanctum cart merge and checkout.
+- API smoke checks pass against local Laravel, including Sanctum cart, checkout and wishlist sync.
 
 ## Backend Contract
 
@@ -200,6 +201,11 @@ The frontend currently consumes:
 | `DELETE` | `/api/cart/items` | Clear authenticated cart |
 | `POST` | `/api/cart/merge` | Merge guest cart after login/register |
 | `POST` | `/api/checkout` | Convert authenticated cart into an order |
+| `GET` | `/api/wishlist` | Authenticated wishlist slugs |
+| `POST` | `/api/wishlist/items` | Add product to authenticated wishlist |
+| `DELETE` | `/api/wishlist/items/{slug}` | Remove product from wishlist |
+| `DELETE` | `/api/wishlist/items` | Clear authenticated wishlist |
+| `POST` | `/api/wishlist/merge` | Merge guest wishlist after login/register |
 
 Money is stored in the API as integer cents (`price_cents`). The adapter
 maps that to the existing UI `Product.price` number before components
@@ -242,7 +248,7 @@ before adding payment webhooks.
 - [x] Etapa 4 - Account dashboard connected to real user data.
 - [x] Etapa 5 - Guest cart syncs into user cart on login.
 - [x] Etapa 6 - Basic checkout: authenticated cart becomes an order.
-- [ ] Etapa 7 - Wishlist sync across devices.
+- [x] Etapa 7 - Wishlist sync across devices.
 - [ ] Etapa 8 - Deploy: Cloudflare Pages + Railway/Render + activate Stripe/OAuth callbacks.
 
 ## Why This Project Matters

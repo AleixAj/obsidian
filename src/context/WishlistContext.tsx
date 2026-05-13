@@ -2,9 +2,19 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   type ReactNode,
 } from "react";
+import { useUser } from "../hooks/queries";
+import {
+  useAddWishlistItem,
+  useClearWishlist,
+  useDeleteWishlistItem,
+  useMergeWishlist,
+  useWishlistQuery,
+} from "../hooks/queries/useWishlistSync";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 
 /**
@@ -24,30 +34,84 @@ interface WishlistContextValue {
 const WishlistContext = createContext<WishlistContextValue | undefined>(undefined);
 
 export function WishlistProvider({ children }: { children: ReactNode }) {
-  const [ids, setIds] = useLocalStorage<string[]>("obsidian:wishlist", [
+  const [guestIds, setGuestIds] = useLocalStorage<string[]>("obsidian:wishlist", [
     "p2",
     "p4",
     "p5",
     "p7",
     "p9",
   ]);
+  const { data: user } = useUser();
+  const isAuthenticated = Boolean(user);
+  const wishlistQuery = useWishlistQuery(isAuthenticated);
+  const addWishlistItem = useAddWishlistItem();
+  const deleteWishlistItem = useDeleteWishlistItem();
+  const clearWishlist = useClearWishlist();
+  const mergeWishlist = useMergeWishlist();
+  const mergedGuestWishlistForUser = useRef<number | null>(null);
+
+  const serverIds = wishlistQuery.data ?? [];
+  const ids = isAuthenticated ? serverIds : guestIds;
+
+  useEffect(() => {
+    if (!user) {
+      mergedGuestWishlistForUser.current = null;
+      return;
+    }
+
+    if (guestIds.length === 0 || mergeWishlist.isPending) return;
+    if (mergedGuestWishlistForUser.current === user.id) return;
+
+    mergedGuestWishlistForUser.current = user.id;
+    mergeWishlist.mutate(guestIds, {
+      onSuccess: () => setGuestIds([]),
+      onError: () => {
+        mergedGuestWishlistForUser.current = null;
+      },
+    });
+  }, [guestIds, mergeWishlist, setGuestIds, user]);
 
   const has = useCallback((id: string) => ids.includes(id), [ids]);
 
   const toggle = useCallback(
-    (id: string) =>
-      setIds((prev) =>
+    (id: string) => {
+      if (isAuthenticated) {
+        if (ids.includes(id)) {
+          deleteWishlistItem.mutate(id);
+          return;
+        }
+
+        addWishlistItem.mutate(id);
+        return;
+      }
+
+      setGuestIds((prev) =>
         prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-      ),
-    [setIds],
+      );
+    },
+    [addWishlistItem, deleteWishlistItem, ids, isAuthenticated, setGuestIds],
   );
 
   const remove = useCallback(
-    (id: string) => setIds((prev) => prev.filter((x) => x !== id)),
-    [setIds],
+    (id: string) => {
+      if (isAuthenticated) {
+        deleteWishlistItem.mutate(id);
+        return;
+      }
+
+      setGuestIds((prev) => prev.filter((x) => x !== id));
+    },
+    [deleteWishlistItem, isAuthenticated, setGuestIds],
   );
 
-  const clear = useCallback(() => setIds([]), [setIds]);
+  const clear = useCallback(() => {
+    if (isAuthenticated) {
+      clearWishlist.mutate();
+      return;
+    }
+
+    setGuestIds([]);
+  }, [clearWishlist, isAuthenticated, setGuestIds]);
 
   const value = useMemo<WishlistContextValue>(
     () => ({ ids, count: ids.length, has, toggle, remove, clear }),
