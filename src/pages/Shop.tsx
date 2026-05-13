@@ -1,10 +1,25 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ProductCard } from "../components/product/ProductCard";
+import { ProductGridSkeleton } from "../components/product/ProductCardSkeleton";
 import { Icon } from "../components/ui/Icon";
 import { Reveal } from "../components/ui/Reveal";
-import { CATEGORY_META, PRODUCTS } from "../data/products";
+import { useCategories, useProducts } from "../hooks/queries";
+import type { CategoryMeta } from "../lib/api";
 import type { Category } from "../types";
+
+/**
+ * Fallback used when the categories endpoint hasn't responded yet or
+ * the route param doesn't map to a known slug (e.g. `/shop/archive`,
+ * which still isn't seeded server-side). Keeps the header rendering
+ * something on-brand instead of flashing empty text.
+ */
+const DEFAULT_META: CategoryMeta = {
+  eyebrow: "FW 26 ✦ Drop 04",
+  title: "arrivals",
+  goldWord: "New",
+  count: 0,
+};
 
 /** Sort modes the user can pick. */
 type SortMode = "featured" | "newest" | "priceAsc" | "priceDesc" | "best";
@@ -32,14 +47,23 @@ const SORT_OPTIONS: { value: SortMode; label: string }[] = [
 /**
  * Product Listing Page.
  *
- * The category comes from the route param (`/shop/:cat`). All
- * filtering is done client-side against the static `PRODUCTS` array,
- * which is perfect for a portfolio demo — every change feels instant
- * and there are no network failures to worry about.
+ * The category comes from the route param (`/shop/:cat`). The backend
+ * narrows the catalogue server-side (`/api/products?category=`), so
+ * this page only handles the in-memory refinements the sidebar offers
+ * (size · colour · sort) once react-query hands it the list.
  */
 export function Shop() {
   const { cat = "new" } = useParams<{ cat: Category }>();
-  const meta = CATEGORY_META[cat] ?? CATEGORY_META.new;
+
+  const {
+    data: products,
+    isPending: productsPending,
+    isError: productsError,
+    refetch: refetchProducts,
+  } = useProducts(cat);
+  const { data: categoryMap } = useCategories();
+
+  const meta = categoryMap?.[cat] ?? DEFAULT_META;
 
   const [size, setSize] = useState<string | null>(null);
   const [color, setColor] = useState<string | null>(null);
@@ -57,13 +81,14 @@ export function Shop() {
   /**
    * Derive the visible product list from the filters. Recomputed only
    * when one of the dependencies actually changes.
+   *
+   * The category filter is applied server-side by `useProducts(cat)`
+   * for any value other than "new" (which by design contains the full
+   * catalogue), so this block only handles the in-memory refinements
+   * the sidebar offers (size · colour · sort).
    */
   const visible = useMemo(() => {
-    let list = [...PRODUCTS];
-
-    // Narrow to the selected category (every product has "new" in its cats
-    // so the default /shop/new listing always shows the full catalogue).
-    if (cat !== "new") list = list.filter((p) => p.cats.includes(cat));
+    let list = products ? [...products] : [];
 
     if (size) list = list.filter((p) => p.sizes.includes(size));
     if (color) list = list.filter((p) => p.colors.includes(color));
@@ -86,12 +111,18 @@ export function Shop() {
     }
 
     return list;
-  }, [cat, size, color, sort]);
+  }, [products, size, color, sort]);
 
   const clearFilters = () => {
     setSize(null);
     setColor(null);
   };
+
+  // Header count: prefer the authoritative total from /api/categories
+  // when available, otherwise fall back to whatever the products query
+  // has returned (useful before categories resolve, or for slugs the
+  // categories endpoint doesn't know about).
+  const headerCount = meta.count || products?.length || 0;
 
   return (
     <main className="fade-in">
@@ -116,7 +147,7 @@ export function Shop() {
             )}
           </h1>
           <div className="summary">
-            <span className="num">{meta.count}</span>
+            <span className="num">{headerCount}</span>
             {meta.eyebrow}
           </div>
         </div>
@@ -237,7 +268,9 @@ export function Shop() {
           <div className="plp-toolbar">
             <div className="left">
               <span>
-                {visible.length} {visible.length === 1 ? "result" : "results"}
+                {productsPending
+                  ? "Loading…"
+                  : `${visible.length} ${visible.length === 1 ? "result" : "results"}`}
               </span>
               {size && (
                 <button type="button" className="chip" onClick={() => setSize(null)}>
@@ -261,7 +294,23 @@ export function Shop() {
             </div>
           </div>
 
-          {visible.length > 0 ? (
+          {productsPending ? (
+            <ProductGridSkeleton count={6} className="plp-grid" />
+          ) : productsError ? (
+            <div className="data-error">
+              <div className="title">✦ Couldn't load this category</div>
+              <div>The catalogue API didn't answer.</div>
+              <button
+                type="button"
+                className="btn"
+                style={{ marginTop: 16 }}
+                onClick={() => refetchProducts()}
+              >
+                Retry <Icon.Arrow />
+              </button>
+              <div className="hint">Backend offline? `php artisan serve` on :8000</div>
+            </div>
+          ) : visible.length > 0 ? (
             <div className="plp-grid">
               {visible.map((p, i) => (
                 <Reveal key={p.id} delay={i * 50}>

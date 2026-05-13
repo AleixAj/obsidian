@@ -1,17 +1,24 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useCart } from "../context/CartContext";
-import { useWishlist } from "../context/WishlistContext";
-import { PRODUCTS } from "../data/products";
-import { formatPrice } from "../utils/format";
 import { Icon } from "../components/ui/Icon";
 import { Placeholder } from "../components/ui/Placeholder";
+import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
+import { useProducts } from "../hooks/queries";
+import type { Product } from "../types";
+import { formatPrice } from "../utils/format";
 
 /* ===========================================
    Mock data — kept inline to keep the account
    page self-contained. Easy to replace with
    real API calls when auth is wired up.
    =========================================== */
+/**
+ * Mock order data. `products` holds product slugs (`p1`, `p7`, …) so
+ * the rows can survive the move from the static catalogue to the live
+ * backend without depending on array positions. The slug is the same
+ * id the PDP route uses, so click-through stays consistent.
+ */
 const MOCK_ORDERS = [
   {
     id: "OBS-2641-OBS",
@@ -20,7 +27,7 @@ const MOCK_ORDERS = [
     statusLabel: "In transit",
     total: 820,
     items: 2,
-    products: [0, 1],
+    products: ["p1", "p2"],
     eta: "2 days · DHL Express",
   },
   {
@@ -30,7 +37,7 @@ const MOCK_ORDERS = [
     statusLabel: "Delivered",
     total: 420,
     items: 1,
-    products: [8],
+    products: ["p7"],
     eta: "Delivered Nov 04",
   },
   {
@@ -40,7 +47,7 @@ const MOCK_ORDERS = [
     statusLabel: "Delivered",
     total: 605,
     items: 2,
-    products: [3, 7],
+    products: ["p6", "p11"],
     eta: "Delivered Oct 17",
   },
   {
@@ -50,7 +57,7 @@ const MOCK_ORDERS = [
     statusLabel: "Delivered",
     total: 890,
     items: 1,
-    products: [4],
+    products: ["p4"],
     eta: "Delivered Oct 01",
   },
   {
@@ -60,10 +67,13 @@ const MOCK_ORDERS = [
     statusLabel: "Refunded",
     total: 285,
     items: 1,
-    products: [3],
+    products: ["p6"],
     eta: "Refunded Sep 15",
   },
 ] as const;
+
+type Order = (typeof MOCK_ORDERS)[number];
+type ProductMap = Map<string, Product>;
 
 const MOCK_ADDRESSES = [
   {
@@ -89,17 +99,21 @@ const SECTIONS: Section[] = ["overview", "orders", "wishlist", "addresses", "set
    Section components
    =========================================== */
 
-function OrderRow({ order }: { order: (typeof MOCK_ORDERS)[number] }) {
+function OrderRow({ order, productMap }: { order: Order; productMap: ProductMap }) {
   return (
     <div className="order-card">
       <div className="stack">
-        {order.products.slice(0, 3).map((pi, i) => {
-          const p = PRODUCTS[pi];
+        {order.products.slice(0, 3).map((slug, i) => {
+          const p = productMap.get(slug);
           return p ? (
             <div key={i} className="thumb">
               <Placeholder palette={p.palette} corner={false} img={p.img} />
             </div>
-          ) : null;
+          ) : (
+            <div key={i} className="thumb">
+              <Placeholder palette="warm" corner={false} />
+            </div>
+          );
         })}
       </div>
       <div>
@@ -123,7 +137,13 @@ function OrderRow({ order }: { order: (typeof MOCK_ORDERS)[number] }) {
   );
 }
 
-function Overview({ goTo }: { goTo: (section: Section) => void }) {
+function Overview({
+  goTo,
+  productMap,
+}: {
+  goTo: (section: Section) => void;
+  productMap: ProductMap;
+}) {
   const { ids: wishlist } = useWishlist();
   return (
     <>
@@ -202,14 +222,14 @@ function Overview({ goTo }: { goTo: (section: Section) => void }) {
       </div>
       <div className="orders-list">
         {MOCK_ORDERS.slice(0, 3).map((o) => (
-          <OrderRow key={o.id} order={o} />
+          <OrderRow key={o.id} order={o} productMap={productMap} />
         ))}
       </div>
     </>
   );
 }
 
-function Orders() {
+function Orders({ productMap }: { productMap: ProductMap }) {
   const [filter, setFilter] = useState<"all" | "transit" | "delivered" | "cancelled">("all");
   const filtered =
     filter === "all" ? MOCK_ORDERS : MOCK_ORDERS.filter((o) => o.status === filter);
@@ -255,14 +275,14 @@ function Orders() {
 
       <div className="orders-list">
         {filtered.map((o) => (
-          <OrderRow key={o.id} order={o} />
+          <OrderRow key={o.id} order={o} productMap={productMap} />
         ))}
       </div>
     </>
   );
 }
 
-function WishlistView() {
+function WishlistView({ productMap }: { productMap: ProductMap }) {
   const navigate = useNavigate();
   const { ids, remove } = useWishlist();
   const { add } = useCart();
@@ -315,7 +335,7 @@ function WishlistView() {
 
       <div className="wishlist-grid">
         {ids.map((id) => {
-          const product = PRODUCTS.find((x) => x.id === id);
+          const product = productMap.get(id);
           if (!product) return null;
           return (
             <article key={product.id} className="wish-card">
@@ -664,6 +684,15 @@ export function Account() {
 
   const { ids: wishlist } = useWishlist();
 
+  // Order thumbnails and wishlist cards look products up by slug, so a
+  // single `Map<slug, Product>` keeps every section's render loop O(1)
+  // without forcing each one to call `useProducts` and re-derive it.
+  const { data: products = [] } = useProducts();
+  const productMap = useMemo<ProductMap>(
+    () => new Map(products.map((p) => [p.id, p])),
+    [products],
+  );
+
   const items: { id: Section; label: string; ct?: number | string }[] = [
     { id: "overview", label: "Overview" },
     { id: "orders", label: "Orders", ct: MOCK_ORDERS.length },
@@ -711,9 +740,9 @@ export function Account() {
         </ul>
       </aside>
       <div className="account-main">
-        {current === "overview" && <Overview goTo={goTo} />}
-        {current === "orders" && <Orders />}
-        {current === "wishlist" && <WishlistView />}
+        {current === "overview" && <Overview goTo={goTo} productMap={productMap} />}
+        {current === "orders" && <Orders productMap={productMap} />}
+        {current === "wishlist" && <WishlistView productMap={productMap} />}
         {current === "addresses" && <Addresses />}
         {current === "settings" && <Settings />}
         {current === "rewards" && <Rewards />}

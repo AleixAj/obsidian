@@ -87,13 +87,20 @@ const API_URL = (
 ).replace(/\/+$/, "");
 
 export class ApiError extends Error {
-  constructor(
-    public status: number,
-    public url: string,
-    public payload?: unknown,
-  ) {
+  // Plain field declarations (no constructor parameter properties) keep
+  // the file compatible with TS 6.0's `erasableSyntaxOnly` setting,
+  // which forbids any syntax that emits runtime code outside of JS-spec
+  // class fields.
+  readonly status: number;
+  readonly url: string;
+  readonly payload?: unknown;
+
+  constructor(status: number, url: string, payload?: unknown) {
     super(`API ${status} on ${url}`);
     this.name = "ApiError";
+    this.status = status;
+    this.url = url;
+    this.payload = payload;
   }
 }
 
@@ -171,4 +178,41 @@ export function toProduct(dto: ApiProductDTO): Product {
     imgAlt: dto.img_alt ?? dto.img,
     cats: dto.categories,
   };
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Adapter: ApiCategoryDTO → CategoryMeta (the shape PLP renders)
+// ──────────────────────────────────────────────────────────────────────
+
+/**
+ * UI-facing copy block for a PLP header.
+ *
+ * Kept structurally identical to the legacy `CATEGORY_META` record so
+ * existing JSX (`meta.eyebrow`, `meta.goldWord`, …) keeps working
+ * without touching every page.
+ */
+export interface CategoryMeta {
+  eyebrow: string;
+  title: string;
+  goldWord: string;
+  count: number;
+}
+
+/** Map a backend category onto the SPA's `CategoryMeta`. */
+export function toCategoryMeta(dto: ApiCategoryDTO): CategoryMeta {
+  return {
+    eyebrow: dto.eyebrow ?? "",
+    title: dto.title ?? "",
+    goldWord: dto.gold_word ?? "",
+    count: dto.count ?? 0,
+  };
+}
+
+/**
+ * Turn the categories list into a `Record<slug, CategoryMeta>` so
+ * lookups stay O(1) on the PLP without scanning the array on every
+ * render.
+ */
+export function toCategoryMap(dtos: ApiCategoryDTO[]): Record<string, CategoryMeta> {
+  return Object.fromEntries(dtos.map((c) => [c.slug, toCategoryMeta(c)]));
 }

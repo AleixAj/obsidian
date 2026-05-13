@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ProductCard } from "../components/product/ProductCard";
+import { ProductGridSkeleton } from "../components/product/ProductCardSkeleton";
 import { Icon } from "../components/ui/Icon";
 import { Marquee } from "../components/ui/Marquee";
 import { Placeholder } from "../components/ui/Placeholder";
 import { Reveal } from "../components/ui/Reveal";
-import { BRAND, PRODUCTS, TEMPLATES } from "../data/products";
+import { BRAND, TEMPLATES } from "../data/products";
+import { useProducts } from "../hooks/queries";
 import { pad } from "../utils/format";
 
 /**
@@ -75,7 +77,9 @@ function Hero() {
 
 /** Featured grid — the first 4 products of the catalogue. */
 function FeaturedGrid() {
-  const featured = PRODUCTS.slice(0, 4);
+  const { data: products, isPending, isError, refetch } = useProducts();
+  const featured = useMemo(() => products?.slice(0, 4) ?? [], [products]);
+
   return (
     <section className="section">
       <div className="section-head">
@@ -90,13 +94,31 @@ function FeaturedGrid() {
         </Link>
       </div>
 
-      <div className="product-grid">
-        {featured.map((product, i) => (
-          <Reveal key={product.id} delay={i * 80}>
-            <ProductCard product={product} />
-          </Reveal>
-        ))}
-      </div>
+      {isPending ? (
+        <ProductGridSkeleton count={4} />
+      ) : isError ? (
+        <div className="data-error">
+          <div className="title">✦ Couldn't load the drop</div>
+          <div>The catalogue API didn't answer.</div>
+          <button
+            type="button"
+            className="btn"
+            style={{ marginTop: 16 }}
+            onClick={() => refetch()}
+          >
+            Retry <Icon.Arrow />
+          </button>
+          <div className="hint">Backend offline? `php artisan serve` on :8000</div>
+        </div>
+      ) : (
+        <div className="product-grid">
+          {featured.map((product, i) => (
+            <Reveal key={product.id} delay={i * 80}>
+              <ProductCard product={product} />
+            </Reveal>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

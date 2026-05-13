@@ -1,13 +1,15 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ProductCard } from "../components/product/ProductCard";
+import { ProductGridSkeleton } from "../components/product/ProductCardSkeleton";
 import { Icon } from "../components/ui/Icon";
 import { Placeholder } from "../components/ui/Placeholder";
 import { Reveal } from "../components/ui/Reveal";
 import { useCart } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
 import { useWishlist } from "../context/WishlistContext";
-import { PRODUCTS } from "../data/products";
+import { useProduct, useProducts } from "../hooks/queries";
+import { ApiError } from "../lib/api";
 import { formatPrice } from "../utils/format";
 import { NotFound } from "./NotFound";
 
@@ -50,7 +52,14 @@ const ACCORDION = [
  */
 export function Product() {
   const { id } = useParams<{ id: string }>();
-  const product = useMemo(() => PRODUCTS.find((p) => p.id === id) ?? null, [id]);
+  const {
+    data: product,
+    isPending,
+    isError,
+    error,
+    refetch,
+  } = useProduct(id);
+  const { data: related = [] } = useProducts();
 
   const { add } = useCart();
   const { has, toggle } = useWishlist();
@@ -69,7 +78,43 @@ export function Product() {
     setOpenAcc("details");
   }, [id]);
 
-  if (!product) return <NotFound />;
+  // A 404 from the API means the slug isn't in the catalogue — render
+  // the same `NotFound` page the router uses, instead of an error card
+  // that would look out of place mid-flow.
+  if (isError && error instanceof ApiError && error.status === 404) {
+    return <NotFound />;
+  }
+
+  if (isPending) {
+    return (
+      <main className="fade-in pdp">
+        <div className="data-error" style={{ borderStyle: "solid", borderColor: "var(--line-2)" }}>
+          <div className="title" style={{ color: "var(--gold)" }}>✦ Loading product…</div>
+          <div>Fetching from the catalogue.</div>
+        </div>
+      </main>
+    );
+  }
+
+  if (isError || !product) {
+    return (
+      <main className="fade-in pdp">
+        <div className="data-error">
+          <div className="title">✦ Couldn't load this product</div>
+          <div>The catalogue API didn't answer.</div>
+          <button
+            type="button"
+            className="btn"
+            style={{ marginTop: 16 }}
+            onClick={() => refetch()}
+          >
+            Retry <Icon.Arrow />
+          </button>
+          <div className="hint">Backend offline? `php artisan serve` on :8000</div>
+        </div>
+      </main>
+    );
+  }
 
   const colorName = COLOR_NAMES[colorIdx] ?? "Obsidian";
 
@@ -271,15 +316,20 @@ export function Product() {
             View all <Icon.Arrow />
           </Link>
         </div>
-        <div className="product-grid">
-          {PRODUCTS.filter((x) => x.id !== product.id)
-            .slice(0, 4)
-            .map((rp, i) => (
-              <Reveal key={rp.id} delay={i * 60}>
-                <ProductCard product={rp} />
-              </Reveal>
-            ))}
-        </div>
+        {related.length === 0 ? (
+          <ProductGridSkeleton count={4} />
+        ) : (
+          <div className="product-grid">
+            {related
+              .filter((x) => x.id !== product.id)
+              .slice(0, 4)
+              .map((rp, i) => (
+                <Reveal key={rp.id} delay={i * 60}>
+                  <ProductCard product={rp} />
+                </Reveal>
+              ))}
+          </div>
+        )}
       </section>
     </main>
   );
