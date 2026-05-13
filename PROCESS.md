@@ -684,13 +684,31 @@ Frontend público:
 
 - `https://obsidian.aleixaj.com`
 
-Cloudflare Pages:
+Cloudflare deploy:
 
 - repo `AleixAj/obsidian`;
 - branch `main`;
 - build command `npm run build`;
 - output `dist`;
 - `VITE_API_URL=https://obsidian-api-production-8b5e.up.railway.app`.
+
+Nota importante: el proyecto quedó funcionando en el modo nuevo de
+Cloudflare **Workers + Assets**, no en Pages clásico puro. Por eso el repo
+incluye `wrangler.jsonc`, con:
+
+- `assets.directory="./dist"`;
+- `not_found_handling="single-page-application"`;
+- deploy command en Cloudflare: `npx wrangler deploy`.
+
+Al activar Workers + Assets eliminamos `public/_redirects`. Ese archivo
+servía para Pages clásico (`/* /index.html 200`), pero junto con
+`not_found_handling="single-page-application"` provocaba un error de deploy:
+**Infinite loop detected**. La navegación SPA sigue funcionando porque ahora
+la gestiona Wrangler.
+
+También se protegió `src/lib/api.ts` para que en producción no use nunca
+`localhost:8000`, aunque una variable `VITE_API_URL` mal configurada llegue
+desde Cloudflare. En local sigue usando `http://localhost:8000`.
 
 ### Paso 8.3 — Demo user
 

@@ -2,7 +2,7 @@
 
 > **Cómo usar este archivo**: si abres una conversación nueva en Cursor, pásamelo con `@etapa-8-checkpoint.md` y arrancamos sin re-explicar nada.
 
-> **Última actualización**: 2026-05-14 — Etapa 8 cerrada: deploy Cloudflare + Railway operativo.
+> **Última actualización**: 2026-05-14 — Etapa 8 cerrada: deploy Cloudflare Workers + Assets + Railway operativo.
 
 ---
 
@@ -55,9 +55,9 @@ Nota técnica:
 
 ---
 
-## Frontend — Cloudflare Pages
+## Frontend — Cloudflare Workers + Assets
 
-Cloudflare Pages:
+Cloudflare:
 
 - URL final: `https://obsidian.aleixaj.com`
 - Repo: `AleixAj/obsidian`
@@ -65,17 +65,30 @@ Cloudflare Pages:
 - Framework: Vite
 - Build command: `npm run build`
 - Output directory: `dist`
+- Deploy command: `npx wrangler deploy`
 - Env: `VITE_API_URL=https://obsidian-api-production-8b5e.up.railway.app`
 
-Archivo nuevo/relevante:
+Archivos nuevos/relevantes:
 
-- `public/_redirects` para soportar rutas SPA (`/account/orders`, `/shop/new`, etc.) en Cloudflare Pages.
+- `wrangler.jsonc` configura Workers + Assets con `assets.directory="./dist"`.
+- `wrangler.jsonc` usa `not_found_handling="single-page-application"` para soportar rutas SPA (`/account/orders`, `/shop/new`, etc.).
+- `public/_redirects` fue eliminado porque en Workers + Assets provocaba error de deploy por loop infinito.
+- `src/lib/api.ts` ignora `localhost:8000` en builds de producción y fuerza la API de Railway si la variable viene mal.
+
+Incidencias resueltas:
+
+- Cloudflare estaba construyendo el bundle con `VITE_API_URL=http://localhost:8000`, causando errores CORS en producción.
+- Se añadió fallback/guard en `src/lib/api.ts` para producción.
+- `public/_redirects` (`/* /index.html 200`) chocaba con el fallback SPA de Wrangler y fallaba con **Infinite loop detected**.
+- Se eliminó `_redirects`; la navegación SPA queda cubierta por Wrangler.
 
 ---
 
 ## Validación realizada en Etapa 8
 
 - Frontend público carga en `https://obsidian.aleixaj.com` ✅
+- Bundle de producción ya no llama a `localhost:8000` ✅
+- Imágenes/productos vuelven a cargar al apuntar el frontend a Railway ✅
 - Backend health responde `status=ok`, `env=production`, `db=true` ✅
 - Registro producción desde Origin `https://obsidian.aleixaj.com` ✅
 - `/api/account` producción devuelve usuario, 3 orders y 2 addresses ✅

@@ -6,32 +6,36 @@
 ![TanStack Query](https://img.shields.io/badge/TanStack_Query-v5-ff4154?logo=reactquery&logoColor=fff)
 ![Laravel API](https://img.shields.io/badge/API-Laravel_11-ff2d20?logo=laravel&logoColor=fff)
 
-Urban streetwear e-commerce built as a portfolio project: a dark,
-gold-accented React storefront backed by a Laravel 11 API.
+Full-stack urban streetwear e-commerce built as a portfolio project: a dark,
+gold-accented React storefront backed by a Laravel 11 API, deployed with a
+production database and real authenticated user flows.
 
-The goal is to show the full product journey an employer expects in a
-real commerce app: browsable catalogue, product detail pages, cart,
-wishlist, account area, API integration, and a roadmap toward auth,
-checkout and deployment.
+The goal is to demonstrate how a real client-facing commerce app is planned,
+implemented and shipped: API-backed catalogue, authenticated account area,
+cart and wishlist synchronisation, order creation, production deployment,
+and documented technical decisions.
 
-> Status: Etapa 8 complete. Deployed at
+> Status: Etapa 8 complete. Live at
 > [`obsidian.aleixaj.com`](https://obsidian.aleixaj.com), backed by a
-> Railway Laravel API with production database and demo user.
+> Railway Laravel API, managed MySQL database and seeded demo user.
 
-## Live Scope
+## Project Scope
 
 This repository is the frontend. The backend lives in
 [`AleixAj/obsidian-api`](https://github.com/AleixAj/obsidian-api).
 
-Current user-facing features:
+Implemented product features:
 
 - Production deployment: [`obsidian.aleixaj.com`](https://obsidian.aleixaj.com).
-- Catalogue pages powered by `/api/products` and `/api/categories`.
+- Catalogue pages powered by Laravel endpoints (`/api/products`, `/api/categories`).
 - Product listing pages with category filtering, size/color filters and sorting.
 - Product detail page with gallery, size/color selectors and "complete the look".
 - Cart drawer with quantities, totals, free-shipping progress, authenticated backend sync and basic checkout.
 - Wishlist persisted for guests and synced to backend for authenticated users.
 - Account dashboard with backend-backed overview, orders, address CRUD and profile settings.
+- Email/password registration and login with Laravel Sanctum cookie sessions.
+- Guest cart/wishlist merge after login or registration.
+- Basic checkout flow that converts the authenticated cart into a real order.
 - Responsive layout down to mobile widths.
 - Loading skeletons and retryable API error states.
 - React Query Devtools in development.
@@ -48,8 +52,8 @@ Current user-facing features:
 | Client state | React Context | Cart, wishlist and toast state without Redux overhead. |
 | Persistence | `localStorage` + backend cart/wishlist | Guest cart/wishlist survive refresh; both sync to Laravel after login. |
 | Styling | Plain CSS + tokens | Demonstrates CSS fundamentals without framework lock-in. |
-| Backend | Laravel 11 API | Separate repo, REST endpoints, SQLite dev DB, Sanctum-ready. |
-| Deploy | Cloudflare Pages + Railway | Static SPA on CDN, Laravel API with managed MySQL. |
+| Backend | Laravel 11 API | Separate repo, REST endpoints, Sanctum auth, MySQL in production. |
+| Deploy | Cloudflare Workers + Assets + Railway | SPA on Cloudflare edge, Laravel API with managed MySQL. |
 
 ## Architecture
 
@@ -71,6 +75,10 @@ src/hooks/queries/
   - useProducts()
   - useProduct()
   - useCategories()
+  - useAuth()
+  - useAccount()
+  - useCartSync()
+  - useWishlistSync()
       |
       v
 Pages and components receive UI-ready Product objects
@@ -92,8 +100,12 @@ changes in one place.
 
 React Query owns server data (`products`, `categories`, `user`, `account`,
 authenticated `cart`, authenticated `wishlist`). React Context owns local
-UI state (`toasts`) and exposes cart/wishlist APIs to components,
-switching between `localStorage` for guests and `/api/*` for logged-in users.
+UI state (`toasts`) and exposes cart/wishlist APIs to components.
+
+Guests use `localStorage`, authenticated users use the Laravel API, and both
+cart and wishlist merge into the backend account after login/register. That
+keeps the browsing experience fast before auth while still making user data
+portable across devices after auth.
 
 ## Project Structure
 
@@ -177,7 +189,9 @@ Verified after Etapa 8:
 
 - `npm run typecheck` passes.
 - `npm run build` passes.
-- Production smoke checks pass against Railway/Cloudflare, including Sanctum auth from `obsidian.aleixaj.com`.
+- Production smoke checks pass against Railway/Cloudflare.
+- Sanctum auth works from `obsidian.aleixaj.com`.
+- Production product images and catalogue data load from the Railway API.
 
 ## Production
 
@@ -185,6 +199,15 @@ Verified after Etapa 8:
 - Backend API: [`https://obsidian-api-production-8b5e.up.railway.app`](https://obsidian-api-production-8b5e.up.railway.app)
 - Health check: [`/api/health`](https://obsidian-api-production-8b5e.up.railway.app/api/health)
 - Demo user: `demo@obsidian.test`
+
+Deployment notes:
+
+- The frontend is deployed through Cloudflare Workers + Assets using `wrangler.jsonc`.
+- Cloudflare build command: `npm run build`.
+- Cloudflare deploy command: `npx wrangler deploy`.
+- SPA routing is handled by Wrangler's `not_found_handling="single-page-application"`.
+- The old Pages-style `public/_redirects` file was removed because it caused a redirect loop in Workers + Assets.
+- `src/lib/api.ts` guards production builds from accidentally using `localhost:8000`.
 
 ## Backend Contract
 
@@ -246,9 +269,10 @@ with a clear "not configured" error instead of failing with a server error.
 
 ## Stripe Setup (Deferred)
 
-Stripe/Cashier dependencies and env placeholders exist, but real payment
-collection is intentionally deferred until Stripe keys/webhook are created.
-The checkout flow already creates real orders without charging cards.
+Stripe/Cashier dependencies and env placeholders exist in the backend, but
+real payment collection is intentionally deferred until Stripe keys/webhook
+are created. The current checkout flow already creates real orders without
+charging cards.
 
 ## Roadmap
 
@@ -260,17 +284,19 @@ The checkout flow already creates real orders without charging cards.
 - [x] Etapa 5 - Guest cart syncs into user cart on login.
 - [x] Etapa 6 - Basic checkout: authenticated cart becomes an order.
 - [x] Etapa 7 - Wishlist sync across devices.
-- [x] Etapa 8 - Deploy: Cloudflare Pages + Railway + production demo user.
-- [ ] Final polish - Activate Stripe and OAuth provider credentials.
+- [x] Etapa 8 - Deploy: Cloudflare Workers + Assets, Railway and production demo user.
+- [ ] Final polish - Activate Stripe payments and OAuth provider credentials.
 
 ## Why This Project Matters
 
-Obsidian is deliberately not just a static mockup. It is structured like
-a real client project:
+Obsidian is deliberately not just a static mockup. It is structured like a
+small production project:
 
 - The UI is polished enough to judge product taste.
 - The backend boundary is real, typed and isolated.
+- Authentication, cart, wishlist, account data and checkout all cross the frontend/backend boundary.
 - Data fetching has production concerns: cache, retries, loading states and errors.
+- The app is deployed with real environment configuration, managed database and smoke checks.
 - Decisions are documented in `PROCESS.md`, including trade-offs and rejected alternatives.
 - The roadmap is incremental, so every stage can be reviewed and shipped cleanly.
 
