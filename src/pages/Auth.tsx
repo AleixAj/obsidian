@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Icon } from "../components/ui/Icon";
 import { Placeholder } from "../components/ui/Placeholder";
 import { BRAND } from "../data/products";
-import { useLogin, useRegister } from "../hooks/queries";
+import { useLogin, useRegister, useUser } from "../hooks/queries";
 import { ApiError, oauthRedirectUrl } from "../lib/api";
 
 /**
@@ -24,6 +24,7 @@ export function Auth() {
   const [params] = useSearchParams();
   const initial = (params.get("mode") as AuthMode) || "signin";
   const oauthError = params.get("error");
+  const returnTo = params.get("returnTo") || "/account";
 
   const [tab, setTab] = useState<AuthMode>(initial);
   const [agree, setAgree] = useState(false);
@@ -31,7 +32,14 @@ export function Auth() {
 
   const loginMutation = useLogin();
   const registerMutation = useRegister();
+  const { data: user } = useUser();
   const isSubmitting = loginMutation.isPending || registerMutation.isPending;
+
+  useEffect(() => {
+    if (user) {
+      navigate(returnTo, { replace: true });
+    }
+  }, [navigate, returnTo, user]);
 
   const authError =
     formError ??
@@ -67,7 +75,7 @@ export function Auth() {
         });
       }
 
-      navigate("/account");
+      navigate(returnTo, { replace: true });
     } catch (error) {
       setFormError(error instanceof ApiError ? "Invalid credentials or email already in use." : "Auth failed. Try again.");
     }

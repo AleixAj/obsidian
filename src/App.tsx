@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { Layout } from "./components/layout/Layout";
 import { CursorBlob } from "./components/ui/CursorBlob";
 import { CartProvider } from "./context/CartContext";
@@ -45,8 +46,22 @@ export default function App() {
 
                 <Route path="/auth" element={<Auth />} />
 
-                <Route path="/account" element={<Account />} />
-                <Route path="/account/:section" element={<Account />} />
+                <Route
+                  path="/account"
+                  element={
+                    <ProtectedRoute>
+                      <Account />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/account/:section"
+                  element={
+                    <ProtectedRoute>
+                      <Account />
+                    </ProtectedRoute>
+                  }
+                />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>

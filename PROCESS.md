@@ -355,6 +355,83 @@ que ahora vienen de la API.
 
 ---
 
+## Etapa 3 — Autenticación real
+
+**Objetivo**: dejar de navegar a `/account` como demo y usar una sesión
+real de Laravel Sanctum. El navegador guarda una cookie de sesión; el
+frontend solo pregunta `GET /api/user` para saber si hay usuario.
+
+### Paso 3.1 — Sanctum stateful API
+
+En Laravel 11 se activa en `bootstrap/app.php`:
+
+```php
+$middleware->statefulApi();
+```
+
+**Por qué**: sin esto, Sanctum trata las peticiones `/api/*` como API
+stateless de tokens. Con esto, las peticiones desde `localhost:5173`
+pueden usar cookies de sesión como una SPA first-party.
+
+### Paso 3.2 — Register / login / logout
+
+Backend:
+
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/auth/logout`
+- `GET /api/user`
+
+Frontend:
+
+- `useUser()`
+- `useLogin()`
+- `useRegister()`
+- `useLogout()`
+
+**Detalle importante**: usamos `fetch`, no Axios. Axios copia
+automáticamente la cookie `XSRF-TOKEN` al header `X-XSRF-TOKEN`.
+`fetch` no lo hace, así que `src/lib/api.ts` lo implementa a mano.
+Si falta, Laravel devuelve `419` o `401`.
+
+### Paso 3.3 — `/account` protegido
+
+`ProtectedRoute` comprueba `useUser()` antes de renderizar Account:
+
+- si está cargando → loading branded;
+- si hay usuario → deja pasar;
+- si no hay sesión → redirige a `/auth?returnTo=/account/...`.
+
+Así evitamos enseñar datos mockeados como si fueran reales.
+
+### Paso 3.4 — OAuth Google/GitHub
+
+Backend preparado con Socialite:
+
+```text
+/auth/google/redirect
+/auth/google/callback
+/auth/github/redirect
+/auth/github/callback
+```
+
+Para activarlo hay que crear apps OAuth y rellenar `.env`:
+
+```env
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google/callback
+
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+GITHUB_REDIRECT_URI=http://localhost:8000/auth/github/callback
+```
+
+Si faltan credenciales, el backend redirige a
+`/auth?error=oauth_not_configured` en vez de romper con error 500.
+
+---
+
 ## 🟢 Comandos diarios
 
 Abrir Cursor con **`obsidian.code-workspace`** (ambos repos a la vez).

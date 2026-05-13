@@ -116,7 +116,7 @@ src/
 Docs worth reading:
 
 - [`PROCESS.md`](./PROCESS.md) - step-by-step "why we chose this" notes.
-- [`.notes/etapa-2-checkpoint.md`](./.notes/etapa-2-checkpoint.md) - current project state and Etapa 3 plan.
+- [`.notes/etapa-2-checkpoint.md`](./.notes/etapa-2-checkpoint.md) - latest checkpoint before auth work started.
 
 ## Full-Stack Local Setup
 
@@ -180,17 +180,40 @@ The frontend currently consumes:
 | `GET` | `/api/products/{slug}` | Product detail page |
 | `GET` | `/api/categories` | Shop page header metadata |
 | `GET` | `/api/health` | Manual smoke checks / future monitoring |
+| `GET` | `/api/user` | Current authenticated user |
+| `POST` | `/api/auth/register` | Create account and start session |
+| `POST` | `/api/auth/login` | Email/password login |
+| `POST` | `/api/auth/logout` | Server-side logout |
 
 Money is stored in the API as integer cents (`price_cents`). The adapter
 maps that to the existing UI `Product.price` number before components
 render it.
+
+## OAuth Setup
+
+Google and GitHub OAuth routes are wired through the Laravel API, but
+provider credentials are intentionally not committed. To enable them in
+local development, create OAuth apps and fill the backend `.env`:
+
+```env
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google/callback
+
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+GITHUB_REDIRECT_URI=http://localhost:8000/auth/github/callback
+```
+
+Until those values exist, the social buttons redirect back to `/auth`
+with a clear "not configured" error instead of failing with a server error.
 
 ## Roadmap
 
 - [x] Etapa 0 - Architecture decisions.
 - [x] Etapa 1 - Laravel 11 backend, schema, seeders and public API.
 - [x] Etapa 2 - React SPA consumes the backend via React Query.
-- [ ] Etapa 3 - Real auth: email/password + Google/GitHub OAuth.
+- [x] Etapa 3 - Real auth: email/password + Google/GitHub OAuth routes.
 - [ ] Etapa 4 - Account dashboard connected to real user data.
 - [ ] Etapa 5 - Guest cart syncs into user cart on login.
 - [ ] Etapa 6 - Stripe checkout in sandbox mode.

@@ -676,6 +676,10 @@ export function Account() {
   const { data: user } = useUser();
   const logoutMutation = useLogout();
 
+  if (!user) {
+    return null;
+  }
+
   const current: Section =
     section && SECTIONS.includes(section as Section) ? (section as Section) : "overview";
 
@@ -697,7 +701,7 @@ export function Account() {
     [products],
   );
 
-  const displayName = user?.name ?? "Aleix Auqué";
+  const displayName = user.name;
   const initials = displayName
     .split(" ")
     .filter(Boolean)
