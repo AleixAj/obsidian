@@ -9,7 +9,7 @@
 ## TL;DR
 
 - **Etapa 3**: ✅ cerrada. Auth real funcionando con Laravel Sanctum (email/password), sesión persistente vía cookie, `/account` protegido y logout server-side.
-- **OAuth Google/GitHub**: rutas y frontend cableados con Socialite, pero faltan credenciales reales (`GOOGLE_CLIENT_ID`, `GITHUB_CLIENT_ID`, etc.). Si se pulsan sin credenciales, vuelve a `/auth?error=oauth_not_configured`.
+- **OAuth Google/GitHub**: rutas y frontend cableados con Socialite, pero se aplaza la activación hasta el final (Etapa 8/deploy), cuando existan dominios/callbacks definitivos. Email/password ya cumple auth real.
 - **Próximo paso**: Etapa 4 — conectar Account dashboard a datos reales del backend (profile/account endpoint, orders, addresses, settings básicos).
 - **Decisiones congeladas**: Laravel 11, Sanctum SPA cookie auth, Socialite para OAuth, React Query para server state, dos repos separados.
 
@@ -142,9 +142,11 @@ En PowerShell, usar `npm.cmd` si sale el error de execution policy con `npm.ps1`
 
 ---
 
-## OAuth Google/GitHub — pendiente de credenciales
+## OAuth Google/GitHub — aplazado al final
 
-Para activar OAuth real:
+No bloquear Etapas 4-7 por esto. Las rutas ya existen, pero conviene activar OAuth cuando tengamos dominios definitivos (Cloudflare/Railway) para no rehacer callbacks.
+
+Para activarlo al final:
 
 1. Crear app OAuth en Google Cloud Console.
 2. Callback local:
@@ -164,13 +166,13 @@ GITHUB_CLIENT_SECRET=
 GITHUB_REDIRECT_URI=http://localhost:8000/auth/github/callback
 ```
 
-No bloquear Etapa 4 por esto; email/password ya cumple auth real.
+Mientras falten credenciales, los botones vuelven a `/auth?error=oauth_not_configured`.
 
 ---
 
 ## 🛣️ Etapa 4 — Próximo paso
 
-**Objetivo**: Account dashboard deja de ser principalmente mock y empieza a leer/escribir datos reales del backend.
+**Objetivo**: Account dashboard deja de ser principalmente mock y empieza a leer/escribir datos reales del backend. Primera parte ya iniciada: account/orders/addresses API + hooks frontend.
 
 **Tareas previstas**:
 
@@ -202,7 +204,7 @@ No bloquear Etapa 4 por esto; email/password ya cumple auth real.
 
 ## ⏸️ Pendientes opcionales
 
-- [ ] Credenciales OAuth Google/GitHub.
+- [ ] Credenciales OAuth Google/GitHub (mover al final/deploy).
 - [ ] Pinear ambos repos en GitHub.
 - [ ] Añadir description + topics en ambos repos.
 - [ ] Branch protection cuando empiecen PRs reales.
@@ -236,7 +238,7 @@ No bloquear Etapa 4 por esto; email/password ya cumple auth real.
 | 5 | Cart sync (guest ↔ user) | ⏸ |
 | 6 | Checkout + Stripe sandbox | ⏸ |
 | 7 | Wishlist sincronizada | ⏸ |
-| 8 | Deploy (Cloudflare Pages + Railway/Render) + usuario demo | ⏸ |
+| 8 | Deploy (Cloudflare Pages + Railway/Render) + usuario demo + OAuth real | ⏸ |
 
 ---
 

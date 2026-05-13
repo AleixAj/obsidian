@@ -54,6 +54,36 @@ function addressLines(address: ApiAddressDTO): string[] {
   ].filter(Boolean) as string[];
 }
 
+function emptyAddress(userName: string, isDefault: boolean): AddressPayload {
+  return {
+    label: "Home",
+    full_name: userName,
+    line1: "",
+    line2: null,
+    city: "",
+    region: null,
+    postal_code: "",
+    country: "ES",
+    phone: null,
+    is_default: isDefault,
+  };
+}
+
+function toAddressPayload(address: ApiAddressDTO): AddressPayload {
+  return {
+    label: address.label,
+    full_name: address.full_name,
+    line1: address.line1,
+    line2: address.line2,
+    city: address.city,
+    region: address.region,
+    postal_code: address.postal_code,
+    country: address.country,
+    phone: address.phone,
+    is_default: address.is_default,
+  };
+}
+
 /* ===========================================
    Section components
    =========================================== */
@@ -372,19 +402,40 @@ function Addresses() {
   const deleteAddress = useDeleteAddress();
 
   const accountAddresses = account?.addresses ?? [];
+  const [editing, setEditing] = useState<{ id: number | null; values: AddressPayload } | null>(null);
 
-  const sampleAddress = (): AddressPayload => ({
-    label: "New address",
-    full_name: account?.user.name ?? "Obsidian Member",
-    line1: "Carrer de Mallorca 401",
-    line2: null,
-    city: "Barcelona",
-    region: null,
-    postal_code: "08013",
-    country: "ES",
-    phone: "+34 600 000 000",
-    is_default: accountAddresses.length === 0,
-  });
+  const isSaving = createAddress.isPending || updateAddress.isPending;
+
+  const startNew = () =>
+    setEditing({
+      id: null,
+      values: emptyAddress(account?.user.name ?? "Obsidian Member", accountAddresses.length === 0),
+    });
+
+  const startEdit = (address: ApiAddressDTO) =>
+    setEditing({
+      id: address.id,
+      values: toAddressPayload(address),
+    });
+
+  const patchEditing = (patch: Partial<AddressPayload>) => {
+    setEditing((current) =>
+      current ? { ...current, values: { ...current.values, ...patch } } : current,
+    );
+  };
+
+  const saveEditing = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editing) return;
+
+    if (editing.id === null) {
+      await createAddress.mutateAsync(editing.values);
+    } else {
+      await updateAddress.mutateAsync({ id: editing.id, payload: editing.values });
+    }
+
+    setEditing(null);
+  };
 
   return (
     <>
@@ -398,6 +449,120 @@ function Addresses() {
           </h1>
         </div>
       </div>
+
+      {editing && (
+        <form className="address-form settings-section" onSubmit={saveEditing}>
+          <div className="head">
+            <h4>{editing.id === null ? "New address" : "Edit address"}</h4>
+            <p>Saved to your authenticated Obsidian account.</p>
+          </div>
+          <div>
+            <div className="field-row">
+              <div className="field">
+                <label>Label</label>
+                <input
+                  type="text"
+                  value={editing.values.label ?? ""}
+                  onChange={(e) => patchEditing({ label: e.target.value })}
+                  placeholder="Home"
+                />
+              </div>
+              <div className="field">
+                <label>Full name</label>
+                <input
+                  type="text"
+                  value={editing.values.full_name}
+                  onChange={(e) => patchEditing({ full_name: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+            <div className="field">
+              <label>Address line 1</label>
+              <input
+                type="text"
+                value={editing.values.line1}
+                onChange={(e) => patchEditing({ line1: e.target.value })}
+                required
+              />
+            </div>
+            <div className="field">
+              <label>Address line 2</label>
+              <input
+                type="text"
+                value={editing.values.line2 ?? ""}
+                onChange={(e) => patchEditing({ line2: e.target.value || null })}
+              />
+            </div>
+            <div className="field-row">
+              <div className="field">
+                <label>City</label>
+                <input
+                  type="text"
+                  value={editing.values.city}
+                  onChange={(e) => patchEditing({ city: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="field">
+                <label>Region</label>
+                <input
+                  type="text"
+                  value={editing.values.region ?? ""}
+                  onChange={(e) => patchEditing({ region: e.target.value || null })}
+                />
+              </div>
+            </div>
+            <div className="field-row">
+              <div className="field">
+                <label>Postal code</label>
+                <input
+                  type="text"
+                  value={editing.values.postal_code}
+                  onChange={(e) => patchEditing({ postal_code: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="field">
+                <label>Country code</label>
+                <input
+                  type="text"
+                  value={editing.values.country}
+                  onChange={(e) => patchEditing({ country: e.target.value.toUpperCase().slice(0, 2) })}
+                  required
+                  maxLength={2}
+                />
+              </div>
+            </div>
+            <div className="field">
+              <label>Phone</label>
+              <input
+                type="tel"
+                value={editing.values.phone ?? ""}
+                onChange={(e) => patchEditing({ phone: e.target.value || null })}
+              />
+            </div>
+            <label className={`checkbox-row ${editing.values.is_default ? "checked" : ""}`}>
+              <span className="box">{editing.values.is_default && <span style={{ fontSize: 9 }}>✓</span>}</span>
+              <input
+                type="checkbox"
+                checked={editing.values.is_default}
+                onChange={(e) => patchEditing({ is_default: e.target.checked })}
+                style={{ display: "none" }}
+              />
+              <span>Use as default shipping address.</span>
+            </label>
+            <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
+              <button type="submit" className="btn btn-primary" disabled={isSaving}>
+                {isSaving ? "Saving..." : "Save address"} <Icon.Arrow />
+              </button>
+              <button type="button" className="btn" onClick={() => setEditing(null)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </form>
+      )}
 
       <div className="addr-grid">
         {isPending && <div className="data-error">Loading your addresses…</div>}
@@ -413,7 +578,7 @@ function Addresses() {
               ))}
             </div>
             <div className="actions">
-              <a onClick={() => updateAddress.mutate({ id: a.id, payload: { label: `${a.label ?? "Address"} ✦` } })}>Edit</a>
+              <a onClick={() => startEdit(a)}>Edit</a>
               {!a.is_default && (
                 <a onClick={() => updateAddress.mutate({ id: a.id, payload: { is_default: true } })}>
                   Set default
@@ -423,9 +588,9 @@ function Addresses() {
             </div>
           </div>
         ))}
-        <div className="addr-card add-new" onClick={() => createAddress.mutate(sampleAddress())}>
+        <div className="addr-card add-new" onClick={startNew}>
           <span className="plus-big">+</span>
-          <span>{createAddress.isPending ? "Adding…" : "Add new address"}</span>
+          <span>Add new address</span>
         </div>
       </div>
     </>

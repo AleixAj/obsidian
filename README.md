@@ -189,11 +189,13 @@ Money is stored in the API as integer cents (`price_cents`). The adapter
 maps that to the existing UI `Product.price` number before components
 render it.
 
-## OAuth Setup
+## OAuth Setup (Deferred)
 
 Google and GitHub OAuth routes are wired through the Laravel API, but
-provider credentials are intentionally not committed. To enable them in
-local development, create OAuth apps and fill the backend `.env`:
+provider credentials are intentionally not committed. We keep this as a
+final deployment task so callback URLs only need to be configured once,
+after Cloudflare/Railway domains exist. To enable it later, create OAuth
+apps and fill the backend `.env`:
 
 ```env
 GOOGLE_CLIENT_ID=
@@ -213,12 +215,12 @@ with a clear "not configured" error instead of failing with a server error.
 - [x] Etapa 0 - Architecture decisions.
 - [x] Etapa 1 - Laravel 11 backend, schema, seeders and public API.
 - [x] Etapa 2 - React SPA consumes the backend via React Query.
-- [x] Etapa 3 - Real auth: email/password + Google/GitHub OAuth routes.
+- [x] Etapa 3 - Real auth: email/password + prepared OAuth routes.
 - [ ] Etapa 4 - Account dashboard connected to real user data.
 - [ ] Etapa 5 - Guest cart syncs into user cart on login.
 - [ ] Etapa 6 - Stripe checkout in sandbox mode.
 - [ ] Etapa 7 - Wishlist sync across devices.
-- [ ] Etapa 8 - Deploy: Cloudflare Pages + Railway/Render.
+- [ ] Etapa 8 - Deploy: Cloudflare Pages + Railway/Render + activate OAuth callbacks.
 
 ## Why This Project Matters
 

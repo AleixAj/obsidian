@@ -404,7 +404,7 @@ Si falta, Laravel devuelve `419` o `401`.
 
 Así evitamos enseñar datos mockeados como si fueran reales.
 
-### Paso 3.4 — OAuth Google/GitHub
+### Paso 3.4 — OAuth Google/GitHub (preparado, activación al final)
 
 Backend preparado con Socialite:
 
@@ -415,7 +415,12 @@ Backend preparado con Socialite:
 /auth/github/callback
 ```
 
-Para activarlo hay que crear apps OAuth y rellenar `.env`:
+Decisión actual: dejar la activación para el final (deploy). Motivo:
+Google/GitHub necesitan callback URLs exactas, y es mejor configurarlas
+una vez con los dominios reales de Cloudflare/Railway que rehacerlas en
+cada etapa.
+
+Para activarlo al final hay que crear apps OAuth y rellenar `.env`:
 
 ```env
 GOOGLE_CLIENT_ID=
@@ -513,12 +518,12 @@ de react-query en la esquina inferior-izquierda del SPA en modo dev.
 | 0 | Decisiones arquitectónicas | – | ✅ |
 | 1 | Setup Laravel + schema + seed + endpoints públicos | Backend operativo | ✅ |
 | 2 | SPA consume `/api/products` con react-query | UI viva contra el backend | ✅ |
-| 3 | Auth real (email/password + OAuth Google/GitHub) | Login funcional, sesión persistente | ⏳ |
+| 3 | Auth real (email/password + OAuth preparado) | Login funcional, sesión persistente | ✅ |
 | 4 | Account dashboard conectado | Pedidos/direcciones/ajustes reales | ⏸ |
 | 5 | Cart sync (guest ↔ user) | El carrito sobrevive al login | ⏸ |
 | 6 | Checkout + Stripe sandbox | Pagar de verdad en modo test | ⏸ |
 | 7 | Wishlist sincronizada | Wishlist multi-dispositivo | ⏸ |
-| 8 | Deploy (Cloudflare Pages + Railway) + demo user | Proyecto navegable desde internet | ⏸ |
+| 8 | Deploy (Cloudflare Pages + Railway) + demo user + OAuth real | Proyecto navegable desde internet | ⏸ |
 
 ---
 
