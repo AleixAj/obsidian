@@ -136,7 +136,7 @@ Requires Node ≥ 20.
 
 ## Backend
 
-A companion **Laravel 11** API lives in [`obsidian-api`](../obsidian-api) (separate repo on deploy). The frontend talks to it via `src/lib/api.ts`, configured with `VITE_API_URL`. See `.env.example`.
+A companion **Laravel 11** API lives in [**AleixAj/obsidian-api**](https://github.com/AleixAj/obsidian-api) (separate repo). The frontend talks to it via `src/lib/api.ts`, configured with `VITE_API_URL`. See `.env.example`.
 
 Etapa 1 (current): the SPA still ships with the static catalogue in `src/data/products.ts`; the backend is live but the screens have not been wired to it yet. Etapa 2 swaps the static array for `fetchProducts()`.
 

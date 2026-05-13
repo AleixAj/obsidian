@@ -1,98 +1,160 @@
-# OBSIDIAN — Estado tras Etapa 1
+# OBSIDIAN — Estado del proyecto
 
-> Si abres Cursor en otro día, pasa este archivo al chat (`@etapa-1-checkpoint.md`) y arrancamos Etapa 2 sin preguntar dos veces.
+> **Cómo usar este archivo**: si abres una conversación nueva en Cursor, pásamelo con `@etapa-1-checkpoint.md` y arrancamos sin re-explicar nada.
 
-## ✅ Etapa 1 cerrada
+> **Última actualización**: 2026-05-13 — Etapa 1 cerrada y publicada en GitHub.
 
-Backend Laravel 11 levantado, schema completo, 11 productos seedeados y los endpoints públicos respondiendo 200. La UI sigue intacta usando el array estático: la conexión real se hace en Etapa 2.
+---
 
-### Lo que existe ahora
+## TL;DR
+
+- **Etapa 1**: ✅ cerrada y pusheada a GitHub bajo `AleixAj`.
+- **Próximo paso**: Etapa 2 — conectar la SPA al backend usando `@tanstack/react-query`. UI no cambia.
+- **Decisiones bloqueadas que ya no hay que volver a tomar**: Laravel 11, SQLite (dev) / MySQL (prod), Sanctum + Socialite + Cashier, Cloudflare Pages para frontend, Railway/Render para backend, dos repos separados.
+
+---
+
+## Repos en GitHub
+
+| Repo | URL | Commits | Notas |
+|---|---|---|---|
+| Frontend | https://github.com/AleixAj/obsidian | 1 (`chore: initial commit`) | Vite 8 + React 19 + TS · UI completa |
+| Backend  | https://github.com/AleixAj/obsidian-api | 7 (Conventional Commits) | Laravel 11 · API pública lista |
+
+Todos los commits con autor `AleixAj <aleixauque@gmail.com>` (cuentan para el gráfico de contribuciones).
+
+---
+
+## Layout local
 
 ```
 C:\Users\Kylen\Desktop\Projects\
-├── obsidian\                 frontend Vite/React (sin cambios visibles, +api.ts +.env)
-├── obsidian-api\             backend Laravel 11 (NUEVO, ya en git con 7 commits)
-└── obsidian.code-workspace   workspace multi-root para Cursor
+├── obsidian\                   frontend Vite/React (repo: AleixAj/obsidian)
+├── obsidian-api\               backend Laravel 11 (repo: AleixAj/obsidian-api)
+└── obsidian.code-workspace     workspace multi-root para Cursor
 ```
 
-### Stack final del backend
+**Cómo abrir Cursor con ambos**: doble click en `obsidian.code-workspace`. NO abras solo `obsidian/` o solo `obsidian-api/` — pierdes el contexto cruzado.
 
-| Componente | Versión |
-|---|---|
-| PHP | 8.3.30 (Laragon) |
-| Composer | 2.9.4 |
-| Laravel | 11.51.0 |
-| Sanctum | ^4.0 (tokens + SPA cookies) |
-| Socialite | ^5.27 (Google, GitHub) |
-| Cashier (Stripe) | ^16.5 |
-| DB dev | SQLite (`database/database.sqlite`) |
+---
 
-### Endpoints listos (Etapa 1)
+## Stack confirmado
 
-| Método | Path | Estado |
+### Backend (`obsidian-api`)
+
+| Componente | Versión | Notas |
 |---|---|---|
-| GET | `/api/health` | 200 + ping a SQLite |
-| GET | `/api/products` | Lista (11) |
-| GET | `/api/products?category=men` | Filtro por slug |
-| GET | `/api/products/{slug}` | Detalle por slug (p1..p11) |
+| PHP | 8.3.30 (Laragon Full v8.6.1) | `C:\laragon\bin\php\php-8.3.30-Win32-vs16-x64\` |
+| Composer | 2.9.4 | `C:\laragon\bin\composer\` |
+| Laravel | 11.51.0 | |
+| Sanctum | ^4.0 | SPA cookie auth + tokens |
+| Socialite | ^5.27 | Google + GitHub (env vars listas, sin credenciales aún) |
+| Cashier (Stripe) | ^16.5 | Test mode, sin claves aún |
+| DB dev | SQLite | `database/database.sqlite` |
+| DB prod (futura) | MySQL | |
+
+### Frontend (`obsidian`)
+
+Igual que estaba antes + 3 archivos nuevos:
+- `src/lib/api.ts` — cliente tipado (DTOs + adapter `toProduct`), **aún no usado por la UI**
+- `src/vite-env.d.ts` — tipa `VITE_API_URL`
+- `.env` / `.env.example` — `VITE_API_URL=http://localhost:8000`
+
+---
+
+## Endpoints listos (Etapa 1)
+
+| Método | Path | Respuesta |
+|---|---|---|
+| GET | `/api/health` | `{status, service, env, time, db}` |
+| GET | `/api/products` | 11 productos, `?category=slug` opcional |
+| GET | `/api/products/{slug}` | Detalle por slug (`p1`–`p11`) |
 | GET | `/api/categories` | 6 categorías con `count` |
-| GET | `/api/user` (auth:sanctum) | Placeholder hasta Etapa 3 |
+| GET | `/api/user` | Auth Sanctum (placeholder hasta Etapa 3) |
 
-Respuesta usa **API Resources**: precios en `price_cents`, `colors` con hex+name, `sizes` con `is_sold_out`, `categories` como array de slugs.
+Precios siempre en `price_cents` (integer). El adapter del frontend divide por 100.
 
-### Schema en SQLite
+---
 
-- `categories`, `products`, `category_product`, `product_colors`, `product_sizes` (catálogo, ya con datos)
-- `users` (+ columnas `oauth_provider`, `oauth_provider_id`, `avatar_url`, `stripe_id`...), `personal_access_tokens`
-- `addresses`, `carts`, `cart_items`, `wishlists`, `orders`, `order_items`, `order_addresses` (vacías hasta Etapas 3–6)
-- Cashier: `subscriptions`, `subscription_items`
-
-### Frontend tocado (mínimo)
-
-- `obsidian/.env` con `VITE_API_URL=http://localhost:8000` (gitignored)
-- `obsidian/.env.example` (versionable)
-- `obsidian/src/lib/api.ts` — cliente tipado con DTOs + adapter `toProduct(dto): Product`. **No se usa todavía**; se enchufa en Etapa 2.
-- `obsidian/src/vite-env.d.ts` — tipa `import.meta.env.VITE_API_URL`
-- `obsidian/.gitignore` — ignora `.env` y `.env.*` excepto `.env.example`
-
-## 🔧 Cómo arrancar el entorno cada día
-
-Dos terminales (o usa `Run Task` en VS Code/Cursor):
+## Cómo arrancar el entorno cada día
 
 ```powershell
-# Backend
+# Terminal 1 — Backend (Laravel)
 cd C:\Users\Kylen\Desktop\Projects\obsidian-api
 php artisan serve
+# → http://localhost:8000
 
-# Frontend
+# Terminal 2 — Frontend (Vite)
 cd C:\Users\Kylen\Desktop\Projects\obsidian
 npm run dev
+# → http://localhost:5173
 ```
 
-Frontend en `http://localhost:5173`, backend en `http://localhost:8000`. CORS ya configurado para que se hablen.
+PHP/Composer ya están en el PATH del usuario (persistentes). Si abren un Cursor nuevo y `php --version` falla, basta cerrar/reabrir Cursor — el PATH se hereda al arrancar el proceso.
 
-Para abrir Cursor con ambos proyectos a la vez: doble click en `Projects\obsidian.code-workspace` (o `File → Open Workspace from File...`).
+---
 
-## ⚠️ Pendientes de tu decisión
+## 🛣️ Etapa 2 — Próximo paso (DECISIÓN YA TOMADA)
 
-1. **Git en `obsidian/` (frontend)** — La carpeta NO está en git todavía. Cuando quieras subirlo a GitHub: `cd obsidian; git init -b main; git add .; git commit -m "feat: initial frontend (Vite + React)"`.
-2. **GitHub remoto** — Crea dos repos vacíos en GitHub (`obsidian` y `obsidian-api`) y luego para cada uno:
-   ```powershell
-   git remote add origin https://github.com/<tu-user>/<repo>.git
-   git push -u origin main
-   ```
-3. **Bug menor detectado** — `CATEGORY_META.knitwear.count` dice `3` en `src/data/products.ts` pero los productos con `knitwear` en su `cats` son solo **2** (p4 y p11). El backend devuelve el dato correcto (2). En Etapa 2 esto se autocorrige al consumir `/api/categories`.
+**Objetivo**: la SPA deja de leer `src/data/products.ts` y consume el backend. UI sin cambios.
 
-## 🛣️ Etapa 2 — Próximo paso
+**Stack añadido**: `@tanstack/react-query` (decidido por el user). Razones:
+- Cache + loading/error/refetch out-of-the-box
+- ~4 KB extra, mucho menos boilerplate
+- Estándar en empresas → vendible en entrevistas
 
-**Objetivo**: el frontend deja de usar `src/data/products.ts` y consume el backend en su lugar. UI exactamente igual.
+**Tareas (en orden)**:
+1. `cd obsidian; npm i @tanstack/react-query @tanstack/react-query-devtools`
+2. Envolver `<App>` con `<QueryClientProvider>` en `src/main.tsx`.
+3. Crear `src/hooks/queries/`:
+   - `useProducts(category?: string)` → `useQuery(['products', category], fetchProducts)`
+   - `useProduct(slug)` → `useQuery(['product', slug], fetchProduct)`
+   - `useCategories()` → `useQuery(['categories'], fetchCategories)`
+   - Todos aplican `toProduct()` en `select` para devolver `Product[]` listos para la UI.
+4. Sustituir en cada página/componente: `import { PRODUCTS } from "@/data/products"` → `const { data: products } = useProducts(...)`.
+5. Reemplazar el `CATEGORY_META` por la respuesta de `useCategories()`.
+6. Estados loading/error: usar el placeholder/skeleton existente del frontend (o crear uno simple si no hay).
+7. Smoke test manual:
+   - Cada PLP (`/shop/new`, `/shop/men`, etc.) renderiza productos correctos.
+   - PDP por slug funciona (`/product/p1`).
+   - Cart/wishlist siguen funcionando (siguen siendo localStorage).
+8. Mantener `IMAGES`, `BRAND`, `TEMPLATES` en `products.ts` (son assets, no catálogo).
+9. Opcional: borrar el array `PRODUCTS` de `products.ts` al final (o dejarlo como fallback de tipo).
 
-Tareas:
-1. Crear `src/hooks/useProducts.ts` y `src/hooks/useProduct.ts` (fetch + cache simple, sin react-query todavía a menos que decidamos meterlo).
-2. Sustituir `import { PRODUCTS } from "@/data/products"` por llamadas a `fetchProducts()` + `toProduct()`.
-3. Reemplazar el `CATEGORY_META` por `fetchCategories()`.
-4. Mantener `IMAGES`, `BRAND`, `TEMPLATES` como están (son assets del frontend, no del catálogo).
-5. Manejar estados loading/error con un esqueleto de skeleton ya existente o uno nuevo.
-6. Smoke test: cada PLP (`/shop/new`, `/shop/men`, etc.) renderiza los productos correctos.
+**Definition of done de Etapa 2**: el frontend con backend caído muestra estados de error legibles; con backend levantado todo se ve igual que antes; `git grep PRODUCTS` solo aparece en `products.ts`.
 
-**Decisión pendiente para Etapa 2**: ¿metemos `@tanstack/react-query` para caching/loading? Mi recomendación es **sí** — añade 4KB pero quita 90% del boilerplate y queda muy bien en el portfolio. Si prefieres "vanilla fetch", también funciona pero hay que gestionar loading/error a mano en cada hook.
+---
+
+## ⏸️ Pendientes opcionales (sin bloquear nada)
+
+- [ ] `gh auth login` (CLI de GitHub instalado pero sin autenticar). Hace falta solo si quieres usar `gh pr create`, `gh issue create`, etc. Para push de git no es necesario — Git Credential Manager ya tiene las credenciales cacheadas.
+- [ ] Pinear ambos repos en https://github.com/AleixAj.
+- [ ] Añadir description + topics a cada repo en GitHub (sugerencias en el chat anterior).
+- [ ] Configurar branch protection para `main` cuando empiece a haber PRs reales (Etapa 3+).
+
+---
+
+## 🛠️ Cosas que pueden romperse y cómo arreglarlas
+
+| Problema | Solución |
+|---|---|
+| `php --version` no se reconoce | El PATH del usuario tiene `C:\laragon\bin\php\php-8.3.30-Win32-vs16-x64`. Cierra/reabre Cursor o lanza `[Environment]::GetEnvironmentVariable("Path","User")` para verificar. |
+| Migraciones desordenadas | `php artisan migrate:fresh --seed --no-interaction` recrea la DB desde cero. SQLite, no hay riesgo. |
+| CORS bloquea al frontend | `config/cors.php` lee `FRONTEND_URL` del `.env`. Si cambias el puerto del Vite, actualiza ambos lados. |
+| Composer protesta por `zip` | Ya activado en `php.ini` (línea ~975, `extension=zip`). Si vuelve a desactivarse: `Select-String -Path "C:\laragon\bin\php\php-8.3.30-Win32-vs16-x64\php.ini" -Pattern "extension=zip"`. |
+
+---
+
+## 🗺️ Roadmap completo (sin cambios desde la decisión inicial)
+
+| # | Etapa | Estado |
+|---|---|---|
+| 0 | Decisiones arquitectónicas | ✅ |
+| 1 | Setup Laravel + schema + seed + endpoints públicos | ✅ |
+| **2** | **SPA consume `/api/products` con react-query** | **⏳ próximo** |
+| 3 | Auth real: email/password + OAuth Google/GitHub | ⏸ |
+| 4 | Account dashboard conectado | ⏸ |
+| 5 | Cart sync (guest ↔ user) | ⏸ |
+| 6 | Checkout + Stripe sandbox | ⏸ |
+| 7 | Wishlist sincronizada | ⏸ |
+| 8 | Deploy (Cloudflare Pages + Railway/Render) + usuario demo | ⏸ |
