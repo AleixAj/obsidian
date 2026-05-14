@@ -1,4 +1,4 @@
-# OBSIDIAN - FW26 Aurum
+﻿# OBSIDIAN - FW26 Aurum
 
 ![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=111)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?logo=typescript&logoColor=fff)
@@ -6,73 +6,68 @@
 ![TanStack Query](https://img.shields.io/badge/TanStack_Query-v5-ff4154?logo=reactquery&logoColor=fff)
 ![Laravel API](https://img.shields.io/badge/API-Laravel_11-ff2d20?logo=laravel&logoColor=fff)
 
-Full-stack urban streetwear e-commerce built as a portfolio project: a dark,
-gold-accented React storefront backed by a Laravel 11 API, deployed with a
-production database and real authenticated user flows.
+E-commerce full-stack de streetwear urbano creado como proyecto de portfolio: una tienda React con estética oscura y acentos dorados, conectada a una API Laravel 11, desplegada con base de datos de producción y flujos reales de usuario autenticado.
 
-The goal is to demonstrate how a real client-facing commerce app is planned,
-implemented and shipped: API-backed catalogue, authenticated account area,
-cart and wishlist synchronisation, order creation, production deployment,
-and documented technical decisions.
+El objetivo es demostrar cómo se planifica, implementa y despliega una app de comercio con enfoque real: catálogo servido por API, área de cuenta autenticada, carrito y wishlist sincronizados, creación de pedidos, despliegue en producción y decisiones técnicas documentadas.
 
-> Status: Etapa 8 complete. Live at
-> [`obsidian.aleixaj.com`](https://obsidian.aleixaj.com), backed by a
-> Railway Laravel API, managed MySQL database and seeded demo user.
+> Estado: Etapa 8 completada. Disponible en
+> [`obsidian.aleixaj.com`](https://obsidian.aleixaj.com), con API Laravel en
+> Railway, base de datos MySQL gestionada y usuario demo seed.
 
-## Screenshots
+## Capturas
 
-![Home hero](./docs/screenshots/home-hero.png)
+![Hero de la home](./docs/screenshots/home-hero.png)
 
-![Home lookbook section](./docs/screenshots/home-lookbook.png)
+![Sección lookbook](./docs/screenshots/home-lookbook.png)
 
-![Shop by category](./docs/screenshots/home-categories.png)
+![Categorías](./docs/screenshots/home-categories.png)
 
-![Women's collection](./docs/screenshots/shop-women.png)
+![Colección women](./docs/screenshots/shop-women.png)
 
-![Product detail page](./docs/screenshots/product-detail.png)
+![Página de producto](./docs/screenshots/product-detail.png)
 
-## Project Scope
+## Alcance del Proyecto
 
-This repository is the frontend. The backend lives in
+Este repositorio contiene el frontend. El backend vive en
 [`AleixAj/obsidian-api`](https://github.com/AleixAj/obsidian-api).
 
-Implemented product features:
+Funcionalidades implementadas:
 
-- Production deployment: [`obsidian.aleixaj.com`](https://obsidian.aleixaj.com).
-- Catalogue pages powered by Laravel endpoints (`/api/products`, `/api/categories`).
-- Product listing pages with category filtering, size/color filters and sorting.
-- Product detail page with gallery, size/color selectors and "complete the look".
-- Cart drawer with quantities, totals, free-shipping progress, authenticated backend sync and basic checkout.
-- Wishlist persisted for guests and synced to backend for authenticated users.
-- Account dashboard with backend-backed overview, orders, address CRUD and profile settings.
-- Email/password registration and login with Laravel Sanctum cookie sessions.
-- Guest cart/wishlist merge after login or registration.
-- Basic checkout flow that converts the authenticated cart into a real order.
-- Responsive layout down to mobile widths.
-- Loading skeletons and retryable API error states.
-- React Query Devtools in development.
+- Despliegue de producción: [`obsidian.aleixaj.com`](https://obsidian.aleixaj.com).
+- Catálogo servido por endpoints Laravel (`/api/products`, `/api/categories`).
+- Páginas de listado con filtros por categoría, talla, color, precio y ordenación.
+- Página de producto con galería, selector de talla/color y sección "complete the look".
+- Drawer de carrito con cantidades, totales, progreso de envío gratis, sincronización backend y checkout básico.
+- Wishlist persistente para invitados y sincronizada con backend para usuarios autenticados.
+- Dashboard de cuenta con resumen, pedidos, CRUD de direcciones y ajustes de perfil.
+- Registro/login con email y contraseña usando sesiones cookie de Laravel Sanctum.
+- Merge de carrito/wishlist invitado después de login o registro.
+- Checkout básico que convierte el carrito autenticado en un pedido real.
+- Layout responsive hasta móvil.
+- Skeletons de carga y estados de error reintentables.
+- React Query Devtools en desarrollo.
 
-## Tech Stack
+## Stack Técnico
 
-| Layer | Choice | Why |
+| Capa | Elección | Motivo |
 |---|---|---|
-| Build | Vite 8 | Fast SPA development, simple static deployment. |
-| UI | React 19 | Component model, hooks, broad hiring-market relevance. |
-| Language | TypeScript 6 | Safer refactors and shared domain models. |
-| Routing | React Router 7 | URL-driven pages and account sections. |
-| Server state | TanStack React Query 5 | Cache, loading/error states, retries and request dedupe. |
-| Client state | React Context | Cart, wishlist and toast state without Redux overhead. |
-| Persistence | `localStorage` + backend cart/wishlist | Guest cart/wishlist survive refresh; both sync to Laravel after login. |
-| Styling | Plain CSS + tokens | Demonstrates CSS fundamentals without framework lock-in. |
-| Backend | Laravel 11 API | Separate repo, REST endpoints, Sanctum auth, MySQL in production. |
-| Deploy | Cloudflare Workers + Assets + Railway | SPA on Cloudflare edge, Laravel API with managed MySQL. |
+| Build | Vite 8 | Desarrollo SPA rápido y despliegue estático sencillo. |
+| UI | React 19 | Modelo de componentes, hooks y buena relevancia profesional. |
+| Lenguaje | TypeScript 6 | Refactors más seguros y modelos de dominio compartidos. |
+| Routing | React Router 7 | Páginas y secciones de cuenta guiadas por URL. |
+| Server state | TanStack React Query 5 | Caché, estados de carga/error, retries y deduplicación de peticiones. |
+| Client state | React Context | Carrito, wishlist y toasts sin añadir Redux. |
+| Persistencia | `localStorage` + backend cart/wishlist | Invitados conservan datos; usuarios sincronizan con Laravel al autenticarse. |
+| Estilos | CSS plano + tokens | Demuestra fundamentos de CSS sin depender de un framework. |
+| Backend | Laravel 11 API | Repositorio separado, endpoints REST, Sanctum auth y MySQL en producción. |
+| Deploy | Cloudflare Workers + Assets + Railway | SPA en Cloudflare edge, API Laravel con MySQL gestionado. |
 
-## Architecture
+## Arquitectura
 
-The frontend keeps the API boundary explicit:
+El frontend mantiene clara la frontera con la API:
 
 ```txt
-Laravel API DTOs
+DTOs de Laravel API
       |
       v
 src/lib/api.ts
@@ -93,33 +88,26 @@ src/hooks/queries/
   - useWishlistSync()
       |
       v
-Pages and components receive UI-ready Product objects
+Pages y componentes reciben objetos Product listos para UI
 ```
 
-This means the UI never renders directly from backend fields like
-`price_cents` or `img_alt`. If the API shape changes later, the adapter
-changes in one place.
+Esto evita que la UI renderice directamente campos de backend como `price_cents` o `img_alt`. Si cambia la forma de la API, el adapter se actualiza en un único punto.
 
-### QueryClient defaults
+### Configuración de QueryClient
 
-`src/lib/queryClient.ts` defines one shared client:
+`src/lib/queryClient.ts` define un cliente compartido:
 
-- `staleTime: 60_000` because catalogue data rarely changes during a session.
-- `retry: 1` to recover from a transient backend hiccup without delaying users.
-- `refetchOnWindowFocus: false` to avoid noisy refetches on every tab switch.
+- `staleTime: 60_000`, porque el catálogo cambia poco durante una sesión.
+- `retry: 1`, para recuperarse de fallos transitorios sin retrasar demasiado al usuario.
+- `refetchOnWindowFocus: false`, para evitar refetches ruidosos al cambiar de pestaña.
 
-### Local vs server state
+### Estado local vs estado servidor
 
-React Query owns server data (`products`, `categories`, `user`, `account`,
-authenticated `cart`, authenticated `wishlist`). React Context owns local
-UI state (`toasts`) and exposes cart/wishlist APIs to components.
+React Query gestiona datos de servidor (`products`, `categories`, `user`, `account`, `cart` autenticado, `wishlist` autenticada). React Context gestiona estado local de UI (`toasts`) y expone las APIs de carrito/wishlist a los componentes.
 
-Guests use `localStorage`, authenticated users use the Laravel API, and both
-cart and wishlist merge into the backend account after login/register. That
-keeps the browsing experience fast before auth while still making user data
-portable across devices after auth.
+Los invitados usan `localStorage`, los usuarios autenticados usan la API Laravel, y ambos estados se fusionan después de login/registro. Así la navegación como invitado es rápida sin perder portabilidad entre dispositivos.
 
-## Project Structure
+## Estructura del Proyecto
 
 ```txt
 src/
@@ -129,35 +117,35 @@ src/
 │   ├── product/       # ProductCard, ProductCardSkeleton
 │   └── ui/            # Logo, Icon, Marquee, Placeholder, Reveal
 ├── context/           # CartContext, WishlistContext, ToastContext
-├── data/              # Brand/editorial assets only
+├── data/              # Assets visuales/editoriales de marca
 ├── hooks/
-│   ├── queries/       # React Query hooks
+│   ├── queries/       # Hooks React Query
 │   ├── useLocalStorage.ts
 │   └── useReveal.ts
-├── lib/               # API client + QueryClient
+├── lib/               # Cliente API + QueryClient
 ├── pages/             # Home, Shop, Product, Lookbook, Auth, Account
-├── styles/            # CSS tokens, globals, page styles
+├── styles/            # Tokens CSS, globales y estilos por página
 ├── types/             # Product, CartItem, Category
 └── utils/             # formatPrice, pad
 ```
 
-Docs worth reading:
+Documentación útil:
 
-- [`PROCESS.md`](./PROCESS.md) - step-by-step "why we chose this" notes.
-- [`.notes/etapa-8-checkpoint.md`](./.notes/etapa-8-checkpoint.md) - deploy checkpoint.
+- [`PROCESS.md`](./PROCESS.md) - notas paso a paso sobre decisiones técnicas.
+- [`.notes/etapa-8-checkpoint.md`](./.notes/etapa-8-checkpoint.md) - checkpoint del despliegue.
 
-## Full-Stack Local Setup
+## Setup Local Full-Stack
 
-### 1. Start the backend
+### 1. Arrancar el backend
 
 ```powershell
 cd C:\Users\Kylen\Desktop\Projects\obsidian-api
 php artisan serve
 ```
 
-Laravel should be available at `http://localhost:8000`.
+Laravel debería estar disponible en `http://localhost:8000`.
 
-Useful endpoint checks:
+Comprobaciones útiles:
 
 ```powershell
 Invoke-RestMethod http://localhost:8000/api/health
@@ -165,7 +153,7 @@ Invoke-RestMethod http://localhost:8000/api/products
 Invoke-RestMethod http://localhost:8000/api/categories
 ```
 
-### 2. Start the frontend
+### 2. Arrancar el frontend
 
 ```powershell
 cd C:\Users\Kylen\Desktop\Projects\obsidian
@@ -173,15 +161,15 @@ npm install
 npm run dev
 ```
 
-Vite should be available at `http://localhost:5173`.
+Vite debería estar disponible en `http://localhost:5173`.
 
-The frontend reads the API base URL from:
+El frontend lee la URL base de la API desde:
 
 ```env
 VITE_API_URL=http://localhost:8000
 ```
 
-Production frontend uses:
+En producción usa:
 
 ```env
 VITE_API_URL=https://obsidian-api-production-8b5e.up.railway.app
@@ -190,81 +178,77 @@ VITE_API_URL=https://obsidian-api-production-8b5e.up.railway.app
 ## Scripts
 
 ```bash
-npm run dev        # start Vite dev server
-npm run typecheck  # TypeScript check, no emit
-npm run build      # production build
-npm run preview    # preview dist locally
+npm run dev        # arranca Vite en desarrollo
+npm run typecheck  # comprueba TypeScript sin emitir archivos
+npm run build      # build de producción
+npm run preview    # previsualiza dist localmente
 npm run lint       # ESLint
 ```
 
-Verified after Etapa 8:
+Verificado tras Etapa 8:
 
-- `npm run typecheck` passes.
-- `npm run build` passes.
-- Production smoke checks pass against Railway/Cloudflare.
-- Sanctum auth works from `obsidian.aleixaj.com`.
-- Production product images and catalogue data load from the Railway API.
+- `npm run typecheck` pasa.
+- `npm run build` pasa.
+- Smoke checks de producción contra Railway/Cloudflare.
+- Auth Sanctum funciona desde `obsidian.aleixaj.com`.
+- Las imágenes y datos de catálogo cargan desde la API de Railway.
 
-## Production
+## Producción
 
 - Frontend: [`https://obsidian.aleixaj.com`](https://obsidian.aleixaj.com)
 - Backend API: [`https://obsidian-api-production-8b5e.up.railway.app`](https://obsidian-api-production-8b5e.up.railway.app)
 - Health check: [`/api/health`](https://obsidian-api-production-8b5e.up.railway.app/api/health)
-- Demo user: `demo@obsidian.test`
+- Usuario demo: `demo@obsidian.test`
 
-Deployment notes:
+Notas de despliegue:
 
-- The frontend is deployed through Cloudflare Workers + Assets using `wrangler.jsonc`.
-- Cloudflare build command: `npm run build`.
-- Cloudflare deploy command: `npx wrangler deploy`.
-- SPA routing is handled by Wrangler's `not_found_handling="single-page-application"`.
-- The old Pages-style `public/_redirects` file was removed because it caused a redirect loop in Workers + Assets.
-- `src/lib/api.ts` guards production builds from accidentally using `localhost:8000`.
+- El frontend se despliega con Cloudflare Workers + Assets usando `wrangler.jsonc`.
+- Comando de build en Cloudflare: `npm run build`.
+- Comando de deploy: `npx wrangler deploy`.
+- El fallback SPA se gestiona con `not_found_handling="single-page-application"`.
+- Se eliminó el antiguo `_redirects` porque provocaba un bucle de redirecciones en Workers + Assets.
+- `src/lib/api.ts` evita que builds de producción usen `localhost:8000` por error.
 
-## Backend Contract
+## Contrato con el Backend
 
-The frontend currently consumes:
+El frontend consume actualmente:
 
-| Method | Endpoint | Used by |
+| Método | Endpoint | Uso |
 |---|---|---|
-| `GET` | `/api/products` | Home, Product related rail, Account |
-| `GET` | `/api/products?category={slug}` | Shop category pages |
-| `GET` | `/api/products/{slug}` | Product detail page |
-| `GET` | `/api/categories` | Shop page header metadata |
-| `GET` | `/api/health` | Manual smoke checks / future monitoring |
-| `GET` | `/api/user` | Current authenticated user |
-| `PATCH` | `/api/user` | Update name/email |
-| `POST` | `/api/auth/register` | Create account and start session |
-| `POST` | `/api/auth/login` | Email/password login |
-| `POST` | `/api/auth/logout` | Server-side logout |
-| `GET` | `/api/account` | Account dashboard summary |
-| `GET` | `/api/orders` | User orders |
-| `GET` | `/api/addresses` | User addresses |
-| `POST` | `/api/addresses` | Create address |
-| `PATCH` | `/api/addresses/{id}` | Update address / set default |
-| `DELETE` | `/api/addresses/{id}` | Delete address |
-| `GET` | `/api/cart` | Authenticated cart |
-| `POST` | `/api/cart/items` | Add product to authenticated cart |
-| `PATCH` | `/api/cart/items/{id}` | Update cart line quantity |
-| `DELETE` | `/api/cart/items/{id}` | Remove cart line |
-| `DELETE` | `/api/cart/items` | Clear authenticated cart |
-| `POST` | `/api/cart/merge` | Merge guest cart after login/register |
-| `POST` | `/api/checkout` | Convert authenticated cart into an order |
-| `GET` | `/api/wishlist` | Authenticated wishlist slugs |
-| `POST` | `/api/wishlist/items` | Add product to authenticated wishlist |
-| `DELETE` | `/api/wishlist/items/{slug}` | Remove product from wishlist |
-| `DELETE` | `/api/wishlist/items` | Clear authenticated wishlist |
-| `POST` | `/api/wishlist/merge` | Merge guest wishlist after login/register |
+| `GET` | `/api/products` | Home, recomendaciones, Account |
+| `GET` | `/api/products?category={slug}` | Páginas Shop por categoría |
+| `GET` | `/api/products/{slug}` | Detalle de producto |
+| `GET` | `/api/categories` | Metadata del header de Shop |
+| `GET` | `/api/health` | Smoke checks/manual monitoring |
+| `GET` | `/api/user` | Usuario autenticado actual |
+| `PATCH` | `/api/user` | Actualizar nombre/email |
+| `POST` | `/api/auth/register` | Crear cuenta e iniciar sesión |
+| `POST` | `/api/auth/login` | Login email/password |
+| `POST` | `/api/auth/logout` | Logout servidor |
+| `GET` | `/api/account` | Resumen dashboard cuenta |
+| `GET` | `/api/orders` | Pedidos del usuario |
+| `GET` | `/api/addresses` | Direcciones del usuario |
+| `POST` | `/api/addresses` | Crear dirección |
+| `PATCH` | `/api/addresses/{id}` | Editar dirección / marcar default |
+| `DELETE` | `/api/addresses/{id}` | Borrar dirección |
+| `GET` | `/api/cart` | Carrito autenticado |
+| `POST` | `/api/cart/items` | Añadir producto al carrito |
+| `PATCH` | `/api/cart/items/{id}` | Cambiar cantidad |
+| `DELETE` | `/api/cart/items/{id}` | Eliminar línea |
+| `DELETE` | `/api/cart/items` | Vaciar carrito |
+| `POST` | `/api/cart/merge` | Fusionar carrito guest tras login/register |
+| `POST` | `/api/checkout` | Convertir carrito en pedido |
+| `GET` | `/api/wishlist` | Slugs de wishlist autenticada |
+| `POST` | `/api/wishlist/items` | Añadir producto a wishlist |
+| `DELETE` | `/api/wishlist/items/{slug}` | Quitar producto de wishlist |
+| `DELETE` | `/api/wishlist/items` | Vaciar wishlist |
+| `POST` | `/api/wishlist/merge` | Fusionar wishlist guest tras login/register |
 
-Money is stored in the API as integer cents (`price_cents`). The adapter
-maps that to the existing UI `Product.price` number before components
-render it.
+El dinero se almacena en la API como céntimos enteros (`price_cents`). El adapter lo transforma al `Product.price` que renderizan los componentes.
 
-## OAuth Setup (Deferred)
+## OAuth Setup (Pendiente)
 
-Google and GitHub OAuth routes are wired through the Laravel API, but
-provider credentials are intentionally not committed. To enable it, create
-OAuth apps with these production callbacks and set Railway variables:
+Las rutas de OAuth con Google/GitHub están preparadas en Laravel, pero las credenciales no se han configurado todavía. Para activarlo, crear apps OAuth y añadir en Railway:
 
 ```env
 GOOGLE_CLIENT_ID=
@@ -276,48 +260,43 @@ GITHUB_CLIENT_SECRET=
 GITHUB_REDIRECT_URI=https://obsidian-api-production-8b5e.up.railway.app/auth/github/callback
 ```
 
-Until those values exist, the social buttons redirect back to `/auth`
-with a clear "not configured" error instead of failing with a server error.
+Mientras no existan esos valores, los botones sociales redirigen de vuelta a `/auth` con un error claro de "not configured".
 
-## Stripe Setup (Deferred)
+## Stripe Setup (Pendiente)
 
-Stripe/Cashier dependencies and env placeholders exist in the backend, but
-real payment collection is intentionally deferred until Stripe keys/webhook
-are created. The current checkout flow already creates real orders without
-charging cards.
+Las dependencias/env placeholders de Stripe/Cashier existen en el backend, pero el cobro real queda aplazado hasta configurar claves y webhook. El checkout actual ya crea pedidos reales sin cobrar tarjeta.
 
 ## Roadmap
 
-- [x] Etapa 0 - Architecture decisions.
-- [x] Etapa 1 - Laravel 11 backend, schema, seeders and public API.
-- [x] Etapa 2 - React SPA consumes the backend via React Query.
-- [x] Etapa 3 - Real auth: email/password + prepared OAuth routes.
-- [x] Etapa 4 - Account dashboard connected to real user data.
-- [x] Etapa 5 - Guest cart syncs into user cart on login.
-- [x] Etapa 6 - Basic checkout: authenticated cart becomes an order.
-- [x] Etapa 7 - Wishlist sync across devices.
-- [x] Etapa 8 - Deploy: Cloudflare Workers + Assets, Railway and production demo user.
-- [ ] Final polish - Activate Stripe payments and OAuth provider credentials.
+- [x] Etapa 0 - Decisiones de arquitectura.
+- [x] Etapa 1 - Backend Laravel 11, esquema, seeders y API pública.
+- [x] Etapa 2 - SPA React consumiendo backend con React Query.
+- [x] Etapa 3 - Auth real: email/password + rutas OAuth preparadas.
+- [x] Etapa 4 - Dashboard de cuenta conectado a datos reales.
+- [x] Etapa 5 - Carrito guest sincronizado con usuario al hacer login.
+- [x] Etapa 6 - Checkout básico: carrito autenticado -> pedido.
+- [x] Etapa 7 - Wishlist sincronizada entre dispositivos.
+- [x] Etapa 8 - Deploy: Cloudflare Workers + Assets, Railway y usuario demo.
+- [ ] Pulido final - Activar pagos Stripe y credenciales OAuth.
 
-## Why This Project Matters
+## Por Qué Importa Este Proyecto
 
-Obsidian is deliberately not just a static mockup. It is structured like a
-small production project:
+Obsidian no es solo un mockup estático. Está estructurado como un proyecto pequeño de producción:
 
-- The UI is polished enough to judge product taste.
-- The backend boundary is real, typed and isolated.
-- Authentication, cart, wishlist, account data and checkout all cross the frontend/backend boundary.
-- Data fetching has production concerns: cache, retries, loading states and errors.
-- The app is deployed with real environment configuration, managed database and smoke checks.
-- Decisions are documented in `PROCESS.md`, including trade-offs and rejected alternatives.
-- The roadmap is incremental, so every stage can be reviewed and shipped cleanly.
+- La UI tiene suficiente acabado para evaluar criterio visual.
+- La frontera con backend es real, tipada y aislada.
+- Auth, carrito, wishlist, cuenta y checkout cruzan frontend/backend.
+- El fetching contempla caché, retries, loading states y errores.
+- La app está desplegada con configuración real, base de datos gestionada y smoke checks.
+- Las decisiones están documentadas en `PROCESS.md`, incluyendo trade-offs.
+- El roadmap es incremental para poder revisar y desplegar por etapas.
 
-## Credits
+## Créditos
 
-- Imagery: Unsplash placeholders and local brand/editorial assets.
-- Typography: Syne, Space Grotesk and JetBrains Mono via Google Fonts.
-- Logo and visual direction: Obsidian Studio concept.
+- Imágenes: Unsplash y assets locales/editoriales de marca.
+- Tipografía: Syne, Space Grotesk y JetBrains Mono vía Google Fonts.
+- Logo y dirección visual: concepto Obsidian Studio.
 
 ---
 
-Portfolio project. Not a real storefront.
+Proyecto de portfolio. No es una tienda real.
