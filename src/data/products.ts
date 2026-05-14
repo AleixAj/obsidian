@@ -34,13 +34,13 @@ export const IMAGES = {
  */
 export const BRAND = {
   /** Dark plate with diagonal gold cracks — hero background. */
-  background1: "/background1.jpg",
+  background1: "/background1.webp",
   /** Black canvas with bold gold corner brackets — countdown bg. */
-  background2: "/background2.jpg",
+  background2: "/background2.webp",
   /** Marble + kintsugi gold — lookbook / editorial mood. */
-  background3: "/background3.jpg",
+  background3: "/background3.webp",
   /** "OBSIDIAN" painted on a graffiti alley wall — brand statement. */
-  street: "/obsidian-street.jpg",
+  street: "/obsidian-street.webp",
   /**
    * Full gold wordmark, high-resolution. The PNG has an opaque black
    * background — blends into the footer (#050505 → black) without
@@ -69,15 +69,15 @@ export const BRAND = {
  */
 export const TEMPLATES = {
   /** Signature: blonde model + storefront with "Obsidian" gold sign. */
-  t1: "/template1.jpg",
+  t1: "/template1.webp",
   /** NYC vibe: crop hoodie + graffiti wall + yellow cabs. */
-  t2: "/template2.jpg",
+  t2: "/template2.webp",
   /** Community: group of four laughing at a skatepark. */
-  t3: "/template3.jpg",
+  t3: "/template3.webp",
   /** Polaroid editorial: composite double-panel social shot. */
-  t4: "/template4.jpg",
+  t4: "/template4.webp",
   /** Street portrait: serious pose, quilted jacket, storefront bg. */
-  t5: "/template5.jpg",
+  t5: "/template5.webp",
   /** Flagship: bomber jacket + cap, OBSIDIAN store façade. */
-  t6: "/template6.jpg",
+  t6: "/template6.webp",
 } as const;

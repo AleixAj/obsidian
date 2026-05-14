@@ -49,6 +49,10 @@ const SORT_OPTIONS: { value: SortMode; label: string }[] = [
 const PRICE_MIN = 0;
 const PRICE_MAX = 890;
 const NEW_COLLECTION_ORDER = [
+  "p7",
+  "p12",
+  "p9",
+  "p18",
   "p1",
   "p4",
   "p2",
@@ -57,16 +61,12 @@ const NEW_COLLECTION_ORDER = [
   "p10",
   "p6",
   "p11",
-  "p7",
-  "p12",
   "p8",
   "p13",
-  "p9",
-  "p14",
   "p15",
   "p17",
   "p16",
-  "p18",
+  "p14",
 ];
 
 /**

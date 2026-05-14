@@ -13,11 +13,36 @@ import { ApiError } from "../lib/api";
 import { formatPrice } from "../utils/format";
 import { NotFound } from "./NotFound";
 
-/** Gallery thumbnails — alternates between primary and alt photo. */
-const VIEW_LABELS = ["FRONT", "BACK", "DETAIL", "ON BODY"] as const;
+/** Shared product gallery used temporarily across every PDP. */
+const VIEW_LABELS = ["FRONT", "BACK", "FULL LOOK"] as const;
 
-/** Friendly names matched index-for-index against `product.colors`. */
-const COLOR_NAMES = ["Obsidian", "Gold Cast", "Tobacco", "Bone", "Bronze"];
+const MODEL_COLORS = [
+  { key: "black", name: "Black", hex: "#0a0a0a" },
+  { key: "grey", name: "Grey", hex: "#7b7b78" },
+  { key: "red", name: "Red", hex: "#8f1f22" },
+  { key: "white", name: "White", hex: "#f5efe2" },
+] as const;
+
+const NEW_COLLECTION_ORDER = [
+  "p7",
+  "p12",
+  "p9",
+  "p18",
+  "p1",
+  "p4",
+  "p2",
+  "p5",
+  "p3",
+  "p10",
+  "p6",
+  "p11",
+  "p8",
+  "p13",
+  "p15",
+  "p17",
+  "p16",
+  "p14",
+];
 
 /** Static accordion content — would come from a CMS in a real app. */
 const ACCORDION = [
@@ -116,7 +141,9 @@ export function Product() {
     );
   }
 
-  const colorName = COLOR_NAMES[colorIdx] ?? "Obsidian";
+  const selectedColor = MODEL_COLORS[colorIdx] ?? MODEL_COLORS[0];
+  const colorName = selectedColor.name;
+  const pdpImages = VIEW_LABELS.map((_, i) => `/model${i + 1}-${selectedColor.key}.webp`);
 
   const handleAdd = () => {
     add({
@@ -153,25 +180,22 @@ export function Product() {
                 <Placeholder
                   palette={product.palette}
                   corner={false}
-                  img={i % 2 === 0 ? product.img : product.imgAlt}
+                  img={pdpImages[i]}
                 />
               </div>
             ))}
           </div>
           <div className="main-img">
-            <span className="zoom">
-              <Icon.Zoom /> Zoom ✦ Drag
-            </span>
             <Placeholder
               label={`${product.id.toUpperCase()} ✦ ${VIEW_LABELS[activeImg]}`}
               palette={
-                activeImg % 2 === 0
+                activeImg === 0
                   ? product.palette
                   : product.palette === "gold"
                     ? "warm"
                     : "gold"
               }
-              img={activeImg % 2 === 0 ? product.img : product.imgAlt}
+              img={pdpImages[activeImg]}
             />
           </div>
         </div>
@@ -208,16 +232,17 @@ export function Product() {
                 Color · <span style={{ color: "var(--gold)" }}>{colorName}</span>
               </span>
               <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--fg-dim)" }}>
-                {product.colors.length} colors
+                {MODEL_COLORS.length} colors
               </span>
             </h4>
             <div className="color-row">
-              {product.colors.map((c, i) => (
+              {MODEL_COLORS.map((color, i) => (
                 <span
-                  key={i}
+                  key={color.key}
                   className={`chip ${colorIdx === i ? "active" : ""}`}
-                  style={{ background: c }}
+                  style={{ background: color.hex }}
                   onClick={() => setColorIdx(i)}
+                  title={color.name}
                 />
               ))}
             </div>
@@ -322,6 +347,7 @@ export function Product() {
           <div className="product-grid">
             {related
               .filter((x) => x.id !== product.id)
+              .sort((a, b) => NEW_COLLECTION_ORDER.indexOf(a.id) - NEW_COLLECTION_ORDER.indexOf(b.id))
               .slice(0, 4)
               .map((rp, i) => (
                 <Reveal key={rp.id} delay={i * 60}>

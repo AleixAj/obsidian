@@ -1,7 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { Layout } from "./components/layout/Layout";
-import { CursorBlob } from "./components/ui/CursorBlob";
 import { CartProvider } from "./context/CartContext";
 import { ToastProvider } from "./context/ToastContext";
 import { WishlistProvider } from "./context/WishlistContext";
@@ -32,7 +31,6 @@ export default function App() {
       <WishlistProvider>
         <CartProvider>
           <BrowserRouter>
-            <CursorBlob />
             <Layout>
               <Routes>
                 <Route path="/" element={<Home />} />

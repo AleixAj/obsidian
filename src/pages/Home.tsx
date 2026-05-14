@@ -11,6 +11,10 @@ import { useProducts } from "../hooks/queries";
 import { pad } from "../utils/format";
 
 const NEW_COLLECTION_ORDER = [
+  "p7",
+  "p12",
+  "p9",
+  "p18",
   "p1",
   "p4",
   "p2",
@@ -19,16 +23,12 @@ const NEW_COLLECTION_ORDER = [
   "p10",
   "p6",
   "p11",
-  "p7",
-  "p12",
   "p8",
   "p13",
-  "p9",
-  "p14",
   "p15",
   "p17",
   "p16",
-  "p18",
+  "p14",
 ];
 
 /**
@@ -119,7 +119,7 @@ function FeaturedGrid() {
           </h2>
         </div>
         <Link to="/shop/new" className="section-link">
-          View all 18 pieces <Icon.Arrow />
+          View all <Icon.Arrow />
         </Link>
       </div>
 
@@ -329,8 +329,9 @@ function BrandStatement() {
           <div className="section-eyebrow">Obsidian ✦ In the wild</div>
           <h2 className="brand-statement-title">
             Worn <span className="gold">where</span> the
+            city
             <br />
-            city forgets itself.
+            forgets itself.
           </h2>
           <p>
             From sodium-lit alleys to last-train platforms — Obsidian lives where the day

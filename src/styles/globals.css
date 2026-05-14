@@ -122,14 +122,16 @@ ul {
   font-size: 10.5px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--fg-dim);
+  color: rgba(245, 239, 226, 0.9);
   display: inline-flex;
   align-items: center;
   gap: 56px;
+  text-shadow: 0 0 12px rgba(245, 239, 226, 0.12);
 }
 
 .marquee-item .star {
   color: var(--gold);
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
 }
 
 @keyframes marquee {
@@ -675,20 +677,6 @@ ul {
 .reveal.visible {
   opacity: 1;
   transform: translateY(0);
-}
-
-/* ------------ Cursor blob (decorative) ------------ */
-.cursor-blob {
-  position: fixed;
-  pointer-events: none;
-  width: 260px;
-  height: 260px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, transparent 60%);
-  z-index: 1;
-  transform: translate(-50%, -50%);
-  transition: transform 0.3s var(--ease);
-  mix-blend-mode: screen;
 }
 
 /* ------------ Cart drawer ------------ */
