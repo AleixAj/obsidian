@@ -1254,6 +1254,39 @@ ul {
   border: 1px solid var(--line-2);
 }
 
+.product-wishlist-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(245, 239, 226, 0.22);
+  border-radius: 999px;
+  background: rgba(10, 10, 10, 0.72);
+  color: var(--fg);
+  backdrop-filter: blur(8px);
+  transition:
+    border-color 0.2s var(--ease),
+    color 0.2s var(--ease),
+    transform 0.2s var(--ease),
+    background 0.2s var(--ease);
+}
+
+.product-wishlist-btn:hover,
+.product-wishlist-btn.active {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(10, 10, 10, 0.9);
+  transform: scale(1.06);
+}
+
+.product-wishlist-btn.active svg {
+  fill: var(--gold);
+}
+
 .quick-add {
   position: absolute;
   bottom: 12px;

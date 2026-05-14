@@ -45,6 +45,37 @@ function formatDate(value: string | null): string {
   return new Intl.DateTimeFormat("en", { month: "short", day: "2-digit", year: "numeric" }).format(new Date(value));
 }
 
+function formatLastLogin(value: string | null | undefined): string {
+  if (!value) return "Pending sync";
+
+  const date = new Date(value);
+  const now = new Date();
+  const timeZone = "Europe/Madrid";
+  const dayFormatter = new Intl.DateTimeFormat("en", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone,
+  });
+  const isToday = dayFormatter.format(date) === dayFormatter.format(now);
+  const time = new Intl.DateTimeFormat("en", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone,
+  }).format(date);
+
+  if (isToday) return `Today · ${time} Barcelona`;
+
+  const day = new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "2-digit",
+    timeZone,
+  }).format(date);
+
+  return `${day} · ${time} Barcelona`;
+}
+
 function addressLines(address: ApiAddressDTO): string[] {
   return [
     address.line1,
@@ -131,12 +162,14 @@ function Overview({
   goTo,
   productMap,
   userName,
+  lastLoginAt,
   orders,
   stats,
 }: {
   goTo: (section: Section) => void;
   productMap: ProductMap;
   userName: string;
+  lastLoginAt: string | null | undefined;
   orders: Order[];
   stats: { orders_count: number; lifetime_spend_cents: number; reward_points: number; tier: string };
 }) {
@@ -160,7 +193,7 @@ function Overview({
         <div className="ts">
           ✦ Last login
           <br />
-          Today · 22:14 Barcelona
+          {formatLastLogin(lastLoginAt)}
         </div>
       </div>
 
@@ -903,6 +936,7 @@ export function Account() {
   );
 
   const displayName = user.name;
+  const lastLoginAt = account?.user.last_login_at ?? user.last_login_at;
   const initials = displayName
     .split(" ")
     .filter(Boolean)
@@ -977,6 +1011,7 @@ export function Account() {
             goTo={goTo}
             productMap={productMap}
             userName={displayName}
+            lastLoginAt={lastLoginAt}
             orders={orders}
             stats={stats}
           />

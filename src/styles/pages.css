@@ -2262,6 +2262,12 @@
 .wish-card .img {
   aspect-ratio: 3 / 4;
   position: relative;
+  overflow: hidden;
+}
+
+.wish-card .img .ph {
+  position: absolute;
+  inset: 0;
 }
 
 .wish-card .heart-btn {

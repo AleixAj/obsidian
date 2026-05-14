@@ -77,6 +77,7 @@ export interface ApiUserDTO {
   avatar_url: string | null;
   oauth_provider: string | null;
   created_at: string | null;
+  last_login_at: string | null;
 }
 
 export interface AuthCredentials {

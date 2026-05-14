@@ -1,7 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
+import { useWishlist } from "../../context/WishlistContext";
+import { useUser } from "../../hooks/queries";
 import type { Product } from "../../types";
 import { formatPrice } from "../../utils/format";
+import { Icon } from "../ui/Icon";
 import { Placeholder } from "../ui/Placeholder";
 
 /**
@@ -20,12 +23,20 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const navigate = useNavigate();
   const { add } = useCart();
+  const { data: user } = useUser();
+  const { has, toggle } = useWishlist();
+  const isSaved = has(product.id);
 
   const goToProduct = () => navigate(`/product/${product.id}`);
 
   const quickAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
     add(product);
+  };
+
+  const toggleWishlist = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggle(product.id);
   };
 
   return (
@@ -39,6 +50,17 @@ export function ProductCard({ product }: ProductCardProps) {
           >
             {product.tag}
           </span>
+        )}
+        {user && (
+          <button
+            type="button"
+            className={`product-wishlist-btn ${isSaved ? "active" : ""}`}
+            onClick={toggleWishlist}
+            aria-pressed={isSaved}
+            title={isSaved ? "Remove from wishlist" : "Add to wishlist"}
+          >
+            <Icon.Heart />
+          </button>
         )}
         <Placeholder
           label={`${product.id.toUpperCase()} · Front`}
