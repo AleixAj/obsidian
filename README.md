@@ -1,4 +1,4 @@
-﻿# OBSIDIAN - FW26 Aurum
+﻿# OBSIDIAN
 
 ![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=111)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?logo=typescript&logoColor=fff)
@@ -6,13 +6,9 @@
 ![TanStack Query](https://img.shields.io/badge/TanStack_Query-v5-ff4154?logo=reactquery&logoColor=fff)
 ![Laravel API](https://img.shields.io/badge/API-Laravel_11-ff2d20?logo=laravel&logoColor=fff)
 
-E-commerce full-stack de streetwear urbano creado como proyecto de portfolio: una tienda React con estética oscura y acentos dorados, conectada a una API Laravel 11, desplegada con base de datos de producción y flujos reales de usuario autenticado.
+E-commerce full-stack de tienda de ropa urbana creado como proyecto de portfolio: una tienda React con estética oscura y acentos dorados, conectada a una API Laravel 11, desplegada con base de datos de producción y flujos reales de usuario autenticado.
 
 El objetivo es demostrar cómo se planifica, implementa y despliega una app de comercio con enfoque real: catálogo servido por API, área de cuenta autenticada, carrito y wishlist sincronizados, creación de pedidos, despliegue en producción y decisiones técnicas documentadas.
-
-> Estado: Etapa 8 completada. Disponible en
-> [`obsidian.aleixaj.com`](https://obsidian.aleixaj.com), con API Laravel en
-> Railway, base de datos MySQL gestionada y usuario demo seed.
 
 ## Capturas
 
@@ -69,7 +65,6 @@ El frontend mantiene clara la frontera con la API:
 ```txt
 DTOs de Laravel API
       |
-      v
 src/lib/api.ts
   - fetchProducts()
   - fetchProduct()
@@ -77,7 +72,6 @@ src/lib/api.ts
   - toProduct()
   - toCategoryMap()
       |
-      v
 src/hooks/queries/
   - useProducts()
   - useProduct()
@@ -87,7 +81,6 @@ src/hooks/queries/
   - useCartSync()
   - useWishlistSync()
       |
-      v
 Pages y componentes reciben objetos Product listos para UI
 ```
 
@@ -128,11 +121,6 @@ src/
 ├── types/             # Product, CartItem, Category
 └── utils/             # formatPrice, pad
 ```
-
-Documentación útil:
-
-- [`PROCESS.md`](./PROCESS.md) - notas paso a paso sobre decisiones técnicas.
-- [`.notes/etapa-8-checkpoint.md`](./.notes/etapa-8-checkpoint.md) - checkpoint del despliegue.
 
 ## Setup Local Full-Stack
 
@@ -185,7 +173,7 @@ npm run preview    # previsualiza dist localmente
 npm run lint       # ESLint
 ```
 
-Verificado tras Etapa 8:
+Verificado:
 
 - `npm run typecheck` pasa.
 - `npm run build` pasa.
