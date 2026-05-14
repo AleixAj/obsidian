@@ -19,6 +19,18 @@ and documented technical decisions.
 > [`obsidian.aleixaj.com`](https://obsidian.aleixaj.com), backed by a
 > Railway Laravel API, managed MySQL database and seeded demo user.
 
+## Screenshots
+
+![Home hero](./docs/screenshots/home-hero.png)
+
+![Home lookbook section](./docs/screenshots/home-lookbook.png)
+
+![Shop by category](./docs/screenshots/home-categories.png)
+
+![Women's collection](./docs/screenshots/shop-women.png)
+
+![Product detail page](./docs/screenshots/product-detail.png)
+
 ## Project Scope
 
 This repository is the frontend. The backend lives in
