@@ -10,6 +10,27 @@ import { BRAND, TEMPLATES } from "../data/products";
 import { useProducts } from "../hooks/queries";
 import { pad } from "../utils/format";
 
+const NEW_COLLECTION_ORDER = [
+  "p1",
+  "p4",
+  "p2",
+  "p5",
+  "p3",
+  "p10",
+  "p6",
+  "p11",
+  "p7",
+  "p12",
+  "p8",
+  "p13",
+  "p9",
+  "p14",
+  "p15",
+  "p17",
+  "p16",
+  "p18",
+];
+
 /**
  * Top hero with the campaign artwork, headline and the two CTAs.
  *
@@ -77,8 +98,16 @@ function Hero() {
 
 /** Featured grid — the first 4 products of the catalogue. */
 function FeaturedGrid() {
-  const { data: products, isPending, isError, refetch } = useProducts();
-  const featured = useMemo(() => products?.slice(0, 4) ?? [], [products]);
+  const { data: products, isPending, isError, refetch } = useProducts("new");
+  const featured = useMemo(
+    () =>
+      products
+        ? [...products]
+            .sort((a, b) => NEW_COLLECTION_ORDER.indexOf(a.id) - NEW_COLLECTION_ORDER.indexOf(b.id))
+            .slice(0, 4)
+        : [],
+    [products],
+  );
 
   return (
     <section className="section">
@@ -90,7 +119,7 @@ function FeaturedGrid() {
           </h2>
         </div>
         <Link to="/shop/new" className="section-link">
-          View all 14 pieces <Icon.Arrow />
+          View all 18 pieces <Icon.Arrow />
         </Link>
       </div>
 

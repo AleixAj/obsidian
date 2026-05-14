@@ -12,9 +12,9 @@
  *    swaps cached lists without a refetch flicker once both have been
  *    visited.
  *
- * Passing `category === "new"` is treated as "no filter" because every
- * product is tagged `new` in the backend; sending the query would just
- * round-trip the same payload.
+ * Category filters are passed through to the API, including "new".
+ * The New Arrivals page is curated server-side and intentionally no
+ * longer mirrors the complete catalogue.
  */
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
@@ -22,7 +22,7 @@ import { fetchProducts, toProduct } from "../../lib/api";
 import type { Product } from "../../types";
 
 export function useProducts(category?: string): UseQueryResult<Product[]> {
-  const effective = !category || category === "new" ? undefined : category;
+  const effective = category || undefined;
 
   return useQuery({
     queryKey: ["products", effective ?? "all"],

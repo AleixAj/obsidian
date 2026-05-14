@@ -63,7 +63,8 @@
   font-size: 11px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--fg-dim);
+  color: rgba(245, 239, 226, 0.92);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.75);
 }
 
 .hero-meta .row .dot {
@@ -126,9 +127,10 @@
 
 .hero-side p {
   max-width: 360px;
-  color: var(--fg-dim);
+  color: rgba(245, 239, 226, 0.84);
   font-size: 14px;
   line-height: 1.6;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
 }
 
 .hero-cta-row {
@@ -147,7 +149,8 @@
   font-size: 10px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--fg-dim);
+  color: rgba(245, 239, 226, 0.82);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -187,7 +190,8 @@
   font-size: 10px;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--fg-dim);
+  color: rgba(245, 239, 226, 0.78);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
   writing-mode: vertical-rl;
   transform-origin: center;
 }
@@ -787,6 +791,56 @@
     0 0 0 3px var(--gold);
 }
 
+.price-range-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+
+.price-range {
+  position: relative;
+  height: 24px;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.price-range-track,
+.price-range-active {
+  position: absolute;
+  top: 11px;
+  height: 2px;
+}
+
+.price-range-track {
+  left: 0;
+  right: 0;
+  background: var(--line-2);
+}
+
+.price-range-active {
+  background: var(--gold);
+}
+
+.price-range-thumb {
+  position: absolute;
+  top: 6px;
+  width: 12px;
+  height: 12px;
+  background: var(--gold);
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+  transform: translateX(-50%);
+  cursor: pointer;
+  touch-action: none;
+  z-index: 1;
+}
+
+.price-range-thumb:hover {
+  box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.14);
+}
+
 .clear-filters {
   padding: 12px 16px;
   border: 1px solid var(--line-2);
@@ -845,7 +899,7 @@
 }
 
 .plp-toolbar .right select {
-  background: transparent;
+  background: var(--bg);
   border: 1px solid var(--line-2);
   color: var(--fg);
   padding: 8px 28px 8px 14px;
@@ -854,6 +908,11 @@
   letter-spacing: 0.14em;
   font-size: 11px;
   cursor: pointer;
+}
+
+.plp-toolbar .right select option {
+  background: var(--bg);
+  color: var(--fg);
 }
 
 .plp-grid {

@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ProductCard } from "../components/product/ProductCard";
 import { ProductGridSkeleton } from "../components/product/ProductCardSkeleton";
@@ -23,6 +24,7 @@ const DEFAULT_META: CategoryMeta = {
 
 /** Sort modes the user can pick. */
 type SortMode = "featured" | "newest" | "priceAsc" | "priceDesc" | "best";
+type PriceHandle = "min" | "max";
 
 /** Color filter options shown in the sidebar. */
 const COLOR_FILTERS: { hex: string; name: string }[] = [
@@ -39,9 +41,32 @@ const SIZE_FILTERS = ["XS", "S", "M", "L", "XL", "XXL", "28", "30", "32", "34"];
 const SORT_OPTIONS: { value: SortMode; label: string }[] = [
   { value: "featured", label: "Sort: Featured" },
   { value: "newest", label: "Sort: Newest" },
-  { value: "priceAsc", label: "Sort: Price ↑" },
-  { value: "priceDesc", label: "Sort: Price ↓" },
+  { value: "priceAsc", label: "Sort: Price: Low to High" },
+  { value: "priceDesc", label: "Sort: Price: High to Low" },
   { value: "best", label: "Sort: Best Sellers" },
+];
+
+const PRICE_MIN = 0;
+const PRICE_MAX = 890;
+const NEW_COLLECTION_ORDER = [
+  "p1",
+  "p4",
+  "p2",
+  "p5",
+  "p3",
+  "p10",
+  "p6",
+  "p11",
+  "p7",
+  "p12",
+  "p8",
+  "p13",
+  "p9",
+  "p14",
+  "p15",
+  "p17",
+  "p16",
+  "p18",
 ];
 
 /**
@@ -65,17 +90,21 @@ export function Shop() {
 
   const meta = categoryMap?.[cat] ?? DEFAULT_META;
 
-  const [size, setSize] = useState<string | null>(null);
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [color, setColor] = useState<string | null>(null);
+  const [priceRange, setPriceRange] = useState<[number, number]>([PRICE_MIN, PRICE_MAX]);
   const [sort, setSort] = useState<SortMode>("featured");
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const priceRangeRef = useRef<HTMLDivElement>(null);
+  const [minPrice, maxPrice] = priceRange;
 
   // Reset filters whenever the category changes so active filters from
   // one section don't bleed into another (e.g. size "28" has no matches
   // in Women after navigating from Men).
   useEffect(() => {
-    setSize(null);
+    setSelectedSizes([]);
     setColor(null);
+    setPriceRange([PRICE_MIN, PRICE_MAX]);
   }, [cat]);
 
   /**
@@ -90,8 +119,11 @@ export function Shop() {
   const visible = useMemo(() => {
     let list = products ? [...products] : [];
 
-    if (size) list = list.filter((p) => p.sizes.includes(size));
+    if (selectedSizes.length > 0) {
+      list = list.filter((p) => selectedSizes.some((selectedSize) => p.sizes.includes(selectedSize)));
+    }
     if (color) list = list.filter((p) => p.colors.includes(color));
+    list = list.filter((p) => p.price >= minPrice && p.price <= maxPrice);
 
     switch (sort) {
       case "priceAsc":
@@ -107,15 +139,77 @@ export function Shop() {
         list.sort((a, b) => (b.tag ? 1 : 0) - (a.tag ? 1 : 0));
         break;
       default:
+        if (cat === "new") {
+          list.sort((a, b) => NEW_COLLECTION_ORDER.indexOf(a.id) - NEW_COLLECTION_ORDER.indexOf(b.id));
+        }
         break;
     }
 
     return list;
-  }, [products, size, color, sort]);
+  }, [cat, products, selectedSizes, color, minPrice, maxPrice, sort]);
+
+  const toggleSize = (nextSize: string) => {
+    setSelectedSizes((current) =>
+      current.includes(nextSize)
+        ? current.filter((selectedSize) => selectedSize !== nextSize)
+        : [...current, nextSize],
+    );
+  };
 
   const clearFilters = () => {
-    setSize(null);
+    setSelectedSizes([]);
     setColor(null);
+    setPriceRange([PRICE_MIN, PRICE_MAX]);
+  };
+
+  const priceStart = ((minPrice - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100;
+  const priceEnd = ((maxPrice - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100;
+
+  const priceFromPointer = (clientX: number) => {
+    const rect = priceRangeRef.current?.getBoundingClientRect();
+    if (!rect) return null;
+
+    const percent = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    const rawPrice = PRICE_MIN + percent * (PRICE_MAX - PRICE_MIN);
+    const steppedPrice = Math.round(rawPrice / 5) * 5;
+
+    return Math.min(PRICE_MAX, Math.max(PRICE_MIN, steppedPrice));
+  };
+
+  const updatePriceFromPointer = (clientX: number, handle: PriceHandle) => {
+    const nextPrice = priceFromPointer(clientX);
+    if (nextPrice === null) return;
+
+    setPriceRange(([currentMin, currentMax]) =>
+      handle === "min"
+        ? [Math.min(nextPrice, currentMax), currentMax]
+        : [currentMin, Math.max(nextPrice, currentMin)],
+    );
+  };
+
+  const startPriceDrag = (handle: PriceHandle, event: ReactPointerEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    updatePriceFromPointer(event.clientX, handle);
+
+    const handlePointerMove = (moveEvent: PointerEvent) => {
+      updatePriceFromPointer(moveEvent.clientX, handle);
+    };
+
+    const stopDragging = () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+    };
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", stopDragging, { once: true });
+  };
+
+  const startNearestPriceDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const nextPrice = priceFromPointer(event.clientX);
+    if (nextPrice === null) return;
+
+    const handle = Math.abs(nextPrice - minPrice) <= Math.abs(nextPrice - maxPrice) ? "min" : "max";
+    startPriceDrag(handle, event);
   };
 
   // Header count: prefer the authoritative total from /api/categories
@@ -190,8 +284,8 @@ export function Shop() {
                 <button
                   key={s}
                   type="button"
-                  className={size === s ? "active" : ""}
-                  onClick={() => setSize(size === s ? null : s)}
+                  className={selectedSizes.includes(s) ? "active" : ""}
+                  onClick={() => toggleSize(s)}
                 >
                   {s}
                 </button>
@@ -216,45 +310,34 @@ export function Shop() {
 
           <div className="filter-group">
             <h4>Price</h4>
-            <div
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 11,
-                letterSpacing: "0.08em",
-                color: "var(--gold)",
-                marginBottom: 10,
-              }}
-            >
-              €75 — €890
+            <div className="price-range-label">
+              €{minPrice} — €{maxPrice}
             </div>
-            <div style={{ position: "relative", height: 24 }}>
-              <div style={{ position: "absolute", top: 11, left: 0, right: 0, height: 2, background: "var(--line-2)" }} />
-              <div style={{ position: "absolute", top: 11, left: "10%", right: "20%", height: 2, background: "var(--gold)" }} />
+            <div className="price-range" ref={priceRangeRef} onPointerDown={startNearestPriceDrag}>
+              <div className="price-range-track" />
               <div
-                style={{
-                  position: "absolute",
-                  top: 6,
-                  left: "10%",
-                  width: 12,
-                  height: 12,
-                  background: "var(--gold)",
-                  border: "2px solid var(--bg)",
-                  borderRadius: "50%",
-                  transform: "translateX(-50%)",
-                }}
+                className="price-range-active"
+                style={{ left: `${priceStart}%`, right: `${100 - priceEnd}%` }}
               />
               <div
-                style={{
-                  position: "absolute",
-                  top: 6,
-                  right: "20%",
-                  width: 12,
-                  height: 12,
-                  background: "var(--gold)",
-                  border: "2px solid var(--bg)",
-                  borderRadius: "50%",
-                  transform: "translateX(50%)",
-                }}
+                className="price-range-thumb"
+                role="slider"
+                aria-label="Minimum price"
+                aria-valuemin={PRICE_MIN}
+                aria-valuemax={maxPrice}
+                aria-valuenow={minPrice}
+                style={{ left: `${priceStart}%` }}
+                onPointerDown={(event) => startPriceDrag("min", event)}
+              />
+              <div
+                className="price-range-thumb"
+                role="slider"
+                aria-label="Maximum price"
+                aria-valuemin={minPrice}
+                aria-valuemax={PRICE_MAX}
+                aria-valuenow={maxPrice}
+                style={{ left: `${priceEnd}%` }}
+                onPointerDown={(event) => startPriceDrag("max", event)}
               />
             </div>
           </div>
@@ -272,9 +355,14 @@ export function Shop() {
                   ? "Loading…"
                   : `${visible.length} ${visible.length === 1 ? "result" : "results"}`}
               </span>
-              {size && (
-                <button type="button" className="chip" onClick={() => setSize(null)}>
-                  Size: {size} ✕
+              {selectedSizes.map((selectedSize) => (
+                <button type="button" className="chip" key={selectedSize} onClick={() => toggleSize(selectedSize)}>
+                  Size: {selectedSize} ✕
+                </button>
+              ))}
+              {(minPrice !== PRICE_MIN || maxPrice !== PRICE_MAX) && (
+                <button type="button" className="chip" onClick={() => setPriceRange([PRICE_MIN, PRICE_MAX])}>
+                  Price: €{minPrice} — €{maxPrice} ✕
                 </button>
               )}
               {color && (

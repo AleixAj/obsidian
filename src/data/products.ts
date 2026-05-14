@@ -20,7 +20,7 @@ export const IMAGES = {
   lookbook: U("1485095329183-d0797cdc5676"),
   catOuterwear: U("1551488831-00ddcb6c6bd3"),
   catKnitwear: U("1583743814966-8936f5b7be1a"),
-  catAccessories: U("1599643478518-a784e5dc4c8f"),
+  catAccessories: U("1646670478703-df9eccd55fb8"),
   authHero: U("1493612276216-ee3925520721"),
   accountHero: U("1490481651871-ab68de25d43d"),
 } as const;
