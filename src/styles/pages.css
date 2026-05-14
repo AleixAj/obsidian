@@ -116,6 +116,13 @@
   font-size: 0.7em;
 }
 
+@media (min-width: 1600px) {
+  .hero-title {
+    font-size: clamp(130px, 9.2vw, 176px);
+    line-height: 0.84;
+  }
+}
+
 .hero-side {
   display: flex;
   flex-direction: column;
