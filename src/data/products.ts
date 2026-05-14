@@ -69,15 +69,15 @@ export const BRAND = {
  */
 export const TEMPLATES = {
   /** Signature: blonde model + storefront with "Obsidian" gold sign. */
-  t1: "/template1.webp",
+  t1: "/template1.jpg",
   /** NYC vibe: crop hoodie + graffiti wall + yellow cabs. */
-  t2: "/template2.webp",
+  t2: "/template2.jpg",
   /** Community: group of four laughing at a skatepark. */
-  t3: "/template3.webp",
+  t3: "/template3.jpg",
   /** Polaroid editorial: composite double-panel social shot. */
-  t4: "/template4.webp",
+  t4: "/template4.jpg",
   /** Street portrait: serious pose, quilted jacket, storefront bg. */
-  t5: "/template5.webp",
+  t5: "/template5.jpg",
   /** Flagship: bomber jacket + cap, OBSIDIAN store façade. */
-  t6: "/template6.webp",
+  t6: "/template6.jpg",
 } as const;
