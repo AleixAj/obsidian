@@ -55,6 +55,13 @@ export const Icon = {
       <line x1="11" y1="3" x2="3" y2="11" />
     </svg>
   ),
+  LogOut: (p: SVGProps<SVGSVGElement>) => (
+    <svg width={15} height={15} viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth={1.2} {...p}>
+      <path d="M6.5 2.5H3.5v10h3" />
+      <path d="M8 4.5l3 3-3 3" />
+      <path d="M11 7.5H5.5" />
+    </svg>
+  ),
   Zoom: (p: SVGProps<SVGSVGElement>) => (
     <svg width={14} height={14} viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth={1.2} {...p}>
       <circle cx="6" cy="6" r="4" />

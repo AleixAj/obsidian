@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
-import { useProducts, useUser } from "../../hooks/queries";
+import { useLogout, useProducts, useUser } from "../../hooks/queries";
 import { formatPrice } from "../../utils/format";
 import { Icon } from "../ui/Icon";
 import { Logo } from "../ui/Logo";
@@ -31,6 +31,7 @@ export function Header() {
   const { totalCount, open: openCart } = useCart();
   const { count: wishlistCount } = useWishlist();
   const { data: user } = useUser();
+  const logoutMutation = useLogout();
   const { data: products = [], refetch: refetchProducts } = useProducts();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -40,6 +41,8 @@ export function Header() {
   const location = useLocation();
 
   const searchTerm = searchQuery.trim().toLowerCase();
+  const isWishlistPage = location.pathname === "/account/wishlist";
+  const isAccountPage = location.pathname === "/account" || location.pathname.startsWith("/account/");
   const searchResults = useMemo(() => {
     if (!searchTerm) return products.slice(0, 6);
 
@@ -109,6 +112,11 @@ export function Header() {
     scrollTop();
   };
 
+  const handleSignOut = async () => {
+    await logoutMutation.mutateAsync();
+    navigate("/");
+  };
+
   return (
     <>
       <header className="header">
@@ -145,13 +153,40 @@ export function Header() {
             <button type="button" aria-label="Search" onClick={openSearch}>
               <Icon.Search /> <span className="tool-label">Search</span>
             </button>
-            <button type="button" aria-label="Wishlist" onClick={() => navigate("/account/wishlist")}>
+            <button
+              type="button"
+              className={`wishlist-tool ${isWishlistPage ? "active" : ""}`}
+              aria-label="Wishlist"
+              aria-pressed={isWishlistPage}
+              onClick={() => navigate("/account/wishlist")}
+            >
               <Icon.Heart />
               {wishlistCount > 0 && <span className="wishlist-count">{wishlistCount}</span>}
             </button>
-            <button type="button" aria-label="Account" onClick={() => navigate(user ? "/account" : "/auth")}>
-              <Icon.User /> <span className="tool-label">{user ? "Account" : "Sign in"}</span>
-            </button>
+            <div className="account-menu">
+              <button
+                type="button"
+                className={`account-tool ${isAccountPage ? "active" : ""}`}
+                aria-label="Account"
+                aria-pressed={isAccountPage}
+                onClick={() => navigate(user ? "/account" : "/auth")}
+              >
+                <Icon.User /> <span className="tool-label">{user ? "Account" : "Sign in"}</span>
+              </button>
+              {user && (
+                <div className="account-menu-panel" role="menu">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={handleSignOut}
+                    disabled={logoutMutation.isPending}
+                  >
+                    <Icon.LogOut />
+                    <span>{logoutMutation.isPending ? "Signing out..." : "Sign out"}</span>
+                  </button>
+                </div>
+              )}
+            </div>
             <button type="button" aria-label="Bag" onClick={openCart}>
               <Icon.Bag /> <span className="tool-label">Bag</span>
               {totalCount > 0 && <span className="bag-count">{totalCount}</span>}
