@@ -1,10 +1,9 @@
 /**
  * Tiny typed client for the Obsidian backend (Laravel, obsidian-api).
  *
- * Etapa 1 (current): the SPA still ships with the static catalogue in
- * `src/data/products.ts`. This module exists so we can hit the backend
- * from a console, an integration test or — starting in Etapa 2 — from
- * the actual product hooks without rewriting the call sites.
+ * This is the only module that knows the Laravel wire format. Components
+ * and hooks consume UI-facing types after the adapters at the bottom of
+ * this file have translated API DTOs into frontend domain objects.
  *
  * Design notes:
  *   - Prices are stored as integer **cents** in the backend so currency
@@ -284,7 +283,7 @@ const jsonRequest = <T>(path: string, payload: unknown): Promise<T> =>
   });
 
 // ──────────────────────────────────────────────────────────────────────
-// Public endpoints (Etapa 1)
+// Public endpoints
 // ──────────────────────────────────────────────────────────────────────
 
 export const health = (): Promise<ApiHealth> => request<ApiHealth>("/api/health");

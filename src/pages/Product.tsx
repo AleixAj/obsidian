@@ -5,6 +5,7 @@ import { ProductGridSkeleton } from "../components/product/ProductCardSkeleton";
 import { Icon } from "../components/ui/Icon";
 import { Placeholder } from "../components/ui/Placeholder";
 import { Reveal } from "../components/ui/Reveal";
+import { compareNewCollectionOrder } from "../constants/catalog";
 import { useCart } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
 import { useWishlist } from "../context/WishlistContext";
@@ -22,27 +23,6 @@ const MODEL_COLORS = [
   { key: "red", name: "Red", hex: "#8f1f22" },
   { key: "white", name: "White", hex: "#f5efe2" },
 ] as const;
-
-const NEW_COLLECTION_ORDER = [
-  "p7",
-  "p12",
-  "p9",
-  "p18",
-  "p1",
-  "p4",
-  "p2",
-  "p5",
-  "p3",
-  "p10",
-  "p6",
-  "p11",
-  "p8",
-  "p13",
-  "p15",
-  "p17",
-  "p16",
-  "p14",
-];
 
 /** Static accordion content — would come from a CMS in a real app. */
 const ACCORDION = [
@@ -347,7 +327,7 @@ export function Product() {
           <div className="product-grid">
             {related
               .filter((x) => x.id !== product.id)
-              .sort((a, b) => NEW_COLLECTION_ORDER.indexOf(a.id) - NEW_COLLECTION_ORDER.indexOf(b.id))
+              .sort(compareNewCollectionOrder)
               .slice(0, 4)
               .map((rp, i) => (
                 <Reveal key={rp.id} delay={i * 60}>

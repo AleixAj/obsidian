@@ -29,6 +29,7 @@ Este repositorio contiene el frontend. El backend vive en
 
 Funcionalidades implementadas:
 
+- CI de portfolio con lint, typecheck, tests unitarios y build en GitHub Actions.
 - Despliegue de producción: [`obsidian.aleixaj.com`](https://obsidian.aleixaj.com).
 - Catálogo servido por endpoints Laravel (`/api/products`, `/api/categories`).
 - Páginas de listado con filtros por categoría, talla, color, precio y ordenación.
@@ -168,6 +169,7 @@ VITE_API_URL=https://obsidian-api-production-8b5e.up.railway.app
 ```bash
 npm run dev        # arranca Vite en desarrollo
 npm run typecheck  # comprueba TypeScript sin emitir archivos
+npm run test:ci    # ejecuta tests unitarios con Vitest
 npm run build      # build de producción
 npm run preview    # previsualiza dist localmente
 npm run lint       # ESLint
@@ -176,7 +178,9 @@ npm run lint       # ESLint
 Verificado:
 
 - `npm run typecheck` pasa.
+- `npm run test:ci` pasa.
 - `npm run build` pasa.
+- GitHub Actions ejecuta lint, typecheck, tests y build en cada push/PR.
 - Smoke checks de producción contra Railway/Cloudflare.
 - Auth Sanctum funciona desde `obsidian.aleixaj.com`.
 - Las imágenes y datos de catálogo cargan desde la API de Railway.

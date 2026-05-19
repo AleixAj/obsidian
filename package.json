@@ -10,6 +10,8 @@
     "deploy": "npm run build && wrangler deploy",
     "lint": "eslint .",
     "preview": "vite preview",
+    "test": "vitest",
+    "test:ci": "vitest run",
     "typecheck": "tsc -b --noEmit"
   },
   "dependencies": {
@@ -32,6 +34,7 @@
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
     "vite": "^8.0.12",
+    "vitest": "^4.0.14",
     "wrangler": "^4.90.1"
   }
 }

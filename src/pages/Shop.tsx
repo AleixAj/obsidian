@@ -5,6 +5,7 @@ import { ProductCard } from "../components/product/ProductCard";
 import { ProductGridSkeleton } from "../components/product/ProductCardSkeleton";
 import { Icon } from "../components/ui/Icon";
 import { Reveal } from "../components/ui/Reveal";
+import { compareNewCollectionOrder } from "../constants/catalog";
 import { useCategories, useProducts } from "../hooks/queries";
 import type { CategoryMeta } from "../lib/api";
 import type { Category } from "../types";
@@ -48,26 +49,6 @@ const SORT_OPTIONS: { value: SortMode; label: string }[] = [
 
 const PRICE_MIN = 0;
 const PRICE_MAX = 890;
-const NEW_COLLECTION_ORDER = [
-  "p7",
-  "p12",
-  "p9",
-  "p18",
-  "p1",
-  "p4",
-  "p2",
-  "p5",
-  "p3",
-  "p10",
-  "p6",
-  "p11",
-  "p8",
-  "p13",
-  "p15",
-  "p17",
-  "p16",
-  "p14",
-];
 
 /**
  * Product Listing Page.
@@ -140,7 +121,7 @@ export function Shop() {
         break;
       default:
         if (cat === "new") {
-          list.sort((a, b) => NEW_COLLECTION_ORDER.indexOf(a.id) - NEW_COLLECTION_ORDER.indexOf(b.id));
+          list.sort(compareNewCollectionOrder);
         }
         break;
     }

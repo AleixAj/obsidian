@@ -909,10 +909,8 @@ export function Account() {
   const { data: user } = useUser();
   const { data: account } = useAccount();
   const logoutMutation = useLogout();
-
-  if (!user) {
-    return null;
-  }
+  const { ids: wishlist } = useWishlist();
+  const { data: products = [] } = useProducts();
 
   const current: Section =
     section && SECTIONS.includes(section as Section) ? (section as Section) : "overview";
@@ -924,16 +922,17 @@ export function Account() {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [current]);
 
-  const { ids: wishlist } = useWishlist();
-
   // Order thumbnails and wishlist cards look products up by slug, so a
   // single `Map<slug, Product>` keeps every section's render loop O(1)
   // without forcing each one to call `useProducts` and re-derive it.
-  const { data: products = [] } = useProducts();
   const productMap = useMemo<ProductMap>(
     () => new Map(products.map((p) => [p.id, p])),
     [products],
   );
+
+  if (!user) {
+    return null;
+  }
 
   const displayName = user.name;
   const lastLoginAt = account?.user.last_login_at ?? user.last_login_at;

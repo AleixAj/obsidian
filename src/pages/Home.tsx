@@ -6,30 +6,10 @@ import { Icon } from "../components/ui/Icon";
 import { Marquee } from "../components/ui/Marquee";
 import { Placeholder } from "../components/ui/Placeholder";
 import { Reveal } from "../components/ui/Reveal";
+import { compareNewCollectionOrder } from "../constants/catalog";
 import { BRAND, TEMPLATES } from "../data/products";
 import { useProducts } from "../hooks/queries";
 import { pad } from "../utils/format";
-
-const NEW_COLLECTION_ORDER = [
-  "p7",
-  "p12",
-  "p9",
-  "p18",
-  "p1",
-  "p4",
-  "p2",
-  "p5",
-  "p3",
-  "p10",
-  "p6",
-  "p11",
-  "p8",
-  "p13",
-  "p15",
-  "p17",
-  "p16",
-  "p14",
-];
 
 /**
  * Top hero with the campaign artwork, headline and the two CTAs.
@@ -103,7 +83,7 @@ function FeaturedGrid() {
     () =>
       products
         ? [...products]
-            .sort((a, b) => NEW_COLLECTION_ORDER.indexOf(a.id) - NEW_COLLECTION_ORDER.indexOf(b.id))
+            .sort(compareNewCollectionOrder)
             .slice(0, 4)
         : [],
     [products],
