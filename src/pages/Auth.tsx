@@ -216,10 +216,10 @@ export function Auth() {
 
           <div className="social-row">
             <button type="button" className="social-btn" onClick={() => startOAuth("google")}>
-              Google
+              <Icon.Google /> Google
             </button>
             <button type="button" className="social-btn" onClick={() => startOAuth("github")}>
-              GitHub
+              <Icon.GitHub /> GitHub
             </button>
           </div>
 
