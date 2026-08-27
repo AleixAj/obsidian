@@ -5,6 +5,11 @@
   "compatibility_date": "2026-05-13",
   "assets": {
     "directory": "./dist",
+    // Sin `binding` no existe `env.ASSETS` dentro del Worker: cualquier ruta
+    // que no coincida con un fichero de ./dist entra en worker.js y lanza una
+    // excepción (error 1101). Con el binding declarado, el fallback SPA
+    // devuelve index.html y los enlaces directos / F5 funcionan.
+    "binding": "ASSETS",
     "not_found_handling": "single-page-application"
   },
   "observability": {
