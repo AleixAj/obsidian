@@ -206,7 +206,9 @@ export function Product() {
             embroidered with the Obsidian sigil. Built to outlast every winter you have left.
           </p>
 
-          <div className="pdp-section">
+          {/* `pdp-section-color` lets the stacked layout pull the swatches up
+              under the gallery — tapping one has to show the photo change. */}
+          <div className="pdp-section pdp-section-color">
             <h4>
               <span>
                 Color · <span style={{ color: "var(--gold)" }}>{colorName}</span>

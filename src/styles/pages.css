@@ -2712,6 +2712,17 @@
     padding-left: 0;
   }
 
+  /* Apilado, la columna de info cae entera bajo la galería y los swatches
+     quedaban fuera de pantalla: cambiar de color obligaba a hacer scroll
+     para ver la foto nueva. `.pdp-info` ya es un flex column, así que basta
+     con adelantar esa sección para dejarla pegada a las imágenes. */
+  .pdp-grid {
+    gap: 28px;
+  }
+  .pdp-section-color {
+    order: -1;
+  }
+
   .pdp-perks {
     grid-template-columns: 1fr;
   }
@@ -2870,6 +2881,13 @@
   }
   .pdp-gallery {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  /* En pantallas cortas el 4/5 completo empuja los swatches fuera de vista:
+     el tope recorta unos píxeles para que foto y selector de color entren
+     juntos. En móviles altos no llega a aplicarse y la foto queda intacta. */
+  .main-img {
+    max-height: 56vh;
   }
   .thumbs {
     flex-direction: row;
