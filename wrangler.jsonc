@@ -10,7 +10,13 @@
     // excepción (error 1101). Con el binding declarado, el fallback SPA
     // devuelve index.html y los enlaces directos / F5 funcionan.
     "binding": "ASSETS",
-    "not_found_handling": "single-page-application"
+    "not_found_handling": "single-page-application",
+    // `single-page-application` sirve index.html en las navegaciones de
+    // navegador (Accept: text/html) sin llegar a ejecutar el Worker, así que
+    // las rutas del backend acababan en el 404 del SPA. Estas se evalúan en
+    // el Worker primero para que el proxy a Laravel funcione — sobre todo el
+    // redirect y el callback de OAuth, que son navegaciones completas.
+    "run_worker_first": ["/api/*", "/auth/*", "/sanctum/*"]
   },
   "observability": {
     "enabled": true
