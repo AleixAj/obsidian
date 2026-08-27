@@ -195,7 +195,8 @@ export function Auth() {
             >
               <span className="box">{agree && <span style={{ fontSize: 9 }}>✓</span>}</span>
               <span>
-                I agree to the <a>Terms</a> and <a>Privacy Policy</a>. Subscribe me to the Inner
+                I agree to the <Link to="/terms">Terms</Link> and{" "}
+                <Link to="/privacy">Privacy Policy</Link>. Subscribe me to the Inner
                 Circle newsletter for early drops and exclusive pieces.
               </span>
             </div>

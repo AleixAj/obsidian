@@ -82,8 +82,8 @@ export function Footer() {
           © {new Date().getFullYear()} Aleix Auqué · Barcelona / Los Angeles / Tokyo
         </span>
         <div className="links">
-          <a>Privacy</a>
-          <a>Terms</a>
+          <Link to="/privacy">Privacy</Link>
+          <Link to="/terms">Terms</Link>
           <a>Cookies</a>
           <a>Instagram ↗</a>
           <a>TikTok ↗</a>

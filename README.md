@@ -117,7 +117,7 @@ src/
 │   ├── useLocalStorage.ts
 │   └── useReveal.ts
 ├── lib/               # Cliente API + QueryClient
-├── pages/             # Home, Shop, Product, Lookbook, Auth, Account
+├── pages/             # Home, Shop, Product, Lookbook, Auth, Account, Legal, NotFound
 ├── styles/            # Tokens CSS, globales y estilos por página
 ├── types/             # Product, CartItem, Category
 └── utils/             # formatPrice, pad
@@ -238,21 +238,37 @@ El frontend consume actualmente:
 
 El dinero se almacena en la API como céntimos enteros (`price_cents`). El adapter lo transforma al `Product.price` que renderizan los componentes.
 
-## OAuth Setup (Pendiente)
+## OAuth Setup
 
-Las rutas de OAuth con Google/GitHub están preparadas en Laravel, pero las credenciales no se han configurado todavía. Para activarlo, crear apps OAuth y añadir en Railway:
+Las rutas de OAuth con Google/GitHub están implementadas en Laravel
+(`SocialiteController`). Sólo faltan las credenciales, que se añaden como
+variables en Railway:
 
 ```env
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
-GOOGLE_REDIRECT_URI=https://obsidian-api-production-8b5e.up.railway.app/auth/google/callback
+GOOGLE_REDIRECT_URI=https://obsidian.aleixaj.com/auth/google/callback
 
 GITHUB_CLIENT_ID=
 GITHUB_CLIENT_SECRET=
-GITHUB_REDIRECT_URI=https://obsidian-api-production-8b5e.up.railway.app/auth/github/callback
+GITHUB_REDIRECT_URI=https://obsidian.aleixaj.com/auth/github/callback
 ```
 
-Mientras no existan esos valores, los botones sociales redirigen de vuelta a `/auth` con un error claro de "not configured".
+**El `redirect_uri` debe apuntar al dominio público, no al de Railway.** El
+Worker proxya `/auth/` hacia el backend (ver `worker.js`), así que la
+callback llega igual a Laravel — pero la cookie de sesión se emite entonces
+sobre `obsidian.aleixaj.com`, que es el dominio desde el que el SPA hace las
+peticiones. Apuntando la callback a `*.up.railway.app` el login parece
+completarse y el usuario vuelve deslogueado, porque la cookie queda en otro
+dominio y Sanctum nunca la recibe.
+
+Para publicar la pantalla de consentimiento de Google en modo producción
+(sin lista de usuarios de prueba) hacen falta una URL de página principal y
+una de política de privacidad servidas desde el dominio autorizado: son las
+rutas `/privacy` y `/terms` (`src/pages/Legal.tsx`).
+
+Mientras no existan esos valores, los botones sociales redirigen de vuelta a
+`/auth` con un error claro de "not configured".
 
 ## Stripe Setup (Pendiente)
 
@@ -269,6 +285,7 @@ Las dependencias/env placeholders de Stripe/Cashier existen en el backend, pero 
 - [x] Etapa 6 - Checkout básico: carrito autenticado -> pedido.
 - [x] Etapa 7 - Wishlist sincronizada entre dispositivos.
 - [x] Etapa 8 - Deploy: Cloudflare Workers + Assets, Railway y usuario demo.
+- [x] Etapa 9 - Páginas legales (`/privacy`, `/terms`) requeridas por el consentimiento de Google.
 - [ ] Pulido final - Activar pagos Stripe y credenciales OAuth.
 
 ## Por Qué Importa Este Proyecto

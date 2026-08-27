@@ -11,6 +11,8 @@ const Auth = lazy(() => import("./pages/Auth").then((module) => ({ default: modu
 const Home = lazy(() => import("./pages/Home").then((module) => ({ default: module.Home })));
 const Lookbook = lazy(() => import("./pages/Lookbook").then((module) => ({ default: module.Lookbook })));
 const NotFound = lazy(() => import("./pages/NotFound").then((module) => ({ default: module.NotFound })));
+const Privacy = lazy(() => import("./pages/Legal").then((module) => ({ default: module.Privacy })));
+const Terms = lazy(() => import("./pages/Legal").then((module) => ({ default: module.Terms })));
 const Product = lazy(() => import("./pages/Product").then((module) => ({ default: module.Product })));
 const Shop = lazy(() => import("./pages/Shop").then((module) => ({ default: module.Shop })));
 
@@ -76,6 +78,10 @@ export default function App() {
                       </ProtectedRoute>
                     }
                   />
+
+                  {/* Public legal pages — also linked from Google's OAuth consent screen. */}
+                  <Route path="/privacy" element={<Privacy />} />
+                  <Route path="/terms" element={<Terms />} />
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>
