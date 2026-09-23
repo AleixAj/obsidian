@@ -9,6 +9,7 @@
 <p>
   <a href="README.md"><img src="docs/readme/lang-es.svg" alt="Español" width="170"></a>
   <img src="docs/readme/lang-en-active.svg" alt="English" width="170">
+  <a href="README.ca.md"><img src="docs/readme/lang-ca.svg" alt="Català" width="170"></a>
 </p>
 
 Full-stack e-commerce for a streetwear clothing store, built as a portfolio project: a React storefront with a dark aesthetic and gold accents, connected to a Laravel 11 API, deployed with a production database and real authenticated user flows.
@@ -130,7 +131,7 @@ src/
 
 ## Local Full-Stack Setup
 
-### 1. Start the backend
+### 1. Start the Backend
 
 ```powershell
 cd C:\Users\Kylen\Desktop\Projects\obsidian-api
@@ -147,7 +148,7 @@ Invoke-RestMethod http://localhost:8000/api/products
 Invoke-RestMethod http://localhost:8000/api/categories
 ```
 
-### 2. Start the frontend
+### 2. Start the Frontend
 
 ```powershell
 cd C:\Users\Kylen\Desktop\Projects\obsidian
@@ -233,13 +234,13 @@ The frontend currently consumes:
 | `PATCH` | `/api/cart/items/{id}` | Change quantity |
 | `DELETE` | `/api/cart/items/{id}` | Remove line item |
 | `DELETE` | `/api/cart/items` | Empty cart |
-| `POST` | `/api/cart/merge` | Merge guest cart after login/register |
+| `POST` | `/api/cart/merge` | Merge guest cart after login/sign-up |
 | `POST` | `/api/checkout` | Turn cart into an order |
 | `GET` | `/api/wishlist` | Authenticated wishlist slugs |
 | `POST` | `/api/wishlist/items` | Add product to wishlist |
 | `DELETE` | `/api/wishlist/items/{slug}` | Remove product from wishlist |
 | `DELETE` | `/api/wishlist/items` | Empty wishlist |
-| `POST` | `/api/wishlist/merge` | Merge guest wishlist after login/register |
+| `POST` | `/api/wishlist/merge` | Merge guest wishlist after login/sign-up |
 
 Money is stored in the API as integer cents (`price_cents`). The adapter converts it into the `Product.price` that components render.
 
@@ -290,7 +291,7 @@ The Stripe/Cashier dependencies and env placeholders exist in the backend, but r
 - [x] Stage 6 - Basic checkout: authenticated cart -> order.
 - [x] Stage 7 - Wishlist synced across devices.
 - [x] Stage 8 - Deploy: Cloudflare Workers + Assets, Railway and demo user.
-- [x] Stage 9 - Legal pages (`/privacy`, `/terms`) required by Google consent.
+- [x] Stage 9 - Legal pages (`/privacy`, `/terms`) required by the Google consent screen.
 - [ ] Final polish - Enable Stripe payments and OAuth credentials.
 
 ## Why This Project Matters
