@@ -269,7 +269,7 @@ the user comes back logged out, because the cookie ends up on a different
 domain and Sanctum never receives it.
 
 To publish the Google consent screen in production mode (without a list of
-test users), you need a home page URL and a privacy policy URL served from the
+test users), you need a privacy policy URL and a terms of service URL served from the
 authorized domain: these are the `/privacy` and `/terms` routes
 (`src/pages/Legal.tsx`).
 

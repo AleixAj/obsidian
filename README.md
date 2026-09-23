@@ -269,8 +269,8 @@ completarse y el usuario vuelve deslogueado, porque la cookie queda en otro
 dominio y Sanctum nunca la recibe.
 
 Para publicar la pantalla de consentimiento de Google en modo producción
-(sin lista de usuarios de prueba) hacen falta una URL de página principal y
-una de política de privacidad servidas desde el dominio autorizado: son las
+(sin lista de usuarios de prueba) hacen falta una URL de política de privacidad y
+otra de condiciones del servicio servidas desde el dominio autorizado: son las
 rutas `/privacy` y `/terms` (`src/pages/Legal.tsx`).
 
 Mientras no existan esos valores, los botones sociales redirigen de vuelta a

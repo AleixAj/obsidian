@@ -269,8 +269,8 @@ sembla completar-se i l'usuari torna sense sessió iniciada, perquè la cookie
 queda en un altre domini i Sanctum no la rep mai.
 
 Per publicar la pantalla de consentiment de Google en mode producció (sense
-llista d'usuaris de prova) calen una URL de pàgina principal i una de política
-de privadesa servides des del domini autoritzat: són les rutes `/privacy` i
+llista d'usuaris de prova) calen una URL de política de privadesa i una de
+condicions del servei servides des del domini autoritzat: són les rutes `/privacy` i
 `/terms` (`src/pages/Legal.tsx`).
 
 Mentre no existeixin aquests valors, els botons socials redirigeixen de nou a
