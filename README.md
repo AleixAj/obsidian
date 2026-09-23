@@ -6,6 +6,11 @@
 ![TanStack Query](https://img.shields.io/badge/TanStack_Query-v5-ff4154?logo=reactquery&logoColor=fff)
 ![Laravel API](https://img.shields.io/badge/API-Laravel_11-ff2d20?logo=laravel&logoColor=fff)
 
+<p>
+  <img src="docs/readme/lang-es-active.svg" alt="Español" width="170">
+  <a href="README.en.md"><img src="docs/readme/lang-en.svg" alt="English" width="170"></a>
+</p>
+
 E-commerce full-stack de tienda de ropa urbana creado como proyecto de portfolio: una tienda React con estética oscura y acentos dorados, conectada a una API Laravel 11, desplegada con base de datos de producción y flujos reales de usuario autenticado.
 
 El objetivo es demostrar cómo se planifica, implementa y despliega una app de comercio con enfoque real: catálogo servido por API, área de cuenta autenticada, carrito y wishlist sincronizados, creación de pedidos, despliegue en producción y decisiones técnicas documentadas.
