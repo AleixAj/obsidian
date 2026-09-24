@@ -243,6 +243,18 @@ export const saveProduct = async (payload: ProductPayload, slug?: string): Promi
   return data;
 };
 
+/** Product photo limits. The API checks them again. */
+export const PRODUCT_IMAGE_MAX_MB = 5;
+
+/** Uploads a product photo and returns its URL ("/api/media/products/..."). */
+export const uploadProductImage = async (file: File): Promise<string> => {
+  await csrfCookie();
+  const body = new FormData();
+  body.append("image", file);
+  const { data } = await request<{ data: { url: string } }>("/api/admin/products/images", { method: "POST", body });
+  return data.url;
+};
+
 export const updateStock = async (
   slug: string,
   variants: { id: number; stock: number; low_stock_at: number }[],

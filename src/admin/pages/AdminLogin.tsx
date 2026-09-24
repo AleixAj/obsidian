@@ -90,6 +90,9 @@ export function AdminLogin() {
           ))}
         </div>
         {demoError && <div className="adm-alert">{demoError}</div>}
+        <p className="adm-muted adm-small">
+          Demo data resets every 24 hours, so feel free to change things. File uploads are off for the demo accounts.
+        </p>
 
         <div className="adm-divider">or sign in with a staff account</div>
 

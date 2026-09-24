@@ -9,12 +9,14 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  deleteAvatar,
   demoLogin,
   fetchUser,
   login,
   logout,
   register,
   updateUser,
+  uploadAvatar,
   type ApiUserDTO,
   type AuthCredentials,
   type DemoRole,
@@ -79,6 +81,31 @@ export function useLogout() {
       queryClient.removeQueries({ queryKey: cartKeys.cart });
       queryClient.removeQueries({ queryKey: wishlistKeys.wishlist });
       queryClient.invalidateQueries({ queryKey: authKeys.user });
+    },
+  });
+}
+
+/** Upload a new profile photo (or remove it with useDeleteAvatar). */
+export function useUploadAvatar() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (file: File) => uploadAvatar(file),
+    onSuccess: (user: ApiUserDTO) => {
+      queryClient.setQueryData(authKeys.user, user);
+      queryClient.invalidateQueries({ queryKey: accountKeys.account });
+    },
+  });
+}
+
+export function useDeleteAvatar() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteAvatar,
+    onSuccess: (user: ApiUserDTO) => {
+      queryClient.setQueryData(authKeys.user, user);
+      queryClient.invalidateQueries({ queryKey: accountKeys.account });
     },
   });
 }

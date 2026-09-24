@@ -1,4 +1,5 @@
 import { Link, useParams } from "react-router-dom";
+import { mediaUrl } from "../../lib/api";
 import { AdminIcon } from "../components/AdminIcon";
 import { StatusBadge } from "../components/StatusBadge";
 import { dateTime, initials, money, monthYear } from "../format";
@@ -36,7 +37,9 @@ export function CustomerDetail() {
 
       <header className="adm-page-header">
         <div className="adm-customer-head">
-          <span className="adm-avatar adm-avatar--lg">{initials(customer.name)}</span>
+          <span className="adm-avatar adm-avatar--lg">
+            {customer.avatar_url ? <img src={mediaUrl(customer.avatar_url)} alt="" referrerPolicy="no-referrer" /> : initials(customer.name)}
+          </span>
           <div>
             <h1>{customer.name}</h1>
             <p>

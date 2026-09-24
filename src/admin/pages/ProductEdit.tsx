@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState, type FormEvent, type KeyboardEvent } from "react";
+import { useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
 import { useUser } from "../../hooks/queries";
-import { fetchCategories } from "../../lib/api";
-import type { AdminProduct, ProductPayload } from "../api";
+import { fetchCategories, mediaUrl } from "../../lib/api";
+import { PRODUCT_IMAGE_MAX_MB, uploadProductImage, type AdminProduct, type ProductPayload } from "../api";
 import { AdminIcon } from "../components/AdminIcon";
 import { StockTable } from "../components/StockTable";
 import { errorMessage } from "../errors";
@@ -84,7 +84,10 @@ function ProductForm({ product }: { product?: AdminProduct }) {
   const [values, setValues] = useState<FormValues>(() => toFormValues(product));
   const [newSize, setNewSize] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState<"img" | "img_alt" | null>(null);
   const save = useSaveProduct(product?.slug);
+  // Demo accounts are shared by everyone, so they can't upload files.
+  const canUpload = canEdit && !user?.is_demo;
   const { data: categories = [] } = useQuery({ queryKey: ["categories", "list"], queryFn: fetchCategories });
 
   /** Updates one field of the form. */
@@ -119,6 +122,32 @@ function ProductForm({ product }: { product?: AdminProduct }) {
     if (event.key === "Enter") {
       event.preventDefault();
       addSize();
+    }
+  }
+
+  /** Uploads the chosen photo and puts its URL in the image field. */
+  async function handleImage(field: "img" | "img_alt", event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setError("Use a JPG, PNG or WebP image.");
+      return;
+    }
+    if (file.size > PRODUCT_IMAGE_MAX_MB * 1024 * 1024) {
+      setError(`The image is too big. The limit is ${PRODUCT_IMAGE_MAX_MB} MB.`);
+      return;
+    }
+
+    setError(null);
+    setUploading(field);
+    try {
+      set(field, await uploadProductImage(file));
+    } catch (err) {
+      setError(errorMessage(err, "Could not upload the image."));
+    } finally {
+      setUploading(null);
     }
   }
 
@@ -319,16 +348,42 @@ function ProductForm({ product }: { product?: AdminProduct }) {
             <div className="adm-card-head">
               <h2>Images</h2>
             </div>
-            {values.img && <img className="adm-preview" src={values.img} alt="" />}
-            <fieldset className="adm-fieldset" disabled={!canEdit}>
-              <label>
-                Main image URL
-                <input className="adm-input" type="url" value={values.img} onChange={(e) => set("img", e.target.value)} required />
-              </label>
-              <label>
-                Hover image URL <small>optional</small>
-                <input className="adm-input" type="url" value={values.img_alt} onChange={(e) => set("img_alt", e.target.value)} />
-              </label>
+            {values.img && <img className="adm-preview" src={mediaUrl(values.img)} alt="" />}
+            <fieldset className="adm-fieldset adm-form" disabled={!canEdit}>
+              {(["img", "img_alt"] as const).map((field) => (
+                <div key={field} className="adm-field">
+                  <label>
+                    {field === "img" ? "Main image" : "Hover image"}{" "}
+                    <small>{field === "img" ? "upload a photo or paste a link" : "optional"}</small>
+                    <input
+                      className="adm-input"
+                      value={values[field]}
+                      onChange={(e) => set(field, e.target.value)}
+                      placeholder="https://…"
+                      required={field === "img"}
+                    />
+                  </label>
+                  {canUpload && (
+                    <label className="adm-btn adm-upload-btn">
+                      {uploading === field ? "Uploading…" : "Upload from computer"}
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        hidden
+                        disabled={uploading !== null}
+                        onChange={(e) => handleImage(field, e)}
+                      />
+                    </label>
+                  )}
+                </div>
+              ))}
+              <p className="adm-muted adm-small">
+                {canUpload
+                  ? `JPG, PNG or WebP, at least 400 px, up to ${PRODUCT_IMAGE_MAX_MB} MB.`
+                  : canEdit
+                    ? "Photo uploads are turned off for the demo accounts. You can paste a link."
+                    : null}
+              </p>
             </fieldset>
           </section>
 

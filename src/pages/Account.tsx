@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { ProfilePhoto } from "../components/account/ProfilePhoto";
 import { Icon } from "../components/ui/Icon";
 import { Placeholder } from "../components/ui/Placeholder";
 import { useCart } from "../context/CartContext";
@@ -15,7 +16,7 @@ import {
   useUpdateAddress,
   useUser,
 } from "../hooks/queries";
-import type { AddressPayload, ApiAddressDTO, ApiOrderDTO } from "../lib/api";
+import { mediaUrl, type AddressPayload, type ApiAddressDTO, type ApiOrderDTO } from "../lib/api";
 import type { Product } from "../types";
 import { formatPrice } from "../utils/format";
 
@@ -669,8 +670,13 @@ function Settings() {
   const submitProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setProfileMessage(null);
-    await updateUser.mutateAsync({ name: name.trim() || "Obsidian Member", email });
-    setProfileMessage("Profile saved.");
+    try {
+      await updateUser.mutateAsync({ name: name.trim() || "Obsidian Member", email });
+      setProfileMessage("Profile saved.");
+    } catch {
+      // The shared demo account can't change its name or email (API answers 403).
+      setProfileMessage(user?.is_demo ? "The demo account details can't be changed." : "Could not save the profile.");
+    }
   };
 
   return (
@@ -685,6 +691,8 @@ function Settings() {
           </h1>
         </div>
       </div>
+
+      <ProfilePhoto />
 
       <form className="settings-section" onSubmit={submitProfile}>
         <div className="head">
@@ -973,7 +981,9 @@ export function Account() {
     <main className="fade-in account">
       <aside className="account-side">
         <div className="user">
-          <div className="avatar">{initials}</div>
+          <div className="avatar">
+            {user.avatar_url ? <img src={mediaUrl(user.avatar_url)} alt="" referrerPolicy="no-referrer" /> : initials}
+          </div>
           <div>
             <div className="name">{displayName}</div>
             <div className="tier">

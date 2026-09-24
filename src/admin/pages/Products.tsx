@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
 import { useUser } from "../../hooks/queries";
+import { mediaUrl } from "../../lib/api";
 import { downloadCsv, type ProductFilters } from "../api";
 import { AdminIcon } from "../components/AdminIcon";
 import { PageHeader } from "../components/PageHeader";
@@ -147,7 +148,7 @@ export function Products() {
                   <tr key={product.id} onClick={() => navigate(`/admin/products/${product.slug}`)}>
                     <td>
                       <div className="adm-product-cell">
-                        <img src={product.img} alt="" loading="lazy" />
+                        <img src={mediaUrl(product.img)} alt="" loading="lazy" />
                         <div>
                           <Link to={`/admin/products/${product.slug}`} className="adm-strong">
                             {product.name}

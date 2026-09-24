@@ -77,6 +77,10 @@ export interface ApiUserDTO {
   oauth_provider: string | null;
   created_at: string | null;
   last_login_at: string | null;
+  /** true when the photo was uploaded here (not the Google/GitHub one). */
+  has_uploaded_avatar: boolean;
+  /** Shared demo account: uploads and profile changes are turned off. */
+  is_demo: boolean;
   /** Staff role for the admin panel. `null` for normal customers. */
   role: "admin" | "warehouse" | "support" | null;
   /** What this role can do in the admin panel (checked again by the API). */
@@ -492,6 +496,37 @@ export const demoLogin = async (role: DemoRole): Promise<void> => {
   await jsonRequest<unknown>("/api/demo-login", { role });
 };
 
+/**
+ * Photos uploaded to our API come back as "/api/media/...". In production
+ * the shop and the API share the domain, but in development the API is on
+ * another port, so we add its address in front.
+ */
+export function mediaUrl(url: string): string;
+export function mediaUrl(url: string | null): string | null;
+export function mediaUrl(url: string | null): string | null {
+  return url && url.startsWith("/api/") ? `${API_URL}${url}` : url;
+}
+
+/** Profile photo limits. The API checks them again. */
+export const AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"];
+export const AVATAR_MAX_MB = 2;
+
+export const uploadAvatar = async (file: File): Promise<ApiUserDTO> => {
+  await csrfCookie();
+  // FormData sends the file as "multipart/form-data". We don't set the
+  // Content-Type header: the browser adds it with the right boundary.
+  const body = new FormData();
+  body.append("avatar", file);
+  const { data } = await request<ApiItemEnvelope<ApiUserDTO>>("/api/user/avatar", { method: "POST", body });
+  return data;
+};
+
+export const deleteAvatar = async (): Promise<ApiUserDTO> => {
+  await csrfCookie();
+  const { data } = await request<ApiItemEnvelope<ApiUserDTO>>("/api/user/avatar", { method: "DELETE" });
+  return data;
+};
+
 export const oauthRedirectUrl = (provider: "google" | "github"): string =>
   `${API_URL}/auth/${provider}/redirect`;
 
@@ -517,8 +552,8 @@ export function toProduct(dto: ApiProductDTO): Product {
     sizes: dto.sizes.map((s) => s.label),
     sold_out: dto.sizes.filter((s) => s.is_sold_out).map((s) => s.label),
     palette: dto.palette === "gold" ? "gold" : "warm",
-    img: dto.img,
-    imgAlt: dto.img_alt ?? dto.img,
+    img: mediaUrl(dto.img),
+    imgAlt: mediaUrl(dto.img_alt ?? dto.img),
     cats: dto.categories,
   };
 }

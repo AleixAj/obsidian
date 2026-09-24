@@ -3,7 +3,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useLogout, useUser } from "../../hooks/queries";
 import { authKeys } from "../../hooks/queries/useAuth";
-import { ApiError } from "../../lib/api";
+import { ApiError, mediaUrl } from "../../lib/api";
 import { useDashboard } from "../hooks";
 import { initials, ROLE_LABELS } from "../format";
 import { canSee, LOGISTICS_NAV, MAIN_NAV, type NavItem } from "../navigation";
@@ -112,7 +112,9 @@ export function AdminLayout() {
         </nav>
 
         <div className="adm-user">
-          <div className="adm-avatar">{initials(user.name)}</div>
+          <div className="adm-avatar">
+            {user.avatar_url ? <img src={mediaUrl(user.avatar_url)} alt="" referrerPolicy="no-referrer" /> : initials(user.name)}
+          </div>
           <div className="adm-user-info">
             <strong>{user.name}</strong>
             <span>{ROLE_LABELS[user.role]}</span>
