@@ -9,6 +9,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  demoLogin,
   fetchUser,
   login,
   logout,
@@ -16,6 +17,7 @@ import {
   updateUser,
   type ApiUserDTO,
   type AuthCredentials,
+  type DemoRole,
   type RegisterPayload,
   type UpdateUserPayload,
 } from "../../lib/api";
@@ -43,6 +45,16 @@ export function useLogin() {
     onSuccess: (user: ApiUserDTO) => {
       queryClient.setQueryData(authKeys.user, user);
     },
+  });
+}
+
+export function useDemoLogin() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (role: DemoRole) => demoLogin(role),
+    // Load the new user (and its role) from /api/user.
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: authKeys.user }),
   });
 }
 

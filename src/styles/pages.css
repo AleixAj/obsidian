@@ -1745,6 +1745,39 @@
   color: var(--gold);
 }
 
+/* "Reviewing this project?" demo shortcut on the sign-in page */
+.auth-demo {
+  margin-bottom: 28px;
+  padding: 16px;
+  border: 1px dashed var(--gold-soft);
+  background: rgba(212, 175, 55, 0.04);
+}
+
+.auth-demo-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.auth-demo p {
+  margin: 6px 0 12px;
+  color: var(--fg-dim);
+  font-size: 13px;
+}
+
+.auth-demo-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.auth-demo-actions .social-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
 .foot-note {
   margin-top: 32px;
   font-family: var(--font-mono);
@@ -2210,11 +2243,11 @@
   background: var(--accent-ok);
 }
 
-.status-pill.transit {
+.status-pill.shipped {
   color: var(--gold);
   border-color: var(--gold-soft);
 }
-.status-pill.transit .dot {
+.status-pill.shipped .dot {
   background: var(--gold);
   box-shadow: 0 0 6px var(--gold);
 }

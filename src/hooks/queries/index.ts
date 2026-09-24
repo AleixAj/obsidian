@@ -8,7 +8,7 @@
 export { useCategories } from "./useCategories";
 export { useProduct } from "./useProduct";
 export { useProducts } from "./useProducts";
-export { useLogin, useLogout, useRegister, useUpdateUser, useUser } from "./useAuth";
+export { useDemoLogin, useLogin, useLogout, useRegister, useUpdateUser, useUser } from "./useAuth";
 export {
   useAccount,
   useAddresses,

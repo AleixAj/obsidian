@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Icon } from "../components/ui/Icon";
 import { Placeholder } from "../components/ui/Placeholder";
 import { BRAND } from "../data/products";
-import { useLogin, useRegister, useUser } from "../hooks/queries";
+import { useDemoLogin, useLogin, useRegister, useUser } from "../hooks/queries";
 import { ApiError, oauthRedirectUrl } from "../lib/api";
 
 /**
@@ -32,6 +32,7 @@ export function Auth() {
 
   const loginMutation = useLogin();
   const registerMutation = useRegister();
+  const demoMutation = useDemoLogin();
   const { data: user } = useUser();
   const isSubmitting = loginMutation.isPending || registerMutation.isPending;
 
@@ -78,6 +79,17 @@ export function Auth() {
       navigate(returnTo, { replace: true });
     } catch (error) {
       setFormError(error instanceof ApiError ? "Invalid credentials or email already in use." : "Auth failed. Try again.");
+    }
+  };
+
+  // Portfolio shortcut: sign in as the demo customer without a password.
+  const startDemo = async () => {
+    setFormError(null);
+    try {
+      await demoMutation.mutateAsync("customer");
+      navigate(returnTo, { replace: true });
+    } catch {
+      setFormError("Could not open the demo account. Try again in a moment.");
     }
   };
 
@@ -140,6 +152,20 @@ export function Auth() {
               </>
             )}
           </h1>
+
+          {/* Shortcut for recruiters reviewing the project: no sign up needed. */}
+          <div className="auth-demo">
+            <div className="auth-demo-title">✦ Reviewing this project?</div>
+            <p>Skip the sign up. Explore it with sample data in one click.</p>
+            <div className="auth-demo-actions">
+              <button type="button" className="social-btn" onClick={startDemo} disabled={demoMutation.isPending}>
+                {demoMutation.isPending ? "Opening…" : "Demo customer"}
+              </button>
+              <Link to="/admin/login" className="social-btn">
+                Admin panel ↗
+              </Link>
+            </div>
+          </div>
 
           <div className="auth-tabs">
             <div

@@ -6,6 +6,8 @@ import { CartProvider } from "./context/CartContext";
 import { ToastProvider } from "./context/ToastContext";
 import { WishlistProvider } from "./context/WishlistContext";
 
+// The admin panel is its own lazy chunk: shop visitors never download it.
+const AdminApp = lazy(() => import("./admin/AdminApp"));
 const Account = lazy(() => import("./pages/Account").then((module) => ({ default: module.Account })));
 const Auth = lazy(() => import("./pages/Auth").then((module) => ({ default: module.Auth })));
 const Home = lazy(() => import("./pages/Home").then((module) => ({ default: module.Home })));
@@ -35,7 +37,8 @@ function RouteFallback() {
  *   2. `WishlistProvider`  → wishlist state (persisted).
  *   3. `CartProvider`      → cart state (persisted).
  *   4. `BrowserRouter`     → URL → component mapping.
- *   5. `Layout`            → header / footer / cart drawer shell.
+ *   5. `/admin/*`          → admin panel (own layout, lazy chunk).
+ *   6. `Layout`            → header / footer / cart drawer shell for the shop.
  *
  * The router lives inside the providers so any route can read or
  * write to those contexts, including the layout itself.
@@ -48,48 +51,67 @@ export default function App() {
       <WishlistProvider>
         <CartProvider>
           <BrowserRouter>
-            <Layout>
-              <Suspense fallback={<RouteFallback />}>
-                <Routes>
-                  <Route path="/" element={<Home />} />
+            <Routes>
+              {/* Admin panel: no shop header/footer, it has its own layout. */}
+              <Route
+                path="/admin/*"
+                element={
+                  <Suspense fallback={<RouteFallback />}>
+                    <AdminApp />
+                  </Suspense>
+                }
+              />
 
-                  {/* Shop redirects `/shop` to the default category. */}
-                  <Route path="/shop" element={<Navigate to="/shop/new" replace />} />
-                  <Route path="/shop/:cat" element={<Shop />} />
-
-                  <Route path="/product/:id" element={<Product />} />
-                  <Route path="/lookbook" element={<Lookbook />} />
-
-                  <Route path="/auth" element={<Auth />} />
-
-                  <Route
-                    path="/account"
-                    element={
-                      <ProtectedRoute>
-                        <Account />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/account/:section"
-                    element={
-                      <ProtectedRoute>
-                        <Account />
-                      </ProtectedRoute>
-                    }
-                  />
-
-                  {/* Public legal pages — also linked from Google's OAuth consent screen. */}
-                  <Route path="/privacy" element={<Privacy />} />
-                  <Route path="/terms" element={<Terms />} />
-
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </Layout>
+              <Route path="*" element={<ShopRoutes />} />
+            </Routes>
           </BrowserRouter>
         </CartProvider>
       </WishlistProvider>
     </ToastProvider>
+  );
+}
+
+/** Every shop page, inside the shop layout (header, footer, cart drawer). */
+function ShopRoutes() {
+  return (
+    <Layout>
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+
+          {/* Shop redirects `/shop` to the default category. */}
+          <Route path="/shop" element={<Navigate to="/shop/new" replace />} />
+          <Route path="/shop/:cat" element={<Shop />} />
+
+          <Route path="/product/:id" element={<Product />} />
+          <Route path="/lookbook" element={<Lookbook />} />
+
+          <Route path="/auth" element={<Auth />} />
+
+          <Route
+            path="/account"
+            element={
+              <ProtectedRoute>
+                <Account />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/account/:section"
+            element={
+              <ProtectedRoute>
+                <Account />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Public legal pages — also linked from Google's OAuth consent screen. */}
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
+    </Layout>
   );
 }

@@ -77,6 +77,10 @@ export interface ApiUserDTO {
   oauth_provider: string | null;
   created_at: string | null;
   last_login_at: string | null;
+  /** Staff role for the admin panel. `null` for normal customers. */
+  role: "admin" | "warehouse" | "support" | null;
+  /** What this role can do in the admin panel (checked again by the API). */
+  permissions: string[];
 }
 
 export interface AuthCredentials {
@@ -131,7 +135,7 @@ export interface ApiOrderDTO {
   id: number;
   number: string;
   email: string;
-  status: "pending" | "transit" | "delivered" | "cancelled" | string;
+  status: "pending" | "paid" | "preparing" | "shipped" | "delivered" | "returned" | "cancelled" | string;
   subtotal_cents: number;
   shipping_cents: number;
   tax_cents: number;
@@ -191,7 +195,7 @@ interface ApiItemEnvelope<T> {
 
 const configuredApiUrl = import.meta.env.VITE_API_URL as string | undefined;
 
-const API_URL = (
+export const API_URL = (
   import.meta.env.PROD
     ? ""
     : configuredApiUrl ?? "http://localhost:8000"
@@ -223,7 +227,7 @@ function getCookie(name: string): string | null {
   return match ? decodeURIComponent(match.split("=").slice(1).join("=")) : null;
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+export async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const url = `${API_URL}${path}`;
   const method = (init.method ?? "GET").toUpperCase();
   const headers = new Headers(init.headers);
@@ -264,7 +268,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   return (text ? JSON.parse(text) : undefined) as T;
 }
 
-const csrfCookie = (): Promise<void> =>
+export const csrfCookie = (): Promise<void> =>
   fetch(`${API_URL}/sanctum/csrf-cookie`, {
     credentials: "include",
   }).then((res) => {
@@ -474,6 +478,18 @@ export const logout = async (): Promise<void> => {
   await request<{ message: string }>("/api/auth/logout", {
     method: "POST",
   });
+};
+
+/** Accounts behind the "Try the demo" buttons. */
+export type DemoRole = "customer" | "admin" | "warehouse" | "support";
+
+/**
+ * One-click demo login (no password), so recruiters can review the
+ * shop and the admin panel without creating an account.
+ */
+export const demoLogin = async (role: DemoRole): Promise<void> => {
+  await csrfCookie();
+  await jsonRequest<unknown>("/api/demo-login", { role });
 };
 
 export const oauthRedirectUrl = (provider: "google" | "github"): string =>

@@ -33,8 +33,11 @@ function statusLabel(status: string): string {
   return (
     {
       pending: "Pending",
-      transit: "In transit",
+      paid: "Paid",
+      preparing: "Preparing",
+      shipped: "In transit",
       delivered: "Delivered",
+      returned: "Returned",
       cancelled: "Refunded",
     }[status] ?? status
   );
@@ -144,7 +147,7 @@ function OrderRow({ order, productMap }: { order: Order; productMap: ProductMap 
         <div className="name">
           {order.items.length} {order.items.length > 1 ? "pieces" : "piece"} · {formatDate(order.created_at)}
         </div>
-        <div className="info">{order.status === "transit" ? "2 days · DHL Express" : formatDate(order.paid_at)}</div>
+        <div className="info">{order.status === "shipped" ? "2 days · DHL Express" : formatDate(order.paid_at)}</div>
       </div>
       <div className={`status-pill ${order.status}`}>
         <span className="dot" />
@@ -262,11 +265,11 @@ function Overview({
 
 function Orders({ productMap }: { productMap: ProductMap }) {
   const { data: orders = [], isPending, isError } = useOrders();
-  const [filter, setFilter] = useState<"all" | "transit" | "delivered" | "cancelled">("all");
+  const [filter, setFilter] = useState<"all" | "shipped" | "delivered" | "cancelled">("all");
   const filtered =
     filter === "all" ? orders : orders.filter((o) => o.status === filter);
   const deliveredCount = orders.filter((o) => o.status === "delivered").length;
-  const transitCount = orders.filter((o) => o.status === "transit").length;
+  const transitCount = orders.filter((o) => o.status === "shipped").length;
   const cancelledCount = orders.filter((o) => o.status === "cancelled").length;
   const total = euroFromCents(orders.reduce((sum, order) => sum + order.total_cents, 0));
 
@@ -289,7 +292,7 @@ function Orders({ productMap }: { productMap: ProductMap }) {
           {(
             [
               ["all", `All (${orders.length})`],
-              ["transit", `In transit (${transitCount})`],
+              ["shipped", `In transit (${transitCount})`],
               ["delivered", `Delivered (${deliveredCount})`],
               ["cancelled", `Refunded (${cancelledCount})`],
             ] as const
