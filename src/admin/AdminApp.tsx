@@ -11,6 +11,9 @@ import { Orders } from "./pages/Orders";
 import { Overview } from "./pages/Overview";
 import { ProductEdit } from "./pages/ProductEdit";
 import { Products } from "./pages/Products";
+import { ReturnDetail } from "./pages/ReturnDetail";
+import { Returns } from "./pages/Returns";
+import { Users } from "./pages/Users";
 import "./admin.css";
 
 /** Shortcut so each route below fits in one line. */
@@ -48,7 +51,12 @@ export default function AdminApp() {
         <Route path="customers" element={only("customers", <Customers />)} />
         <Route path="customers/:id" element={only("customers", <CustomerDetail />)} />
 
-        {/* Returns, users and the 3D warehouse come in the next phases. */}
+        <Route path="returns" element={only("returns", <Returns />)} />
+        <Route path="returns/:id" element={only("returns", <ReturnDetail />)} />
+
+        <Route path="users" element={only("users", <Users />)} />
+
+        {/* The 3D warehouse comes in a later version. */}
         <Route path="*" element={<ComingSoon />} />
       </Route>
     </Routes>

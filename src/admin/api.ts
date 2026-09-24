@@ -52,7 +52,7 @@ export interface Dashboard {
     created_at: string;
   }[];
   low_stock: LowStockItem[];
-  badges: { orders_to_prepare: number; low_stock: number };
+  badges: { orders_to_prepare: number; low_stock: number; returns_to_review: number };
 }
 
 export interface LowStockItem {
@@ -321,19 +321,134 @@ export const fetchCustomer = async (id: number): Promise<CustomerDetail> => {
 };
 
 // ──────────────────────────────────────────────────────────────────────
-// CSV export
+// Returns
 // ──────────────────────────────────────────────────────────────────────
 
+export type ReturnStatus = "requested" | "approved" | "rejected" | "refunded";
+
+export interface AdminReturn {
+  id: number;
+  number: string;
+  status: ReturnStatus;
+  reason: string;
+  reason_label: string;
+  customer_note: string | null;
+  staff_note: string | null;
+  restock: boolean;
+  refund_cents: number;
+  refund_reference: string | null;
+  refunded_at: string | null;
+  created_at: string;
+  units?: number;
+  order?: { id: number; number: string; total_cents: number; created_at: string } | null;
+  customer?: { id: number; name: string; email: string } | null;
+  handled_by?: string | null;
+  items?: {
+    id: number;
+    product_name: string;
+    size_label: string | null;
+    color_hex: string | null;
+    quantity: number;
+    unit_price_cents: number;
+  }[];
+  expected_refund_cents?: number;
+}
+
+export interface ReturnFilters {
+  status?: ReturnStatus | "";
+  search?: string;
+  page?: number;
+}
+
+export const fetchReturns = (filters: ReturnFilters): Promise<Paginated<AdminReturn>> =>
+  request<Paginated<AdminReturn>>(`/api/admin/returns${toQueryString(filters)}`);
+
+export const fetchReturn = async (id: number): Promise<AdminReturn> => {
+  const { data } = await request<{ data: AdminReturn }>(`/api/admin/returns/${id}`);
+  return data;
+};
+
+/** approve / reject / refund a return. */
+export const returnAction = async (
+  id: number,
+  action: "approve" | "reject" | "refund",
+  body: { restock?: boolean; note?: string } = {},
+): Promise<AdminReturn> => {
+  await csrfCookie();
+  const { data } = await request<{ data: AdminReturn }>(`/api/admin/returns/${id}/${action}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  return data;
+};
+
+// ──────────────────────────────────────────────────────────────────────
+// Users & roles
+// ──────────────────────────────────────────────────────────────────────
+
+export interface StaffMember {
+  id: number;
+  name: string;
+  email: string;
+  avatar_url: string | null;
+  role: Role;
+  is_demo: boolean;
+  last_login_at: string | null;
+  created_at: string | null;
+}
+
+export interface RoleInfo {
+  value: Role;
+  label: string;
+  permissions: string[];
+}
+
+export const fetchTeam = (): Promise<{ data: StaffMember[]; roles: RoleInfo[] }> =>
+  request<{ data: StaffMember[]; roles: RoleInfo[] }>("/api/admin/users");
+
+export const addStaff = async (payload: { name: string; email: string; role: Role }): Promise<StaffMember> => {
+  await csrfCookie();
+  const { data } = await request<{ data: StaffMember }>("/api/admin/users", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return data;
+};
+
+export const changeRole = async (id: number, role: Role): Promise<StaffMember> => {
+  await csrfCookie();
+  const { data } = await request<{ data: StaffMember }>(`/api/admin/users/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ role }),
+  });
+  return data;
+};
+
+export const removeStaff = async (id: number): Promise<void> => {
+  await csrfCookie();
+  await request<unknown>(`/api/admin/users/${id}`, { method: "DELETE" });
+};
+
+// ──────────────────────────────────────────────────────────────────────
+// Export (CSV or Excel)
+// ──────────────────────────────────────────────────────────────────────
+
+export type ExportSection = "orders" | "products" | "customers" | "returns";
+export type ExportFormat = "csv" | "xlsx";
+
 /**
- * Downloads a CSV from the API ("orders", "products" or "customers").
- * We use fetch (not a plain link) so the session cookie is sent, then
- * turn the response into a file the browser saves.
+ * Downloads a list as CSV or Excel. We use fetch (not a plain link) so the
+ * session cookie is sent, then turn the response into a file the browser saves.
  */
-export async function downloadCsv(
-  section: "orders" | "products" | "customers",
-  filters: Record<string, string | number | undefined> = {},
+export async function downloadExport(
+  section: ExportSection,
+  filters: Record<string, string | number | undefined>,
+  format: ExportFormat,
 ): Promise<void> {
-  const url = `${API_URL}/api/admin/${section}/export${toQueryString(filters)}`;
+  const url = `${API_URL}/api/admin/${section}/export${toQueryString({ ...filters, format })}`;
   const res = await fetch(url, { credentials: "include" });
   if (!res.ok) throw new ApiError(res.status, url);
 
@@ -342,7 +457,7 @@ export async function downloadCsv(
   link.href = URL.createObjectURL(blob);
   // The products export is a stock list (one row per SKU).
   const name = section === "products" ? "stock" : section;
-  link.download = `${name}-${new Date().toISOString().slice(0, 10)}.csv`;
+  link.download = `${name}-${new Date().toISOString().slice(0, 10)}.${format}`;
   link.click();
   URL.revokeObjectURL(link.href);
 }

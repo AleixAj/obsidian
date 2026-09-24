@@ -13,8 +13,10 @@ import {
   fetchAccount,
   fetchAddresses,
   fetchOrders,
+  requestReturn,
   updateAddress,
   type AddressPayload,
+  type ReturnRequestPayload,
 } from "../../lib/api";
 
 export const accountKeys = {
@@ -34,6 +36,16 @@ export function useOrders() {
   return useQuery({
     queryKey: accountKeys.orders,
     queryFn: fetchOrders,
+  });
+}
+
+/** Ask to return (part of) an order, then reload the orders list. */
+export function useRequestReturn(orderId: number) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: ReturnRequestPayload) => requestReturn(orderId, payload),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: accountKeys.orders }),
   });
 }
 

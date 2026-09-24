@@ -1162,6 +1162,93 @@
   color: var(--accent-warn);
 }
 
+/* ------------ Export buttons ------------ */
+
+.adm-export {
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-lg);
+  background: var(--adm-panel);
+  overflow: hidden;
+}
+
+.adm-export-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  font-size: 13px;
+  color: var(--fg-dim);
+}
+
+.adm-export button {
+  height: 100%;
+  padding: 0 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  border-left: 1px solid var(--line-2);
+}
+
+.adm-export button:hover:not(:disabled) {
+  color: var(--gold);
+  background: #15130e;
+}
+
+/* ------------ Returns & users ------------ */
+
+.adm-badge--return-requested { color: #e0a44a; }
+.adm-badge--return-approved { color: #6ea8e6; }
+.adm-badge--return-refunded { color: var(--accent-ok); }
+.adm-badge--return-rejected { color: var(--fg-dim); }
+
+.adm-textarea {
+  height: auto;
+  min-height: 84px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.adm-select {
+  width: auto;
+  min-width: 170px;
+  cursor: pointer;
+}
+
+.adm-quote {
+  margin-top: 6px;
+  color: var(--fg-dim);
+  font-style: italic;
+}
+
+.adm-card-head--spaced {
+  margin-top: 20px;
+}
+
+.adm-table--static tbody tr {
+  cursor: default;
+}
+
+.adm-table--static tbody tr:hover {
+  background: none;
+}
+
+.adm-roles-table td,
+.adm-roles-table th {
+  white-space: nowrap;
+}
+
+.adm-yes {
+  color: var(--accent-ok);
+  font-weight: 700;
+}
+
+.adm-no {
+  color: var(--fg-mute);
+}
+
 /* ------------ Customers ------------ */
 
 .adm-avatar--sm {

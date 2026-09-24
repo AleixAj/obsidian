@@ -6,6 +6,8 @@
 
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  addStaff,
+  changeRole,
   fetchCustomer,
   fetchCustomers,
   fetchDashboard,
@@ -13,6 +15,11 @@ import {
   fetchOrders,
   fetchProduct,
   fetchProducts,
+  fetchReturn,
+  fetchReturns,
+  fetchTeam,
+  removeStaff,
+  returnAction,
   saveProduct,
   updateOrderStatus,
   updateStock,
@@ -22,6 +29,8 @@ import {
   type ProductFilters,
   type ProductPayload,
   type Range,
+  type ReturnFilters,
+  type Role,
 } from "./api";
 
 export const adminKeys = {
@@ -32,6 +41,9 @@ export const adminKeys = {
   product: (slug: string) => ["admin", "product", slug] as const,
   customers: (filters: CustomerFilters) => ["admin", "customers", filters] as const,
   customer: (id: number) => ["admin", "customer", id] as const,
+  returns: (filters: ReturnFilters) => ["admin", "returns", filters] as const,
+  return: (id: number) => ["admin", "return", id] as const,
+  team: ["admin", "team"] as const,
 };
 
 // ── Overview ─────────────────────────────────────────────────────────
@@ -149,5 +161,71 @@ export function useAdminCustomer(id: number) {
   return useQuery({
     queryKey: adminKeys.customer(id),
     queryFn: () => fetchCustomer(id),
+  });
+}
+
+// ── Returns ──────────────────────────────────────────────────────────
+
+export function useAdminReturns(filters: ReturnFilters) {
+  return useQuery({
+    queryKey: adminKeys.returns(filters),
+    queryFn: () => fetchReturns(filters),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useAdminReturn(id: number) {
+  return useQuery({
+    queryKey: adminKeys.return(id),
+    queryFn: () => fetchReturn(id),
+  });
+}
+
+/** Approve, reject or refund. Refreshes everything the change can affect. */
+export function useReturnAction(id: number) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ action, restock, note }: { action: "approve" | "reject" | "refund"; restock?: boolean; note?: string }) =>
+      returnAction(id, action, { restock, note }),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(adminKeys.return(id), updated);
+      queryClient.invalidateQueries({ queryKey: ["admin", "returns"] });
+      // A refund changes stock, the order status and the dashboard.
+      queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "order"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
+    },
+  });
+}
+
+// ── Users & roles ────────────────────────────────────────────────────
+
+export function useTeam() {
+  return useQuery({ queryKey: adminKeys.team, queryFn: fetchTeam });
+}
+
+export function useAddStaff() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { name: string; email: string; role: Role }) => addStaff(payload),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.team }),
+  });
+}
+
+export function useChangeRole() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, role }: { id: number; role: Role }) => changeRole(id, role),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.team }),
+  });
+}
+
+export function useRemoveStaff() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => removeStaff(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.team }),
   });
 }

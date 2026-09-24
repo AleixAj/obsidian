@@ -2,7 +2,7 @@
  * Small display helpers for the admin panel.
  */
 
-import type { OrderStatus, Role } from "./api";
+import type { OrderStatus, ReturnStatus, Role } from "./api";
 
 const euros = new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR" });
 const eurosShort = new Intl.NumberFormat("en-IE", {
@@ -68,3 +68,21 @@ export function initials(name: string): string {
     .slice(0, 2)
     .toUpperCase();
 }
+
+export const RETURN_STATUS_LABELS: Record<ReturnStatus, string> = {
+  requested: "To review",
+  approved: "Approved",
+  rejected: "Rejected",
+  refunded: "Refunded",
+};
+
+/** Names of the permissions, for the roles table in "Users & roles". */
+export const PERMISSION_LABELS: Record<string, string> = {
+  dashboard: "Overview",
+  orders: "Orders",
+  stock: "Stock",
+  products: "Edit products",
+  customers: "Customers",
+  returns: "Returns & refunds",
+  users: "Users & roles",
+};

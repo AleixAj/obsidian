@@ -1,8 +1,8 @@
-import { useState, type FormEvent } from "react";
+import type { FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { useToast } from "../../context/ToastContext";
-import { downloadCsv, type CustomerFilters } from "../api";
+import type { CustomerFilters } from "../api";
 import { AdminIcon } from "../components/AdminIcon";
+import { ExportButtons } from "../components/ExportButtons";
 import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../components/Pagination";
 import { initials, money, monthYear, shortDate } from "../format";
@@ -20,8 +20,6 @@ const SORTS: { value: Sort; label: string }[] = [
 export function Customers() {
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
-  const { push } = useToast();
-  const [exporting, setExporting] = useState(false);
 
   const search = params.get("search") ?? "";
   const sort = (params.get("sort") ?? "recent") as Sort;
@@ -43,28 +41,12 @@ export function Customers() {
     setParam("search", String(text ?? "").trim());
   }
 
-  async function handleExport() {
-    setExporting(true);
-    try {
-      await downloadCsv("customers", { search, sort });
-    } catch {
-      push("Could not export the customers.", "warn");
-    } finally {
-      setExporting(false);
-    }
-  }
-
   return (
     <>
       <PageHeader
         title="Customers"
         subtitle={data ? `${data.meta.total} ${data.meta.total === 1 ? "customer" : "customers"}` : undefined}
-        actions={
-          <button type="button" className="adm-btn" onClick={handleExport} disabled={exporting}>
-            <AdminIcon.Download />
-            {exporting ? "Exporting…" : "Export CSV"}
-          </button>
-        }
+        actions={<ExportButtons section="customers" filters={{ search, sort }} />}
       />
 
       <div className="adm-toolbar">

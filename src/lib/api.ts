@@ -148,6 +148,16 @@ export interface ApiOrderDTO {
   paid_at: string | null;
   created_at: string | null;
   items: ApiOrderItemDTO[];
+  /** Latest return of the order (only in GET /api/orders). */
+  return?: { number: string; status: "requested" | "approved" | "rejected" | "refunded"; refund_cents: number; staff_note: string | null } | null;
+  /** true when the order can still be returned (delivered, within 30 days). */
+  can_return?: boolean;
+}
+
+export interface ReturnRequestPayload {
+  items: { order_item_id: number; quantity: number }[];
+  reason: "wrong_size" | "damaged" | "not_as_described" | "changed_mind" | "other";
+  note?: string;
 }
 
 export interface ApiAccountDTO {
@@ -339,6 +349,11 @@ export const fetchAccount = async (): Promise<ApiAccountDTO> => {
 export const fetchOrders = async (): Promise<ApiOrderDTO[]> => {
   const { data } = await request<ApiListEnvelope<ApiOrderDTO>>("/api/orders");
   return data;
+};
+
+export const requestReturn = async (orderId: number, payload: ReturnRequestPayload): Promise<void> => {
+  await csrfCookie();
+  await jsonRequest<unknown>(`/api/orders/${orderId}/returns`, payload);
 };
 
 export const fetchAddresses = async (): Promise<ApiAddressDTO[]> => {

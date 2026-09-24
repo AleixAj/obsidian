@@ -1,8 +1,8 @@
-import { useState, type FormEvent } from "react";
+import type { FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { useToast } from "../../context/ToastContext";
-import { downloadCsv, type OrderStatus } from "../api";
+import type { OrderStatus } from "../api";
 import { AdminIcon } from "../components/AdminIcon";
+import { ExportButtons } from "../components/ExportButtons";
 import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../components/Pagination";
 import { StatusBadge } from "../components/StatusBadge";
@@ -20,8 +20,6 @@ const STATUS_TABS: (OrderStatus | "")[] = ["", "paid", "preparing", "shipped", "
 export function Orders() {
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
-  const { push } = useToast();
-  const [exporting, setExporting] = useState(false);
 
   const status = (params.get("status") ?? "") as OrderStatus | "";
   const search = params.get("search") ?? "";
@@ -50,28 +48,12 @@ export function Orders() {
     setFilter("search", String(text ?? "").trim());
   }
 
-  async function handleExport() {
-    setExporting(true);
-    try {
-      await downloadCsv("orders", { status, search });
-    } catch {
-      push("Could not export the orders.", "warn");
-    } finally {
-      setExporting(false);
-    }
-  }
-
   return (
     <>
       <PageHeader
         title="Orders"
         subtitle={data ? `${data.meta.total.toLocaleString("en")} ${data.meta.total === 1 ? "order" : "orders"}` : undefined}
-        actions={
-          <button type="button" className="adm-btn" onClick={handleExport} disabled={exporting}>
-            <AdminIcon.Download />
-            {exporting ? "Exporting…" : "Export CSV"}
-          </button>
-        }
+        actions={<ExportButtons section="orders" filters={{ status, search }} />}
       />
 
       <div className="adm-toolbar">

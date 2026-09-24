@@ -14,6 +14,12 @@ import { AdminIcon } from "./AdminIcon";
  * (<Outlet />) in the middle. On small screens the sidebar becomes
  * a drawer opened with the menu button.
  */
+const BADGE_TITLES: Record<string, string> = {
+  "/admin/orders": "Orders to prepare",
+  "/admin/products": "Variants with low stock",
+  "/admin/returns": "Returns to review",
+};
+
 export function AdminLayout() {
   const { data: user } = useUser();
   const logout = useLogout();
@@ -28,6 +34,7 @@ export function AdminLayout() {
   const badges: Record<string, number> = {
     "/admin/orders": dashboard?.badges.orders_to_prepare ?? 0,
     "/admin/products": dashboard?.badges.low_stock ?? 0,
+    "/admin/returns": dashboard?.badges.returns_to_review ?? 0,
   };
 
   // 401 = the session expired. Forget the user so RequireStaff sends
@@ -73,7 +80,7 @@ export function AdminLayout() {
         {badges[item.path] > 0 && (
           <span
             className={`adm-nav-count${item.path === "/admin/products" ? " is-warn" : ""}`}
-            title={item.path === "/admin/products" ? "Variants with low stock" : "Orders to prepare"}
+            title={BADGE_TITLES[item.path]}
           >
             {badges[item.path]}
           </span>

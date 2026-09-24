@@ -1,10 +1,10 @@
-import { useState, type FormEvent } from "react";
+import type { FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { useToast } from "../../context/ToastContext";
 import { useUser } from "../../hooks/queries";
 import { mediaUrl } from "../../lib/api";
-import { downloadCsv, type ProductFilters } from "../api";
+import type { ProductFilters } from "../api";
 import { AdminIcon } from "../components/AdminIcon";
+import { ExportButtons } from "../components/ExportButtons";
 import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../components/Pagination";
 import { money } from "../format";
@@ -25,9 +25,7 @@ const STOCK_TABS: { value: StockTab; label: string }[] = [
 export function Products() {
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
-  const { push } = useToast();
   const { data: user } = useUser();
-  const [exporting, setExporting] = useState(false);
 
   const stock = (params.get("stock") ?? "") as StockTab;
   const search = params.get("search") ?? "";
@@ -57,17 +55,6 @@ export function Products() {
     setFilter("search", String(text ?? "").trim());
   }
 
-  async function handleExport() {
-    setExporting(true);
-    try {
-      await downloadCsv("products");
-    } catch {
-      push("Could not export the stock list.", "warn");
-    } finally {
-      setExporting(false);
-    }
-  }
-
   return (
     <>
       <PageHeader
@@ -75,10 +62,7 @@ export function Products() {
         subtitle={data ? `${data.meta.total} ${data.meta.total === 1 ? "product" : "products"}` : undefined}
         actions={
           <>
-            <button type="button" className="adm-btn" onClick={handleExport} disabled={exporting}>
-              <AdminIcon.Download />
-              {exporting ? "Exporting…" : "Export stock CSV"}
-            </button>
+            <ExportButtons section="products" />
             {canEdit && (
               <Link to="/admin/products/new" className="adm-btn adm-btn--gold">
                 + New product

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { OrderReturn } from "../components/account/OrderReturn";
 import { ProfilePhoto } from "../components/account/ProfilePhoto";
 import { Icon } from "../components/ui/Icon";
 import { Placeholder } from "../components/ui/Placeholder";
@@ -39,7 +40,7 @@ function statusLabel(status: string): string {
       shipped: "In transit",
       delivered: "Delivered",
       returned: "Returned",
-      cancelled: "Refunded",
+      cancelled: "Cancelled",
     }[status] ?? status
   );
 }
@@ -295,7 +296,7 @@ function Orders({ productMap }: { productMap: ProductMap }) {
               ["all", `All (${orders.length})`],
               ["shipped", `In transit (${transitCount})`],
               ["delivered", `Delivered (${deliveredCount})`],
-              ["cancelled", `Refunded (${cancelledCount})`],
+              ["cancelled", `Cancelled (${cancelledCount})`],
             ] as const
           ).map(([k, l]) => (
             <button
@@ -319,7 +320,12 @@ function Orders({ productMap }: { productMap: ProductMap }) {
         {isError && <div className="data-error">Couldn't load your orders.</div>}
         {!isPending &&
           !isError &&
-          filtered.map((o) => <OrderRow key={o.id} order={o} productMap={productMap} />)}
+          filtered.map((o) => (
+            <div key={o.id} className="order-block">
+              <OrderRow order={o} productMap={productMap} />
+              <OrderReturn order={o} />
+            </div>
+          ))}
       </div>
     </>
   );
