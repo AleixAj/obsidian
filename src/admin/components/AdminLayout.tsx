@@ -23,9 +23,12 @@ export function AdminLayout() {
   const [search, setSearch] = useState("");
 
   // The dashboard query is cached, so this doesn't cost an extra request
-  // when the Overview page is open. We only use it for the badge.
+  // when the Overview page is open. We only use it for the badges.
   const { data: dashboard, error } = useDashboard("30d");
-  const ordersToPrepare = dashboard?.badges.orders_to_prepare ?? 0;
+  const badges: Record<string, number> = {
+    "/admin/orders": dashboard?.badges.orders_to_prepare ?? 0,
+    "/admin/products": dashboard?.badges.low_stock ?? 0,
+  };
 
   // 401 = the session expired. Forget the user so RequireStaff sends
   // them back to the login page.
@@ -67,8 +70,13 @@ export function AdminLayout() {
       >
         <Icon />
         <span>{item.label}</span>
-        {item.path === "/admin/orders" && ordersToPrepare > 0 && (
-          <span className="adm-nav-count">{ordersToPrepare}</span>
+        {badges[item.path] > 0 && (
+          <span
+            className={`adm-nav-count${item.path === "/admin/products" ? " is-warn" : ""}`}
+            title={item.path === "/admin/products" ? "Variants with low stock" : "Orders to prepare"}
+          >
+            {badges[item.path]}
+          </span>
         )}
         {item.soon && <span className="adm-nav-soon">Soon</span>}
       </NavLink>

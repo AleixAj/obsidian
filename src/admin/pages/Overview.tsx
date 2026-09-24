@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useUser } from "../../hooks/queries";
 import type { Range } from "../api";
 import { KpiCard } from "../components/KpiCard";
 import { PageHeader } from "../components/PageHeader";
@@ -24,6 +25,8 @@ const RANGE_TITLES: Record<Range, string> = {
 export function Overview() {
   const [range, setRange] = useState<Range>("30d");
   const { data, isPending, isError } = useDashboard(range);
+  const { data: user } = useUser();
+  const canSeeStock = user?.permissions.includes("stock") ?? false;
 
   const rangeSwitch = (
     <div className="adm-segmented" role="group" aria-label="Period">
@@ -129,6 +132,36 @@ export function Overview() {
           </ul>
         </div>
       </section>
+
+      {/* Stock alerts, only for roles that handle stock. */}
+      {canSeeStock && data.low_stock.length > 0 && (
+        <section className="adm-card">
+          <div className="adm-card-head">
+            <h2>Low stock · {data.badges.low_stock} variants</h2>
+            <Link to="/admin/products?stock=low" className="adm-link">
+              See all
+            </Link>
+          </div>
+          <ul className="adm-low-list">
+            {data.low_stock.map((item) => (
+              <li key={item.id}>
+                <Link to={`/admin/products/${item.product_slug}`}>
+                  <span className="adm-swatch" style={{ background: item.color_hex }} />
+                  <span className="adm-recent-name">
+                    {item.product_name}
+                    <small className="adm-mono">
+                      {item.sku} · size {item.size_label}
+                    </small>
+                  </span>
+                  <strong className={item.stock === 0 ? "adm-stock-out" : "adm-stock-low"}>
+                    {item.stock === 0 ? "Out" : `${item.stock} left`}
+                  </strong>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </>
   );
 }

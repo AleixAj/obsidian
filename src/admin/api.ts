@@ -51,7 +51,18 @@ export interface Dashboard {
     total_cents: number;
     created_at: string;
   }[];
-  badges: { orders_to_prepare: number };
+  low_stock: LowStockItem[];
+  badges: { orders_to_prepare: number; low_stock: number };
+}
+
+export interface LowStockItem {
+  id: number;
+  sku: string;
+  product_slug: string;
+  product_name: string;
+  color_hex: string;
+  size_label: string;
+  stock: number;
 }
 
 export interface AdminOrder {
@@ -104,7 +115,7 @@ export interface OrderFilters {
 }
 
 /** Builds "?status=paid&search=ana", skipping empty values. */
-function toQueryString(filters: OrderFilters): string {
+function toQueryString(filters: object): string {
   const params = new URLSearchParams();
   Object.entries(filters).forEach(([key, value]) => {
     if (value !== undefined && value !== "") params.set(key, String(value));
@@ -140,20 +151,186 @@ export const updateOrderStatus = async (
   return data;
 };
 
+// ──────────────────────────────────────────────────────────────────────
+// Products & stock
+// ──────────────────────────────────────────────────────────────────────
+
+export interface ProductVariant {
+  id: number;
+  sku: string;
+  color_hex: string;
+  size_label: string;
+  stock: number;
+  low_stock_at: number;
+  is_low: boolean;
+}
+
+export interface StockMovement {
+  id: number;
+  sku: string | null;
+  change: number;
+  stock_after: number;
+  reason: "sale" | "adjustment" | "restock" | "return" | string;
+  note: string | null;
+  by: string;
+  at: string;
+}
+
+export interface AdminProduct {
+  id: number;
+  slug: string;
+  name: string;
+  sub_label: string | null;
+  price_cents: number;
+  old_price_cents: number | null;
+  tag: string | null;
+  img: string;
+  img_alt: string | null;
+  is_active: boolean;
+  categories: string[];
+  // Only in the list:
+  total_stock?: number;
+  variants_count?: number;
+  low_variants_count?: number;
+  // Only in the detail page:
+  colors?: { hex: string; name: string | null }[];
+  sizes?: string[];
+  variants?: ProductVariant[];
+  recent_movements?: StockMovement[];
+}
+
+/** What the product form sends to the API. */
+export interface ProductPayload {
+  name: string;
+  sub_label: string | null;
+  price_cents: number;
+  old_price_cents: number | null;
+  tag: string | null;
+  img: string;
+  img_alt: string | null;
+  is_active: boolean;
+  categories: string[];
+  colors: { hex: string; name: string | null }[];
+  sizes: string[];
+}
+
+export interface ProductFilters {
+  search?: string;
+  stock?: "" | "low" | "out";
+  status?: "" | "active" | "archived";
+  page?: number;
+}
+
+export const fetchProducts = (filters: ProductFilters): Promise<Paginated<AdminProduct>> =>
+  request<Paginated<AdminProduct>>(`/api/admin/products${toQueryString(filters)}`);
+
+export const fetchProduct = async (slug: string): Promise<AdminProduct> => {
+  const { data } = await request<{ data: AdminProduct }>(`/api/admin/products/${encodeURIComponent(slug)}`);
+  return data;
+};
+
+/** Create (no slug) or edit (with slug) a product. */
+export const saveProduct = async (payload: ProductPayload, slug?: string): Promise<AdminProduct> => {
+  await csrfCookie();
+  const { data } = await request<{ data: AdminProduct }>(
+    slug ? `/api/admin/products/${encodeURIComponent(slug)}` : "/api/admin/products",
+    {
+      method: slug ? "PUT" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    },
+  );
+  return data;
+};
+
+export const updateStock = async (
+  slug: string,
+  variants: { id: number; stock: number; low_stock_at: number }[],
+  note?: string,
+): Promise<AdminProduct> => {
+  await csrfCookie();
+  const { data } = await request<{ data: AdminProduct }>(`/api/admin/products/${encodeURIComponent(slug)}/stock`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ variants, note }),
+  });
+  return data;
+};
+
+// ──────────────────────────────────────────────────────────────────────
+// Customers
+// ──────────────────────────────────────────────────────────────────────
+
+export interface CustomerRow {
+  id: number;
+  name: string;
+  email: string;
+  created_at: string | null;
+  orders_count: number;
+  spent_cents: number;
+  last_order_at: string | null;
+}
+
+export interface CustomerDetail {
+  id: number;
+  name: string;
+  email: string;
+  avatar_url: string | null;
+  signed_up_with: string;
+  created_at: string | null;
+  last_login_at: string | null;
+  stats: { orders: number; spent_cents: number; average_ticket_cents: number; returns: number };
+  addresses: {
+    id: number;
+    label: string | null;
+    full_name: string;
+    line1: string;
+    city: string;
+    postal_code: string;
+    country: string;
+    phone: string | null;
+    is_default: boolean;
+  }[];
+  orders: AdminOrder[];
+}
+
+export interface CustomerFilters {
+  search?: string;
+  sort?: "recent" | "spent" | "orders";
+  page?: number;
+}
+
+export const fetchCustomers = (filters: CustomerFilters): Promise<Paginated<CustomerRow>> =>
+  request<Paginated<CustomerRow>>(`/api/admin/customers${toQueryString(filters)}`);
+
+export const fetchCustomer = async (id: number): Promise<CustomerDetail> => {
+  const { data } = await request<{ data: CustomerDetail }>(`/api/admin/customers/${id}`);
+  return data;
+};
+
+// ──────────────────────────────────────────────────────────────────────
+// CSV export
+// ──────────────────────────────────────────────────────────────────────
+
 /**
- * Downloads the CSV. We use fetch (not a plain link) so the session
- * cookie is sent, then turn the response into a file the browser saves.
+ * Downloads a CSV from the API ("orders", "products" or "customers").
+ * We use fetch (not a plain link) so the session cookie is sent, then
+ * turn the response into a file the browser saves.
  */
-export async function downloadOrdersCsv(filters: OrderFilters): Promise<void> {
-  const { status, search } = filters;
-  const url = `${API_URL}/api/admin/orders/export${toQueryString({ status, search })}`;
+export async function downloadCsv(
+  section: "orders" | "products" | "customers",
+  filters: Record<string, string | number | undefined> = {},
+): Promise<void> {
+  const url = `${API_URL}/api/admin/${section}/export${toQueryString(filters)}`;
   const res = await fetch(url, { credentials: "include" });
   if (!res.ok) throw new ApiError(res.status, url);
 
   const blob = await res.blob();
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`;
+  // The products export is a stock list (one row per SKU).
+  const name = section === "products" ? "stock" : section;
+  link.download = `${name}-${new Date().toISOString().slice(0, 10)}.csv`;
   link.click();
   URL.revokeObjectURL(link.href);
 }

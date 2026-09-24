@@ -19,15 +19,15 @@ export interface NavItem {
 export const MAIN_NAV: NavItem[] = [
   { path: "/admin", label: "Overview", icon: "Overview", permission: "dashboard" },
   { path: "/admin/orders", label: "Orders", icon: "Orders", permission: "orders" },
-  { path: "/admin/products", label: "Products & stock", icon: "Products", permission: "products", soon: true },
-  { path: "/admin/customers", label: "Customers", icon: "Customers", permission: "customers", soon: true },
+  { path: "/admin/products", label: "Products & stock", icon: "Products", permission: "stock" },
+  { path: "/admin/customers", label: "Customers", icon: "Customers", permission: "customers" },
   { path: "/admin/returns", label: "Returns", icon: "Returns", permission: "returns", soon: true },
   { path: "/admin/users", label: "Users & roles", icon: "Users", permission: "users", soon: true },
 ];
 
 // Logistics tools. The 3D warehouse view will live here.
 export const LOGISTICS_NAV: NavItem[] = [
-  { path: "/admin/warehouse", label: "Warehouse 3D", icon: "Warehouse", permission: "products", soon: true },
+  { path: "/admin/warehouse", label: "Warehouse 3D", icon: "Warehouse", permission: "stock", soon: true },
 ];
 
 export function canSee(permissions: string[], item: NavItem): boolean {

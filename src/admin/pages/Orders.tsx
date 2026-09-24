@@ -1,9 +1,10 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
-import { downloadOrdersCsv, type OrderStatus } from "../api";
+import { downloadCsv, type OrderStatus } from "../api";
 import { AdminIcon } from "../components/AdminIcon";
 import { PageHeader } from "../components/PageHeader";
+import { Pagination } from "../components/Pagination";
 import { StatusBadge } from "../components/StatusBadge";
 import { dateTime, money, STATUS_LABELS } from "../format";
 import { useAdminOrders } from "../hooks";
@@ -52,7 +53,7 @@ export function Orders() {
   async function handleExport() {
     setExporting(true);
     try {
-      await downloadOrdersCsv({ status, search });
+      await downloadCsv("orders", { status, search });
     } catch {
       push("Could not export the orders.", "warn");
     } finally {
@@ -155,24 +156,7 @@ export function Orders() {
           </div>
         )}
 
-        {data && data.meta.last_page > 1 && (
-          <div className="adm-pagination">
-            <button type="button" className="adm-btn" disabled={page <= 1} onClick={() => goToPage(page - 1)}>
-              Previous
-            </button>
-            <span className="adm-muted">
-              Page {data.meta.current_page} of {data.meta.last_page}
-            </span>
-            <button
-              type="button"
-              className="adm-btn"
-              disabled={page >= data.meta.last_page}
-              onClick={() => goToPage(page + 1)}
-            >
-              Next
-            </button>
-          </div>
-        )}
+        {data && <Pagination page={page} lastPage={data.meta.last_page} onChange={goToPage} />}
       </div>
     </>
   );

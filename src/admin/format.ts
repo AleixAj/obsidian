@@ -38,6 +38,11 @@ export function shortDate(iso: string): string {
   return new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short" }).format(new Date(iso));
 }
 
+/** "2025-09-11T10:15:00Z" → "Sep 2025" */
+export function monthYear(iso: string): string {
+  return new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric" }).format(new Date(iso));
+}
+
 export const STATUS_LABELS: Record<OrderStatus, string> = {
   pending: "Pending",
   paid: "Paid",

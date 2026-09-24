@@ -198,6 +198,11 @@ export function OrderDetail() {
             </div>
             <p className="adm-strong">{order.customer?.name ?? "Guest"}</p>
             <p className="adm-muted">{order.email}</p>
+            {order.customer && user?.permissions.includes("customers") && (
+              <Link to={`/admin/customers/${order.customer.id}`} className="adm-link">
+                View profile →
+              </Link>
+            )}
           </section>
 
           {order.shipping_address && (
