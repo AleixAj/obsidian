@@ -73,7 +73,7 @@ devolución encaja con su motivo y cada dirección es de su ciudad.
 Las cuentas del equipo (también las demo) ven un botón **Administración** en la cabecera de la tienda
 para entrar directamente; los clientes no lo ven.
 
-![Cabecera de la tienda con el botón del panel](./docs/screenshots/shop-header-admin.png)
+![Cabecera de la tienda con el botón del panel](./docs/screenshots/shop-header-admin-es.png)
 
 ![Ficha de producto con la tabla de stock](./docs/screenshots/admin-product-stock.png)
 

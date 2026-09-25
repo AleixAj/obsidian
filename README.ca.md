@@ -73,7 +73,7 @@ comentari de devolució encaixa amb el seu motiu i cada adreça és de la seva c
 Els comptes de l'equip (també els de demostració) veuen un botó **Admin** / **Administración** a la
 capçalera de la botiga per entrar-hi directament; els clients no el veuen.
 
-![Capçalera de la botiga amb el botó del panell](./docs/screenshots/shop-header-admin.png)
+![Capçalera de la botiga amb el botó del panell](./docs/screenshots/shop-header-admin-es.png)
 
 ![Fitxa de producte amb la taula d'estoc](./docs/screenshots/admin-product-stock.png)
 
