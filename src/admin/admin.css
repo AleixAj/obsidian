@@ -254,7 +254,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  width: min(360px, 100%);
+  flex: 0 1 360px;
+  min-width: 0;
   height: 36px;
   padding: 0 12px;
   background: var(--adm-panel);
@@ -280,6 +281,7 @@
 
 .adm-lang {
   margin-left: auto;
+  flex-shrink: 0;
 }
 
 .adm-login-top {

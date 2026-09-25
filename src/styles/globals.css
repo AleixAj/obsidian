@@ -243,6 +243,14 @@ ul {
   color: var(--gold);
 }
 
+/* Team accounts have one more button (the admin panel). On medium screens
+   the buttons show only their icon, so everything fits next to the logo. */
+@media (max-width: 1320px) {
+  .header-tools.has-admin .tool-label {
+    display: none;
+  }
+}
+
 .account-tool.active {
   color: var(--gold);
 }

@@ -159,7 +159,7 @@ export function Header() {
 
           <Logo onClick={scrollTop} />
 
-          <div className="header-tools">
+          <div className={`header-tools ${user?.role ? "has-admin" : ""}`}>
             <LanguageSwitch className="header-lang" />
             <button type="button" aria-label={t("header.search")} onClick={openSearch}>
               <Icon.Search /> <span className="tool-label">{t("header.search")}</span>
@@ -174,6 +174,12 @@ export function Header() {
               <Icon.Heart />
               {wishlistCount > 0 && <span className="wishlist-count">{wishlistCount}</span>}
             </button>
+            {/* Only team accounts (admin, warehouse, support) see the link to the panel. */}
+            {user?.role && (
+              <button type="button" aria-label={t("header.adminPanel")} onClick={() => navigate("/admin")}>
+                <Icon.Panel /> <span className="tool-label">{t("header.admin")}</span>
+              </button>
+            )}
             <div className="account-menu">
               <button
                 type="button"
@@ -223,9 +229,11 @@ export function Header() {
           <button type="button" onClick={() => navigate(user ? "/account" : "/auth")}>
             {user ? t("header.account") : t("header.signInOrCreate")}
           </button>
-          <button type="button" onClick={() => navigate("/account")}>
-            {t("header.account")}
-          </button>
+          {user?.role && (
+            <button type="button" onClick={() => navigate("/admin")}>
+              {t("header.adminPanel")}
+            </button>
+          )}
           <button type="button" onClick={openSearch}>
             {t("header.search")}
           </button>

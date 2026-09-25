@@ -35,6 +35,8 @@
     "search": "Search",
     "wishlist": "Wishlist",
     "account": "Account",
+    "admin": "Admin",
+    "adminPanel": "Admin panel",
     "signIn": "Sign in",
     "signInOrCreate": "Sign in / Create account",
     "signOut": "Sign out",

@@ -26,6 +26,15 @@ export const Icon = {
       <path d="M3 14c0-2.8 2.2-5 5-5s5 2.2 5 5" />
     </svg>
   ),
+  // Four squares, like a dashboard: the link to the admin panel.
+  Panel: (p: SVGProps<SVGSVGElement>) => (
+    <svg width={16} height={16} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.2} {...p}>
+      <rect x="2.5" y="2.5" width="4.5" height="4.5" />
+      <rect x="9" y="2.5" width="4.5" height="4.5" />
+      <rect x="2.5" y="9" width="4.5" height="4.5" />
+      <rect x="9" y="9" width="4.5" height="4.5" />
+    </svg>
+  ),
   Arrow: (p: SVGProps<SVGSVGElement>) => (
     <svg width={14} height={14} viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth={1.2} {...p}>
       <line x1="2" y1="7" x2="12" y2="7" />

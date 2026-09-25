@@ -35,6 +35,8 @@
     "search": "Buscar",
     "wishlist": "Favoritos",
     "account": "Cuenta",
+    "admin": "Panel",
+    "adminPanel": "Panel de administración",
     "signIn": "Entrar",
     "signInOrCreate": "Entrar / Crear cuenta",
     "signOut": "Cerrar sesión",

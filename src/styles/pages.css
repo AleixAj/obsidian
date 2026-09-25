@@ -315,7 +315,7 @@
 .lookbook-img {
   aspect-ratio: 4 / 5;
   position: relative;
-  width: clamp(920px, 38vw, 520px);
+  width: clamp(320px, 38vw, 520px);
 }
 
 .lookbook-text {
