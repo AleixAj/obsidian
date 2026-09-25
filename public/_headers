@@ -3,14 +3,14 @@
 # assets applies it. It does NOT apply to /api/*, /auth/* and /sanctum/*:
 # those go through worker.js to Laravel, which adds its own headers.
 #
-# The Content-Security-Policy is "Report-Only" for now: the browser only
-# prints a warning in the console when something breaks the rule, it
-# doesn't block it. Check the console on every page (shop, admin, 3D
-# warehouse) and, when there are no warnings, rename it to
-# "Content-Security-Policy" to enforce it.
+# The Content-Security-Policy tells the browser where the page may load
+# things from (scripts, styles, images...). Anything else is blocked, so an
+# injected script from another site can't run.
 #   - img-src allows any https image: product photos can be any web
 #     address the admin types (Unsplash, Google/GitHub avatars...).
-#   - blob:/data: are used by three.js and the 3D text (troika).
+#   - blob:/data: are used by three.js and the 3D text (troika). The 3D text
+#     draws its letters in a background worker that loads blob: scripts
+#     created by our own code, so script-src needs blob: too.
 #   - cdn.jsdelivr.net: troika downloads fonts from there if a letter is
 #     missing in our font.
 /*
@@ -19,4 +19,4 @@
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
-  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' data: blob: https://cdn.jsdelivr.net; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' data: blob: https://cdn.jsdelivr.net; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'

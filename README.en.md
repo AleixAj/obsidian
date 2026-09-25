@@ -153,7 +153,7 @@ protected against abuse and mistakes:
 - **Only through Cloudflare:** the Worker adds a shared secret and the visitor's real IP.
   Laravel rejects requests that reach Railway directly without that secret.
 - **Security headers** on the site and the API (HSTS, `nosniff`, `X-Frame-Options`,
-  `Referrer-Policy`, `Permissions-Policy`) and a report-only Content-Security-Policy.
+  `Referrer-Policy`, `Permissions-Policy`) and a Content-Security-Policy that blocks scripts from other sites.
 - **Isolated demo accounts:** they only see and change demo data (made-up customers and
   orders) and can't change the public catalogue, upload files or manage the team.
 - **Accounts:** signing in with Google to an account created earlier with a password

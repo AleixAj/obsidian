@@ -155,7 +155,7 @@ que es protegeix contra abusos i errors tant a l'API com a la interfície:
 - **Només a través de Cloudflare:** el Worker afegeix una clau secreta i la IP real del
   visitant. Laravel rebutja les peticions que arriben directes a Railway sense aquesta clau.
 - **Capçaleres de seguretat** al web i a l'API (HSTS, `nosniff`, `X-Frame-Options`,
-  `Referrer-Policy`, `Permissions-Policy`) i una Content-Security-Policy en mode informe.
+  `Referrer-Policy`, `Permissions-Policy`) i una Content-Security-Policy que bloqueja scripts d'altres llocs.
 - **Comptes de demostració aïllats:** només veuen i modifiquen dades de demostració (clients
   i comandes inventats) i no poden canviar el catàleg públic, pujar fitxers ni tocar l'equip.
 - **Comptes:** si algú entra amb Google en un compte creat abans amb contrasenya, aquesta

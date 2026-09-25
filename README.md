@@ -156,7 +156,7 @@ se protege contra abusos y errores tanto en la API como en la interfaz:
 - **Solo a través de Cloudflare:** el Worker añade una clave secreta y la IP real del
   visitante. Laravel rechaza las peticiones que llegan directas a Railway sin esa clave.
 - **Cabeceras de seguridad** en la web y en la API (HSTS, `nosniff`, `X-Frame-Options`,
-  `Referrer-Policy`, `Permissions-Policy`) y una Content-Security-Policy en modo informe.
+  `Referrer-Policy`, `Permissions-Policy`) y una Content-Security-Policy que bloquea scripts de otros sitios.
 - **Cuentas demo aisladas:** solo ven y modifican datos de demo (clientes y pedidos
   inventados), no pueden cambiar el catálogo público, subir archivos ni tocar el equipo.
 - **Cuentas:** si alguien entra con Google en una cuenta creada antes con contraseña, esa
