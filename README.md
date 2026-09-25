@@ -53,7 +53,7 @@ Funcionalidades implementadas:
 - Layout responsive hasta móvil.
 - Skeletons de carga y estados de error reintentables.
 - React Query Devtools en desarrollo.
-- Panel de administración en `/admin` con roles, pedidos, stock, clientes, devoluciones y equipo ([ver sección](#panel-de-administración-admin)).
+- Panel de administración en `/admin` con roles, pedidos, stock, clientes, devoluciones, equipo y almacén en 3D ([ver sección](#panel-de-administración-admin)).
 - Acceso demo con un clic (tienda y panel) para revisar el proyecto sin registrarse.
 - Test de extremo a extremo con Playwright del flujo principal.
 
@@ -77,7 +77,15 @@ devoluciones) se reinician solos cada 24 horas.
 | Clientes | Listado con total gastado y ficha con direcciones e historial de pedidos. |
 | Devoluciones | El cliente la pide desde su cuenta (30 días); atención al cliente la aprueba o rechaza y hace el reembolso (simulado, sin Stripe todavía). El stock vuelve solo. |
 | Usuarios y roles | Equipo, tabla de permisos, añadir personas y cambiar su rol. |
+| Almacén 3D | 192 ubicaciones (pasillo, módulo y nivel) dibujadas en 3D: cada caja tiene el color de su stock y la altura de lo llena que está. Vistas Plano y Lista para móvil, búsqueda por SKU o ubicación, reponer y mover productos. |
 | Exportar | Cada listado se descarga en CSV o Excel. |
+
+**Almacén en 3D** (`/admin/warehouse`): hecho con react-three-fiber (Three.js escrito como
+componentes de React). Los datos son los mismos que en el resto del panel: cada ubicación
+guarda una variante y su stock, y al reponer se crea un movimiento de stock normal. El código
+3D se descarga solo al abrir esa página, y en móvil o sin WebGL se abre la vista Plano.
+
+![Almacén en 3D](./docs/screenshots/admin-warehouse-3d.png)
 
 **Roles** (se comprueban en la API en cada petición, no solo en la interfaz):
 
@@ -97,9 +105,9 @@ devoluciones) se reinician solos cada 24 horas.
 - Las fotos se reducen y se guardan en WebP con GD, en un volumen de Railway.
 - Gráficas con Recharts; Excel con OpenSpout.
 
-**Tests:** 65 tests de la API (sobre todo permisos por rol) y un test de extremo a extremo
+**Tests:** 71 tests de la API (sobre todo permisos por rol) y un test de extremo a extremo
 con Playwright (`e2e/main-flow.e2e.ts`): un cliente pide una devolución, atención al cliente
-la aprueba y la reembolsa, el cliente ve el reembolso, almacén prepara un pedido y no puede
+la aprueba y la reembolsa, el cliente ve el reembolso, almacén prepara un pedido, repone una ubicación y no puede
 ver clientes, y administración revisa el resumen y el equipo. Se ejecuta en la CI de la API
 en cada push y cada noche.
 
@@ -118,6 +126,7 @@ en cada push y cada noche.
 | Persistencia | `localStorage` + backend cart/wishlist | Invitados conservan datos; usuarios sincronizan con Laravel al autenticarse. |
 | Estilos | CSS plano + tokens | Demuestra fundamentos de CSS sin depender de un framework. |
 | Backend | Laravel 11 API | Repositorio separado, endpoints REST, Sanctum auth y MySQL en producción. |
+| 3D | react-three-fiber + drei | Three.js como componentes de React, para el almacén del panel. |
 | Deploy | Cloudflare Workers + Assets + Railway | SPA en Cloudflare edge, API Laravel con MySQL gestionado. |
 
 ## Arquitectura
@@ -350,7 +359,8 @@ Las dependencias/env placeholders de Stripe/Cashier existen en el backend, pero 
 - [x] Etapa 8 - Deploy: Cloudflare Workers + Assets, Railway y usuario demo.
 - [x] Etapa 9 - Páginas legales (`/privacy`, `/terms`) requeridas por el consentimiento de Google.
 - [x] Etapa 10 - Panel de administración: roles, pedidos, stock, clientes, devoluciones, equipo y exportación.
-- [ ] Siguiente - Almacén en 3D (ubicaciones por variante) y pagos reales con Stripe.
+- [x] Etapa 11 - Almacén en 3D: ubicaciones por variante, reposición y vistas 3D, plano y lista.
+- [ ] Siguiente - Pagos reales con Stripe.
 
 ## Por Qué Importa Este Proyecto
 

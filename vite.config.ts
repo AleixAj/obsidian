@@ -7,6 +7,6 @@ export default defineConfig({
   build: {
     // The 3D warehouse (Three.js) is one big file, but it only downloads
     // when someone opens that page, so the warning is not useful here.
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 1200,
   },
 })

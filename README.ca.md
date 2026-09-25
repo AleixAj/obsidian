@@ -53,7 +53,7 @@ Funcionalitats implementades:
 - Disseny responsive fins a mòbil.
 - Skeletons de càrrega i estats d'error amb opció de reintentar.
 - React Query Devtools en desenvolupament.
-- Panell d'administració a `/admin` amb rols, comandes, estoc, clients, devolucions i equip ([vegeu la secció](#panell-dadministració-admin)).
+- Panell d'administració a `/admin` amb rols, comandes, estoc, clients, devolucions, equip i magatzem en 3D ([vegeu la secció](#panell-dadministració-admin)).
 - Accés de demostració amb un clic (botiga i panell) per revisar el projecte sense registrar-se.
 - Test d'extrem a extrem amb Playwright del flux principal.
 
@@ -77,7 +77,15 @@ un accés de "client de demostració". Les dades d'exemple (unes 900 comandes de
 | Clients | Llistat amb el total gastat i fitxa amb adreces i historial de comandes. |
 | Devolucions | El client la demana des del seu compte (30 dies); atenció al client l'aprova o la rebutja i fa el reemborsament (simulat, encara sense Stripe). L'estoc torna sol. |
 | Usuaris i rols | Equip, taula de permisos, afegir persones i canviar-ne el rol. |
+| Magatzem 3D | 192 ubicacions (passadís, mòdul i nivell) dibuixades en 3D: cada caixa té el color del seu estoc i l'alçada de com de plena està. Vistes Pla i Llista per al mòbil, cerca per SKU o ubicació, reposar i moure productes. |
 | Exportar | Cada llistat es descarrega en CSV o Excel. |
+
+**Magatzem en 3D** (`/admin/warehouse`): fet amb react-three-fiber (Three.js escrit com a
+components de React). Fa servir les mateixes dades que la resta del panell: cada ubicació
+guarda una variant i el seu estoc, i reposar crea un moviment d'estoc normal. El codi 3D només
+es descarrega en obrir aquesta pàgina, i al mòbil o sense WebGL s'obre la vista Pla.
+
+![Magatzem en 3D](./docs/screenshots/admin-warehouse-3d.png)
 
 **Rols** (l'API els comprova a cada petició, no només a la interfície):
 
@@ -97,9 +105,9 @@ un accés de "client de demostració". Les dades d'exemple (unes 900 comandes de
 - Les fotos es redueixen i es desen en WebP amb GD, en un volum de Railway.
 - Gràfiques amb Recharts; Excel amb OpenSpout.
 
-**Tests:** 65 tests de l'API (sobretot permisos per rol) i un test d'extrem a extrem amb
+**Tests:** 71 tests de l'API (sobretot permisos per rol) i un test d'extrem a extrem amb
 Playwright (`e2e/main-flow.e2e.ts`): un client demana una devolució, atenció al client
-l'aprova i la reemborsa, el client veu el reemborsament, magatzem prepara una comanda i
+l'aprova i la reemborsa, el client veu el reemborsament, magatzem prepara una comanda, reposa una ubicació i
 no pot veure clients, i administració revisa el resum i l'equip. S'executa a la CI de
 l'API a cada push i cada nit.
 
@@ -118,6 +126,7 @@ l'API a cada push i cada nit.
 | Persistència | `localStorage` + cistella/wishlist al backend | Els convidats conserven les dades; els usuaris se sincronitzen amb Laravel en autenticar-se. |
 | Estils | CSS pla + tokens | Demostra els fonaments de CSS sense dependre d'un framework. |
 | Backend | API Laravel 11 | Repositori separat, endpoints REST, autenticació Sanctum i MySQL a producció. |
+| 3D | react-three-fiber + drei | Three.js com a components de React, per al magatzem del panell. |
 | Desplegament | Cloudflare Workers + Assets + Railway | SPA a l'edge de Cloudflare, API Laravel amb MySQL gestionat. |
 
 ## Arquitectura
@@ -350,7 +359,8 @@ Les dependències i els placeholders d'entorn de Stripe/Cashier existeixen al ba
 - [x] Etapa 8 - Desplegament: Cloudflare Workers + Assets, Railway i usuari de demostració.
 - [x] Etapa 9 - Pàgines legals (`/privacy`, `/terms`) requerides per la pantalla de consentiment de Google.
 - [x] Etapa 10 - Panell d'administració: rols, comandes, estoc, clients, devolucions, equip i exportació.
-- [ ] Següent - Magatzem en 3D (ubicacions per variant) i pagaments reals amb Stripe.
+- [x] Etapa 11 - Magatzem en 3D: ubicacions per variant, reposició i vistes 3D, pla i llista.
+- [ ] Següent - Pagaments reals amb Stripe.
 
 ## Per què és important aquest projecte
 

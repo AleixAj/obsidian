@@ -53,7 +53,7 @@ Implemented features:
 - Responsive layout down to mobile.
 - Loading skeletons and retryable error states.
 - React Query Devtools in development.
-- Admin panel at `/admin` with roles, orders, stock, customers, returns and team ([see section](#admin-panel-admin)).
+- Admin panel at `/admin` with roles, orders, stock, customers, returns, team and a 3D warehouse ([see section](#admin-panel-admin)).
 - One-click demo access (shop and panel) to review the project without signing up.
 - End-to-end Playwright test of the main flow.
 
@@ -77,7 +77,15 @@ itself every 24 hours.
 | Customers | List with total spent, and a profile with addresses and order history. |
 | Returns | The customer asks from their account (30 days); support approves or rejects it and refunds (simulated, no Stripe yet). Stock comes back automatically. |
 | Users & roles | Team, permissions table, adding people and changing their role. |
+| Warehouse 3D | 192 locations (aisle, bay and level) drawn in 3D: each box has the colour of its stock and the height of how full it is. Plan and List views for phones, search by SKU or location, restock and move products. |
 | Export | Every list downloads as CSV or Excel. |
+
+**3D warehouse** (`/admin/warehouse`): made with react-three-fiber (Three.js written as React
+components). It uses the same data as the rest of the panel: each location holds a variant and
+its stock, and a restock creates a normal stock movement. The 3D code only downloads when that
+page opens, and phones or browsers without WebGL open the Plan view.
+
+![3D warehouse](./docs/screenshots/admin-warehouse-3d.png)
 
 **Roles** (checked by the API on every request, not only in the UI):
 
@@ -97,9 +105,9 @@ itself every 24 hours.
 - Photos are resized and saved as WebP with GD, on a Railway volume.
 - Charts with Recharts; Excel with OpenSpout.
 
-**Tests:** 65 API tests (mostly permissions per role) and an end-to-end Playwright test
+**Tests:** 71 API tests (mostly permissions per role) and an end-to-end Playwright test
 (`e2e/main-flow.e2e.ts`): a customer asks for a return, support approves and refunds it,
-the customer sees the refund, the warehouse prepares an order and can't open customers,
+the customer sees the refund, the warehouse prepares an order, restocks a location and can't open customers,
 and the admin checks the overview and the team. It runs in the API CI on every push and
 every night.
 
@@ -118,6 +126,7 @@ every night.
 | Persistence | `localStorage` + backend cart/wishlist | Guests keep their data; users sync with Laravel once authenticated. |
 | Styling | Plain CSS + tokens | Shows CSS fundamentals without relying on a framework. |
 | Backend | Laravel 11 API | Separate repository, REST endpoints, Sanctum auth and MySQL in production. |
+| 3D | react-three-fiber + drei | Three.js as React components, for the panel's warehouse. |
 | Deploy | Cloudflare Workers + Assets + Railway | SPA on the Cloudflare edge, Laravel API with managed MySQL. |
 
 ## Architecture
@@ -350,7 +359,8 @@ The Stripe/Cashier dependencies and env placeholders exist in the backend, but r
 - [x] Stage 8 - Deploy: Cloudflare Workers + Assets, Railway and demo user.
 - [x] Stage 9 - Legal pages (`/privacy`, `/terms`) required by the Google consent screen.
 - [x] Stage 10 - Admin panel: roles, orders, stock, customers, returns, team and exports.
-- [ ] Next - 3D warehouse (locations per variant) and real Stripe payments.
+- [x] Stage 11 - 3D warehouse: locations per variant, restocking and 3D, plan and list views.
+- [ ] Next - Real Stripe payments.
 
 ## Why This Project Matters
 
