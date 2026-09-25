@@ -1,4 +1,5 @@
 import type { FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import type { CustomerFilters } from "../api";
 import { AdminIcon } from "../components/AdminIcon";
@@ -10,14 +11,12 @@ import { useAdminCustomers } from "../hooks";
 
 type Sort = NonNullable<CustomerFilters["sort"]>;
 
-const SORTS: { value: Sort; label: string }[] = [
-  { value: "recent", label: "Last order" },
-  { value: "spent", label: "Most spent" },
-  { value: "orders", label: "Most orders" },
-];
+// Texts in admin.json: "customers.sorts.recent"...
+const SORTS: Sort[] = ["recent", "spent", "orders"];
 
 /** Customers list with search, sorting and CSV export. */
 export function Customers() {
+  const { t } = useTranslation("admin");
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -44,23 +43,23 @@ export function Customers() {
   return (
     <>
       <PageHeader
-        title="Customers"
-        subtitle={data ? `${data.meta.total} ${data.meta.total === 1 ? "customer" : "customers"}` : undefined}
+        title={t("customers.title")}
+        subtitle={data ? t("customers.count", { count: data.meta.total }) : undefined}
         actions={<ExportButtons section="customers" filters={{ search, sort }} />}
       />
 
       <div className="adm-toolbar">
-        <div className="adm-tabs" role="tablist" aria-label="Sort customers">
+        <div className="adm-tabs" role="tablist" aria-label={t("customers.sortLabel")}>
           {SORTS.map((option) => (
             <button
-              key={option.value}
+              key={option}
               type="button"
               role="tab"
-              aria-selected={sort === option.value}
-              className={sort === option.value ? "is-active" : ""}
-              onClick={() => setParam("sort", option.value)}
+              aria-selected={sort === option}
+              className={sort === option ? "is-active" : ""}
+              onClick={() => setParam("sort", option)}
             >
-              {option.label}
+              {t(`customers.sorts.${option}`)}
             </button>
           ))}
         </div>
@@ -74,19 +73,19 @@ export function Customers() {
             onChange={(event) => {
               if (event.target.value === "") setParam("search", "");
             }}
-            placeholder="Name or email"
-            aria-label="Search customers"
+            placeholder={t("customers.searchPlaceholder")}
+            aria-label={t("customers.searchLabel")}
           />
         </form>
       </div>
 
       <div className={`adm-card adm-table-card${isFetching ? " is-loading" : ""}`}>
-        {isPending && <div className="adm-loading">Loading customers…</div>}
-        {isError && <div className="adm-empty">Could not load the customers.</div>}
+        {isPending && <div className="adm-loading">{t("customers.loading")}</div>}
+        {isError && <div className="adm-empty">{t("customers.loadError")}</div>}
         {data && data.data.length === 0 && (
           <div className="adm-empty">
-            <strong>No customers found</strong>
-            <span>Try another search.</span>
+            <strong>{t("customers.empty")}</strong>
+            <span>{t("customers.emptyHint")}</span>
           </div>
         )}
 
@@ -95,17 +94,17 @@ export function Customers() {
             <table className="adm-table adm-table--cards">
               <thead>
                 <tr>
-                  <th>Customer</th>
-                  <th className="num">Orders</th>
-                  <th className="num">Spent</th>
-                  <th>Last order</th>
-                  <th>Customer since</th>
+                  <th>{t("common.customer")}</th>
+                  <th className="num">{t("customers.columns.orders")}</th>
+                  <th className="num">{t("customers.columns.spent")}</th>
+                  <th>{t("customers.columns.lastOrder")}</th>
+                  <th>{t("customers.columns.since")}</th>
                 </tr>
               </thead>
               <tbody>
                 {data.data.map((customer) => (
                   <tr key={customer.id} onClick={() => navigate(`/admin/customers/${customer.id}`)}>
-                    <td data-label="Customer">
+                    <td data-label={t("common.customer")}>
                       <div className="adm-product-cell">
                         <span className="adm-avatar adm-avatar--sm">{initials(customer.name)}</span>
                         <div>
@@ -116,10 +115,10 @@ export function Customers() {
                         </div>
                       </div>
                     </td>
-                    <td data-label="Orders" className="num">{customer.orders_count}</td>
-                    <td data-label="Spent" className="num adm-mono">{money(customer.spent_cents)}</td>
-                    <td data-label="Last order" className="adm-muted">{customer.last_order_at ? shortDate(customer.last_order_at) : "—"}</td>
-                    <td data-label="Customer since" className="adm-muted">{customer.created_at ? monthYear(customer.created_at) : "—"}</td>
+                    <td data-label={t("customers.columns.orders")} className="num">{customer.orders_count}</td>
+                    <td data-label={t("customers.columns.spent")} className="num adm-mono">{money(customer.spent_cents)}</td>
+                    <td data-label={t("customers.columns.lastOrder")} className="adm-muted">{customer.last_order_at ? shortDate(customer.last_order_at) : "—"}</td>
+                    <td data-label={t("customers.columns.since")} className="adm-muted">{customer.created_at ? monthYear(customer.created_at) : "—"}</td>
                   </tr>
                 ))}
               </tbody>

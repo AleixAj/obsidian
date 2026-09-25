@@ -1,15 +1,19 @@
 import { Area, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { useTranslation } from "react-i18next";
 import type { Dashboard } from "../api";
-import { money } from "../format";
+import { chartLabel, money } from "../format";
 
 /**
  * Sales chart: this period (gold area) vs the previous one (grey dashed line).
  * Built with Recharts. The colours come from the shop's design tokens.
+ * `byHour` is true for the "Today" range: the labels show hours, not days.
  */
-export function SalesChart({ points }: { points: Dashboard["chart"] }) {
+export function SalesChart({ points, byHour }: { points: Dashboard["chart"]; byHour: boolean }) {
+  const { t } = useTranslation("admin");
   // Recharts works with plain numbers, so we pass euros instead of cents.
   const data = points.map((point) => ({
-    label: point.label,
+    // The date is formatted here, so it follows the chosen language.
+    label: chartLabel(point.date, byHour),
     current: point.sales_cents / 100,
     previous: point.previous_sales_cents / 100,
   }));
@@ -46,7 +50,7 @@ export function SalesChart({ points }: { points: Dashboard["chart"] }) {
             labelStyle={{ color: "#8a847a" }}
             formatter={(value, name) => [
               money(Number(value) * 100),
-              name === "current" ? "This period" : "Previous",
+              name === "current" ? t("chart.thisPeriod") : t("chart.previous"),
             ]}
           />
           <Line

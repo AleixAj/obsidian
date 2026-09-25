@@ -1,4 +1,5 @@
 import type { FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import type { ReturnStatus } from "../api";
 import { AdminIcon } from "../components/AdminIcon";
@@ -16,6 +17,7 @@ const TABS: (ReturnStatus | "")[] = ["requested", "approved", "refunded", "rejec
  * for customer support.
  */
 export function Returns() {
+  const { t } = useTranslation("admin");
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -43,13 +45,13 @@ export function Returns() {
   return (
     <>
       <PageHeader
-        title="Returns"
-        subtitle="Approve, reject and refund what customers send back"
+        title={t("returns.title")}
+        subtitle={t("returns.subtitle")}
         actions={<ExportButtons section="returns" filters={{ status, search }} />}
       />
 
       <div className="adm-toolbar">
-        <div className="adm-tabs" role="tablist" aria-label="Filter by status">
+        <div className="adm-tabs" role="tablist" aria-label={t("returns.filterByStatus")}>
           {TABS.map((tab) => (
             <button
               key={tab || "all"}
@@ -59,7 +61,7 @@ export function Returns() {
               className={status === tab ? "is-active" : ""}
               onClick={() => setParam("status", tab || "all")}
             >
-              {tab ? RETURN_STATUS_LABELS[tab] : "All"}
+              {tab ? t(RETURN_STATUS_LABELS[tab]) : t("common.all")}
             </button>
           ))}
         </div>
@@ -73,19 +75,19 @@ export function Returns() {
             onChange={(event) => {
               if (event.target.value === "") setParam("search", "");
             }}
-            placeholder="Return, order or customer"
-            aria-label="Search returns"
+            placeholder={t("returns.searchPlaceholder")}
+            aria-label={t("returns.searchLabel")}
           />
         </form>
       </div>
 
       <div className={`adm-card adm-table-card${isFetching ? " is-loading" : ""}`}>
-        {isPending && <div className="adm-loading">Loading returns…</div>}
-        {isError && <div className="adm-empty">Could not load the returns.</div>}
+        {isPending && <div className="adm-loading">{t("returns.loading")}</div>}
+        {isError && <div className="adm-empty">{t("returns.loadError")}</div>}
         {data && data.data.length === 0 && (
           <div className="adm-empty">
-            <strong>{status === "requested" ? "Nothing to review" : "No returns found"}</strong>
-            <span>{status === "requested" ? "All caught up." : "Try another status or search."}</span>
+            <strong>{status === "requested" ? t("returns.nothingToReview") : t("returns.empty")}</strong>
+            <span>{status === "requested" ? t("returns.allCaughtUp") : t("returns.emptyHint")}</span>
           </div>
         )}
 
@@ -94,31 +96,33 @@ export function Returns() {
             <table className="adm-table adm-table--cards">
               <thead>
                 <tr>
-                  <th>Return</th>
-                  <th>Requested</th>
-                  <th>Order</th>
-                  <th>Customer</th>
-                  <th>Reason</th>
-                  <th className="num">Units</th>
-                  <th className="num">Refund</th>
-                  <th>Status</th>
+                  <th>{t("returns.columns.return")}</th>
+                  <th>{t("returns.columns.requested")}</th>
+                  <th>{t("common.order")}</th>
+                  <th>{t("common.customer")}</th>
+                  <th>{t("returns.columns.reason")}</th>
+                  <th className="num">{t("common.units")}</th>
+                  <th className="num">{t("returns.columns.refund")}</th>
+                  <th>{t("common.status")}</th>
                 </tr>
               </thead>
               <tbody>
                 {data.data.map((item) => (
                   <tr key={item.id} onClick={() => navigate(`/admin/returns/${item.id}`)}>
-                    <td data-label="Return">
+                    <td data-label={t("returns.columns.return")}>
                       <Link to={`/admin/returns/${item.id}`} className="adm-mono adm-order-link">
                         {item.number}
                       </Link>
                     </td>
-                    <td data-label="Requested" className="adm-muted">{dateTime(item.created_at)}</td>
-                    <td data-label="Order" className="adm-mono">{item.order?.number}</td>
-                    <td data-label="Customer">{item.customer?.name ?? "—"}</td>
-                    <td data-label="Reason" className="adm-muted">{item.reason_label}</td>
-                    <td data-label="Units" className="num">{item.units}</td>
-                    <td data-label="Refund" className="num adm-mono">{item.status === "refunded" ? money(item.refund_cents) : "—"}</td>
-                    <td data-label="Status">
+                    <td data-label={t("returns.columns.requested")} className="adm-muted">{dateTime(item.created_at)}</td>
+                    <td data-label={t("common.order")} className="adm-mono">{item.order?.number}</td>
+                    <td data-label={t("common.customer")}>{item.customer?.name ?? "—"}</td>
+                    <td data-label={t("returns.columns.reason")} className="adm-muted">
+                      {t(`returns.reasons.${item.reason}`, { defaultValue: item.reason_label })}
+                    </td>
+                    <td data-label={t("common.units")} className="num">{item.units}</td>
+                    <td data-label={t("returns.columns.refund")} className="num adm-mono">{item.status === "refunded" ? money(item.refund_cents) : "—"}</td>
+                    <td data-label={t("common.status")}>
                       <ReturnBadge status={item.status} />
                     </td>
                   </tr>

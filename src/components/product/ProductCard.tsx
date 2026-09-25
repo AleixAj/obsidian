@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
@@ -21,6 +22,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { add } = useCart();
   const { data: user } = useUser();
@@ -57,25 +59,25 @@ export function ProductCard({ product }: ProductCardProps) {
             className={`product-wishlist-btn ${isSaved ? "active" : ""}`}
             onClick={toggleWishlist}
             aria-pressed={isSaved}
-            title={isSaved ? "Remove from wishlist" : "Add to wishlist"}
+            title={isSaved ? t("productCard.removeWishlist") : t("productCard.addWishlist")}
           >
             <Icon.Heart />
           </button>
         )}
         <Placeholder
-          label={`${product.id.toUpperCase()} · Front`}
+          label={`${product.id.toUpperCase()} · ${t("productCard.front")}`}
           palette={product.palette}
           className="main"
           img={product.img}
         />
         <Placeholder
-          label={`${product.id.toUpperCase()} · Back`}
+          label={`${product.id.toUpperCase()} · ${t("productCard.back")}`}
           palette={product.palette === "gold" ? "warm" : "gold"}
           className="alt"
           img={product.imgAlt}
         />
         <button type="button" className="quick-add" onClick={quickAdd}>
-          Quick add ✦ {formatPrice(product.price)}
+          {t("productCard.quickAdd", { price: formatPrice(product.price) })}
         </button>
       </div>
       <div className="product-info">

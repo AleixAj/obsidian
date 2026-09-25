@@ -4,6 +4,7 @@
  * `permission` must match the API permissions (App\Enums\Role in
  * obsidian-api). A section is only shown if the user's role has it.
  * `soon` marks sections planned for the next versions.
+ * `label` is a translation key (admin.json), shown with t(item.label).
  */
 
 import type { AdminIconName } from "./components/AdminIcon";
@@ -17,17 +18,17 @@ export interface NavItem {
 }
 
 export const MAIN_NAV: NavItem[] = [
-  { path: "/admin", label: "Overview", icon: "Overview", permission: "dashboard" },
-  { path: "/admin/orders", label: "Orders", icon: "Orders", permission: "orders" },
-  { path: "/admin/products", label: "Products & stock", icon: "Products", permission: "stock" },
-  { path: "/admin/customers", label: "Customers", icon: "Customers", permission: "customers" },
-  { path: "/admin/returns", label: "Returns", icon: "Returns", permission: "returns" },
-  { path: "/admin/users", label: "Users & roles", icon: "Users", permission: "users" },
+  { path: "/admin", label: "nav.overview", icon: "Overview", permission: "dashboard" },
+  { path: "/admin/orders", label: "nav.orders", icon: "Orders", permission: "orders" },
+  { path: "/admin/products", label: "nav.products", icon: "Products", permission: "stock" },
+  { path: "/admin/customers", label: "nav.customers", icon: "Customers", permission: "customers" },
+  { path: "/admin/returns", label: "nav.returns", icon: "Returns", permission: "returns" },
+  { path: "/admin/users", label: "nav.users", icon: "Users", permission: "users" },
 ];
 
 // Logistics tools.
 export const LOGISTICS_NAV: NavItem[] = [
-  { path: "/admin/warehouse", label: "Warehouse 3D", icon: "Warehouse", permission: "stock" },
+  { path: "/admin/warehouse", label: "nav.warehouse", icon: "Warehouse", permission: "stock" },
 ];
 
 export function canSee(permissions: string[], item: NavItem): boolean {

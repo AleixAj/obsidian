@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { useToast } from "../../context/ToastContext";
 import { useUser } from "../../hooks/queries";
 import { mediaUrl } from "../../lib/api";
@@ -15,6 +16,7 @@ const ROLES: Role[] = ["admin", "warehouse", "support"];
  * and adding or changing people.
  */
 export function Users() {
+  const { t } = useTranslation("admin");
   const { data: me } = useUser();
   const { data, isPending, isError } = useTeam();
   const addStaff = useAddStaff();
@@ -30,10 +32,10 @@ export function Users() {
     event.preventDefault();
     addStaff.mutate(form, {
       onSuccess: () => {
-        push(`${form.name} was added. They can sign in with Google using ${form.email}.`);
+        push(t("users.added", { name: form.name, email: form.email }));
         setForm({ name: "", email: "", role: "warehouse" });
       },
-      onError: (error) => push(errorMessage(error, "Could not add this person."), "warn"),
+      onError: (error) => push(errorMessage(error, t("users.addError")), "warn"),
     });
   }
 
@@ -41,47 +43,44 @@ export function Users() {
     changeRole.mutate(
       { id, role },
       {
-        onSuccess: () => push("Role updated."),
-        onError: (error) => push(errorMessage(error, "Could not change the role."), "warn"),
+        onSuccess: () => push(t("users.roleUpdated")),
+        onError: (error) => push(errorMessage(error, t("users.roleError")), "warn"),
       },
     );
   }
 
   function handleRemove(id: number, name: string) {
-    if (!window.confirm(`Remove ${name} from the team? Their account stays, but without access to the panel.`)) return;
+    if (!window.confirm(t("users.confirmRemove", { name }))) return;
     removeStaff.mutate(id, {
-      onSuccess: () => push(`${name} no longer has access.`),
-      onError: (error) => push(errorMessage(error, "Could not remove this person."), "warn"),
+      onSuccess: () => push(t("users.removed", { name })),
+      onError: (error) => push(errorMessage(error, t("users.removeError")), "warn"),
     });
   }
 
   return (
     <>
-      <PageHeader title="Users & roles" subtitle="Who can use the panel, and what each role can do" />
+      <PageHeader title={t("users.title")} subtitle={t("users.subtitle")} />
 
       {readOnly && (
-        <div className="adm-note">
-          You're using a shared demo account, so changes to the team are turned off. Otherwise anyone could give their own
-          account admin access.
-        </div>
+        <div className="adm-note">{t("users.readOnly")}</div>
       )}
 
-      {isPending && <div className="adm-loading">Loading the team…</div>}
-      {isError && <div className="adm-empty">Could not load the team.</div>}
+      {isPending && <div className="adm-loading">{t("users.loading")}</div>}
+      {isError && <div className="adm-empty">{t("users.loadError")}</div>}
 
       {data && (
         <>
           <section className="adm-card adm-table-card">
             <div className="adm-card-head adm-card-head--padded">
-              <h2>Team · {data.data.length}</h2>
+              <h2>{t("users.team", { total: data.data.length })}</h2>
             </div>
             <div className="adm-table-scroll">
               <table className="adm-table adm-table--static">
                 <thead>
                   <tr>
-                    <th>Person</th>
-                    <th>Role</th>
-                    <th>Last sign in</th>
+                    <th>{t("users.person")}</th>
+                    <th>{t("users.role")}</th>
+                    <th>{t("users.lastSignIn")}</th>
                     <th />
                   </tr>
                 </thead>
@@ -101,8 +100,8 @@ export function Users() {
                             </span>
                             <div>
                               <span className="adm-strong">
-                                {person.name} {isMe && <span className="adm-pill">You</span>}{" "}
-                                {person.is_demo && <span className="adm-pill">Demo</span>}
+                                {person.name} {isMe && <span className="adm-pill">{t("users.you")}</span>}{" "}
+                                {person.is_demo && <span className="adm-pill">{t("users.demo")}</span>}
                               </span>
                               <small className="adm-cell-sub">{person.email}</small>
                             </div>
@@ -114,11 +113,11 @@ export function Users() {
                             value={person.role}
                             onChange={(e) => handleRole(person.id, e.target.value as Role)}
                             disabled={readOnly || isMe || changeRole.isPending}
-                            aria-label={`Role of ${person.name}`}
+                            aria-label={t("users.roleOf", { name: person.name })}
                           >
                             {ROLES.map((role) => (
                               <option key={role} value={role}>
-                                {ROLE_LABELS[role]}
+                                {t(ROLE_LABELS[role])}
                               </option>
                             ))}
                           </select>
@@ -127,7 +126,7 @@ export function Users() {
                         <td className="num">
                           {!isMe && !readOnly && (
                             <button type="button" className="adm-btn adm-btn--danger" onClick={() => handleRemove(person.id, person.name)}>
-                              Remove
+                              {t("users.remove")}
                             </button>
                           )}
                         </td>
@@ -142,16 +141,16 @@ export function Users() {
           <div className="adm-detail">
             <section className="adm-card adm-detail-main">
               <div className="adm-card-head">
-                <h2>What each role can do</h2>
+                <h2>{t("users.whatEachRole")}</h2>
               </div>
               <div className="adm-table-scroll">
                 <table className="adm-table adm-table--plain adm-table--static adm-roles-table">
                   <thead>
                     <tr>
-                      <th>Permission</th>
+                      <th>{t("users.permission")}</th>
                       {data.roles.map((role) => (
                         <th key={role.value} className="num">
-                          {role.label}
+                          {t(ROLE_LABELS[role.value])}
                         </th>
                       ))}
                     </tr>
@@ -159,13 +158,13 @@ export function Users() {
                   <tbody>
                     {Object.entries(PERMISSION_LABELS).map(([permission, label]) => (
                       <tr key={permission}>
-                        <td>{label}</td>
+                        <td>{t(label)}</td>
                         {data.roles.map((role) => (
                           <td key={role.value} className="num">
                             {role.permissions.includes(permission) ? (
-                              <span className="adm-yes" aria-label="Yes">✓</span>
+                              <span className="adm-yes" aria-label={t("common.yes")}>✓</span>
                             ) : (
-                              <span className="adm-no" aria-label="No">—</span>
+                              <span className="adm-no" aria-label={t("common.no")}>—</span>
                             )}
                           </td>
                         ))}
@@ -174,21 +173,21 @@ export function Users() {
                   </tbody>
                 </table>
               </div>
-              <p className="adm-muted adm-small">The API checks these permissions on every request, not only this screen.</p>
+              <p className="adm-muted adm-small">{t("users.apiChecks")}</p>
             </section>
 
             <section className="adm-card adm-detail-side">
               <div className="adm-card-head">
-                <h2>Add someone</h2>
+                <h2>{t("users.addSomeone")}</h2>
               </div>
               <form className="adm-form" onSubmit={handleAdd}>
                 <fieldset className="adm-fieldset adm-form" disabled={readOnly || addStaff.isPending}>
                   <label>
-                    Name
+                    {t("users.name")}
                     <input className="adm-input" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required maxLength={120} />
                   </label>
                   <label>
-                    Email <small>they sign in with Google using it</small>
+                    {t("users.email")} <small>{t("users.emailHint")}</small>
                     <input
                       className="adm-input"
                       type="email"
@@ -198,17 +197,17 @@ export function Users() {
                     />
                   </label>
                   <label>
-                    Role
+                    {t("users.role")}
                     <select className="adm-input adm-select" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as Role })}>
                       {ROLES.map((role) => (
                         <option key={role} value={role}>
-                          {ROLE_LABELS[role]}
+                          {t(ROLE_LABELS[role])}
                         </option>
                       ))}
                     </select>
                   </label>
                   <button type="submit" className="adm-btn adm-btn--gold">
-                    {addStaff.isPending ? "Adding…" : "Add to the team"}
+                    {addStaff.isPending ? t("users.adding") : t("users.add")}
                   </button>
                 </fieldset>
               </form>

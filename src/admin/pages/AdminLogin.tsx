@@ -1,30 +1,19 @@
 import { useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { useDemoLogin, useLogin, useUser } from "../../hooks/queries";
 import { ApiError } from "../../lib/api";
 import { LanguageSwitch } from "../../components/ui/LanguageSwitch";
 import type { Role } from "../api";
 
-/** The three demo accounts, with what each one can do. */
-const DEMO_ROLES: { role: Role; title: string; name: string; can: string }[] = [
-  {
-    role: "admin",
-    title: "Administrator",
-    name: "Aleix Auqué",
-    can: "Everything: sales, orders, products, customers, returns and users.",
-  },
-  {
-    role: "warehouse",
-    title: "Warehouse",
-    name: "Javier Molina",
-    can: "Orders and stock. Prepares and ships orders.",
-  },
-  {
-    role: "support",
-    title: "Customer support",
-    name: "Lucía Fernández",
-    can: "Orders, customers and returns.",
-  },
+/**
+ * The three demo accounts. The role name and what each one can do
+ * come from admin.json ("roles.admin", "login.can.admin"...).
+ */
+const DEMO_ROLES: { role: Role; name: string }[] = [
+  { role: "admin", name: "Aleix Auqué" },
+  { role: "warehouse", name: "Javier Molina" },
+  { role: "support", name: "Lucía Fernández" },
 ];
 
 /**
@@ -32,6 +21,7 @@ const DEMO_ROLES: { role: Role; title: string; name: string; can: string }[] = [
  * ("demo" buttons) or sign in with a real staff account.
  */
 export function AdminLogin() {
+  const { t } = useTranslation("admin");
   const [params] = useSearchParams();
   const { data: user } = useUser();
   const demoLogin = useDemoLogin();
@@ -53,9 +43,9 @@ export function AdminLogin() {
   }
 
   const demoError = demoLogin.error instanceof ApiError && demoLogin.error.status === 503
-    ? "Demo data is not installed on the server yet."
+    ? t("login.demoNotInstalled")
     : demoLogin.error
-      ? "Could not start the demo. Try again."
+      ? t("login.demoFailed")
       : null;
 
   return (
@@ -70,13 +60,10 @@ export function AdminLogin() {
           <LanguageSwitch />
         </div>
 
-        <h1>Back office</h1>
-        <p className="adm-login-lead">
-          Orders, sales and stock of the Obsidian store. Try it with demo data: each role sees
-          different sections, and the API checks every permission.
-        </p>
+        <h1>{t("login.title")}</h1>
+        <p className="adm-login-lead">{t("login.lead")}</p>
 
-        {noAccess && <div className="adm-alert">This account has no access to the admin panel.</div>}
+        {noAccess && <div className="adm-alert">{t("login.noAccess")}</div>}
 
         <div className="adm-demo-list">
           {DEMO_ROLES.map((demo) => (
@@ -87,26 +74,24 @@ export function AdminLogin() {
               onClick={() => demoLogin.mutate(demo.role)}
               disabled={demoLogin.isPending}
             >
-              <span className="adm-demo-role">{demo.title}</span>
-              <strong>Enter as {demo.name}</strong>
-              <span className="adm-demo-can">{demo.can}</span>
+              <span className="adm-demo-role">{t(`roles.${demo.role}`)}</span>
+              <strong>{t("login.enterAs", { name: demo.name })}</strong>
+              <span className="adm-demo-can">{t(`login.can.${demo.role}`)}</span>
             </button>
           ))}
         </div>
         {demoError && <div className="adm-alert">{demoError}</div>}
-        <p className="adm-muted adm-small">
-          Demo data resets every 24 hours, so feel free to change things. File uploads are off for the demo accounts.
-        </p>
+        <p className="adm-muted adm-small">{t("login.demoReset")}</p>
 
-        <div className="adm-divider">or sign in with a staff account</div>
+        <div className="adm-divider">{t("login.divider")}</div>
 
         <form className="adm-login-form" onSubmit={handleSubmit}>
           <label>
-            Email
+            {t("login.email")}
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
           </label>
           <label>
-            Password
+            {t("login.password")}
             <input
               type="password"
               value={password}
@@ -115,9 +100,9 @@ export function AdminLogin() {
               autoComplete="current-password"
             />
           </label>
-          {login.isError && <div className="adm-alert">Wrong email or password.</div>}
+          {login.isError && <div className="adm-alert">{t("login.wrongPassword")}</div>}
           <button type="submit" className="adm-btn adm-btn--gold" disabled={login.isPending}>
-            {login.isPending ? "Signing in…" : "Sign in"}
+            {login.isPending ? t("login.signingIn") : t("login.signIn")}
           </button>
         </form>
       </div>

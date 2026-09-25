@@ -1,4 +1,5 @@
 import { useRef, useState, type ChangeEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { useDeleteAvatar, useUploadAvatar, useUser } from "../../hooks/queries";
 import { ApiError, AVATAR_MAX_MB, AVATAR_TYPES, mediaUrl } from "../../lib/api";
 
@@ -10,6 +11,7 @@ import { ApiError, AVATAR_MAX_MB, AVATAR_TYPES, mediaUrl } from "../../lib/api";
  * to go back to the Google photo / initials.
  */
 export function ProfilePhoto() {
+  const { t } = useTranslation("account");
   const { data: user } = useUser();
   const upload = useUploadAvatar();
   const remove = useDeleteAvatar();
@@ -29,11 +31,11 @@ export function ProfilePhoto() {
 
     // Quick checks here, so the user doesn't wait for an upload that will fail.
     if (!AVATAR_TYPES.includes(file.type)) {
-      setError("Use a JPG, PNG or WebP image.");
+      setError(t("photo.errors.type"));
       return;
     }
     if (file.size > AVATAR_MAX_MB * 1024 * 1024) {
-      setError(`The image is too big. The limit is ${AVATAR_MAX_MB} MB.`);
+      setError(t("photo.errors.size", { mb: AVATAR_MAX_MB }));
       return;
     }
 
@@ -41,7 +43,7 @@ export function ProfilePhoto() {
     upload.mutate(file, {
       onError: (err) => {
         const payload = err instanceof ApiError ? (err.payload as { message?: string } | undefined) : undefined;
-        setError(payload?.message ?? "Could not upload the photo. Try again.");
+        setError(payload?.message ?? t("photo.errors.upload"));
       },
     });
   }
@@ -49,12 +51,12 @@ export function ProfilePhoto() {
   return (
     <div className="settings-section">
       <div className="head">
-        <h4>Profile photo</h4>
+        <h4>{t("photo.title")}</h4>
         <p>
           {user.oauth_provider === "google"
-            ? "We use your Google photo. You can replace it with your own."
-            : "Shown in your account."}{" "}
-          JPG, PNG or WebP, up to {AVATAR_MAX_MB} MB.
+            ? t("photo.google")
+            : t("photo.shown")}{" "}
+          {t("photo.formats", { mb: AVATAR_MAX_MB })}
         </p>
       </div>
 
@@ -64,16 +66,16 @@ export function ProfilePhoto() {
         </div>
 
         {user.is_demo ? (
-          <p className="profile-photo-note">Photo uploads are turned off for the demo account.</p>
+          <p className="profile-photo-note">{t("photo.demo")}</p>
         ) : (
           <div className="profile-photo-actions">
             <input ref={fileInput} type="file" accept={AVATAR_TYPES.join(",")} hidden onChange={handleFile} />
             <button type="button" className="btn-submit" onClick={() => fileInput.current?.click()} disabled={busy}>
-              {upload.isPending ? "Uploading…" : "Upload photo"}
+              {upload.isPending ? t("photo.uploading") : t("photo.upload")}
             </button>
             {user.has_uploaded_avatar && (
               <button type="button" className="social-btn" onClick={() => remove.mutate()} disabled={busy}>
-                {user.oauth_provider === "google" ? "Use Google photo" : "Remove photo"}
+                {user.oauth_provider === "google" ? t("photo.useGoogle") : t("photo.remove")}
               </button>
             )}
           </div>

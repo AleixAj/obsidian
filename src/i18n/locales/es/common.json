@@ -3,5 +3,124 @@
     "label": "Idioma",
     "en": "English",
     "es": "Español"
+  },
+  "loading": {
+    "title": "Cargando Obsidian…",
+    "sub": "Preparando la siguiente vista."
+  },
+  "session": {
+    "checking": "✦ Comprobando sesión…",
+    "sub": "Buscando tu cookie de miembro de Obsidian."
+  },
+  "announce": {
+    "drop": "✦ Drop 04 — Aurum ya disponible",
+    "shipping": "Envío gratis a partir de 200 €",
+    "innerCircle": "Inner Circle ✦ Acceso anticipado",
+    "madeIn": "Hecho en Barcelona · Fundido en oro",
+    "limited": "Limitado a 200 unidades por pieza"
+  },
+  "logo": {
+    "home": "Inicio de Obsidian"
+  },
+  "nav": {
+    "label": "Principal",
+    "home": "Inicio",
+    "new": "Novedades",
+    "men": "Hombre",
+    "women": "Mujer",
+    "lookbook": "Lookbook"
+  },
+  "header": {
+    "toggleMenu": "Abrir o cerrar menú",
+    "search": "Buscar",
+    "wishlist": "Favoritos",
+    "account": "Cuenta",
+    "signIn": "Entrar",
+    "signInOrCreate": "Entrar / Crear cuenta",
+    "signOut": "Cerrar sesión",
+    "signingOut": "Cerrando sesión...",
+    "bag": "Cesta"
+  },
+  "search": {
+    "close": "Cerrar búsqueda",
+    "dialog": "Buscar productos",
+    "eyebrow": "Buscar ✦ Catálogo",
+    "title": "Encuentra tu pieza",
+    "placeholder": "Busca: hoodie, outerwear, men...",
+    "empty": "No hay piezas.",
+    "emptyHint": "Prueba con \"hoodie\", \"outerwear\" o \"women\"."
+  },
+  "footer": {
+    "tagline": "Prendas de peso fundidas en oro. Diseñadas en Barcelona, hechas en Los Ángeles, para llevar después de medianoche en cualquier ciudad que importe.",
+    "columns": {
+      "shop": "Tienda",
+      "about": "Nosotros",
+      "service": "Ayuda"
+    },
+    "links": {
+      "newIn": "Novedades",
+      "outerwear": "Abrigos",
+      "knitwear": "Punto",
+      "accessories": "Accesorios",
+      "archive": "Rebajas de archivo",
+      "story": "Historia",
+      "lookbook": "Lookbook",
+      "materials": "Materiales",
+      "stockists": "Tiendas",
+      "journal": "Journal",
+      "shipping": "Envíos",
+      "returns": "Devoluciones",
+      "sizeGuide": "Guía de tallas",
+      "contact": "Contacto",
+      "faq": "Preguntas frecuentes"
+    },
+    "newsletter": {
+      "title": "Únete al Inner Circle",
+      "text": "Acceso anticipado a los drops, piezas exclusivas y eventos privados.",
+      "placeholder": "tu@email.com",
+      "subscribe": "Suscribirme →"
+    },
+    "copyright": "© {{year}} Aleix Auqué · Barcelona / Los Ángeles / Tokio",
+    "privacy": "Privacidad",
+    "terms": "Términos",
+    "cookies": "Cookies"
+  },
+  "cart": {
+    "label": "Cesta de la compra",
+    "title": "Tu cesta",
+    "close": "Cerrar ✕",
+    "untilFree": "Te faltan {{amount}} para el envío gratis",
+    "freeUnlocked": "Envío gratis desbloqueado",
+    "empty": {
+      "title": "Tu cesta está vacía",
+      "sub": "Las piezas te esperan en el drop"
+    },
+    "size": "Talla {{size}}",
+    "defaultColor": "Por defecto",
+    "decrease": "Quitar una unidad",
+    "increase": "Añadir una unidad",
+    "remove": "Quitar",
+    "subtotal": "Subtotal",
+    "shipping": "Envío",
+    "free": "GRATIS",
+    "total": "Total",
+    "checkout": "Pagar",
+    "placing": "Creando pedido...",
+    "note": "Pago básico · ",
+    "noteGold": "Stripe más adelante",
+    "signInToCheckout": "Inicia sesión para terminar la compra",
+    "orderPlaced": "Pedido {{number}} realizado",
+    "failed": "No se pudo completar la compra. Inténtalo de nuevo."
+  },
+  "productCard": {
+    "addWishlist": "Añadir a favoritos",
+    "removeWishlist": "Quitar de favoritos",
+    "front": "Delante",
+    "back": "Detrás",
+    "quickAdd": "Añadir ✦ {{price}}"
+  },
+  "toast": {
+    "addedWishlist": "Añadido a favoritos",
+    "removedWishlist": "Quitado de favoritos"
   }
 }

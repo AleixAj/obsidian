@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { OrderReturn } from "../components/account/OrderReturn";
 import { ProfilePhoto } from "../components/account/ProfilePhoto";
@@ -17,6 +18,7 @@ import {
   useUpdateAddress,
   useUser,
 } from "../hooks/queries";
+import i18n, { currentLocale } from "../i18n";
 import { mediaUrl, type AddressPayload, type ApiAddressDTO, type ApiOrderDTO } from "../lib/api";
 import type { Product } from "../types";
 import { formatPrice } from "../utils/format";
@@ -31,54 +33,48 @@ function euroFromCents(cents: number): number {
   return Math.round(cents / 100);
 }
 
+// These helpers live outside components, so they use i18n.t() directly
+// instead of the useTranslation() hook.
+const ORDER_STATUSES = ["pending", "paid", "preparing", "shipped", "delivered", "returned", "cancelled"];
+
 function statusLabel(status: string): string {
-  return (
-    {
-      pending: "Pending",
-      paid: "Paid",
-      preparing: "Preparing",
-      shipped: "In transit",
-      delivered: "Delivered",
-      returned: "Returned",
-      cancelled: "Cancelled",
-    }[status] ?? status
-  );
+  return ORDER_STATUSES.includes(status) ? i18n.t(`status.${status}`, { ns: "account" }) : status;
 }
 
 function formatDate(value: string | null): string {
-  if (!value) return "Pending";
-  return new Intl.DateTimeFormat("en", { month: "short", day: "2-digit", year: "numeric" }).format(new Date(value));
+  if (!value) return i18n.t("dates.pending", { ns: "account" });
+  return new Intl.DateTimeFormat(currentLocale(), { month: "short", day: "2-digit", year: "numeric" }).format(new Date(value));
 }
 
 function formatLastLogin(value: string | null | undefined): string {
-  if (!value) return "Pending sync";
+  if (!value) return i18n.t("dates.pendingSync", { ns: "account" });
 
   const date = new Date(value);
   const now = new Date();
   const timeZone = "Europe/Madrid";
-  const dayFormatter = new Intl.DateTimeFormat("en", {
+  const dayFormatter = new Intl.DateTimeFormat(currentLocale(), {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
     timeZone,
   });
   const isToday = dayFormatter.format(date) === dayFormatter.format(now);
-  const time = new Intl.DateTimeFormat("en", {
+  const time = new Intl.DateTimeFormat(currentLocale(), {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
     timeZone,
   }).format(date);
 
-  if (isToday) return `Today · ${time} Barcelona`;
+  if (isToday) return i18n.t("dates.today", { ns: "account", time });
 
-  const day = new Intl.DateTimeFormat("en", {
+  const day = new Intl.DateTimeFormat(currentLocale(), {
     month: "short",
     day: "2-digit",
     timeZone,
   }).format(date);
 
-  return `${day} · ${time} Barcelona`;
+  return i18n.t("dates.day", { ns: "account", day, time });
 }
 
 function addressLines(address: ApiAddressDTO): string[] {
@@ -91,9 +87,9 @@ function addressLines(address: ApiAddressDTO): string[] {
   ].filter(Boolean) as string[];
 }
 
-function emptyAddress(userName: string, isDefault: boolean): AddressPayload {
+function emptyAddress(userName: string, isDefault: boolean, label: string): AddressPayload {
   return {
-    label: "Home",
+    label,
     full_name: userName,
     line1: "",
     line2: null,
@@ -126,6 +122,7 @@ function toAddressPayload(address: ApiAddressDTO): AddressPayload {
    =========================================== */
 
 function OrderRow({ order, productMap }: { order: Order; productMap: ProductMap }) {
+  const { t } = useTranslation("account");
   return (
     <div className="order-card">
       <div className="stack">
@@ -144,19 +141,19 @@ function OrderRow({ order, productMap }: { order: Order; productMap: ProductMap 
       </div>
       <div>
         <div className="id">
-          Order <span className="num">#{order.number}</span>
+          {t("orderRow.order")} <span className="num">#{order.number}</span>
         </div>
         <div className="name">
-          {order.items.length} {order.items.length > 1 ? "pieces" : "piece"} · {formatDate(order.created_at)}
+          {t("orderRow.pieces", { count: order.items.length })} · {formatDate(order.created_at)}
         </div>
-        <div className="info">{order.status === "shipped" ? "2 days · DHL Express" : formatDate(order.paid_at)}</div>
+        <div className="info">{order.status === "shipped" ? t("orderRow.shipping") : formatDate(order.paid_at)}</div>
       </div>
       <div className={`status-pill ${order.status}`}>
         <span className="dot" />
         {statusLabel(order.status)}
       </div>
       <div className="total">{formatPrice(euroFromCents(order.total_cents))}</div>
-      <button type="button" className="arrow-btn" aria-label={`View order ${order.number}`}>
+      <button type="button" className="arrow-btn" aria-label={t("orderRow.view", { number: order.number })}>
         <Icon.Arrow />
       </button>
     </div>
@@ -178,6 +175,7 @@ function Overview({
   orders: Order[];
   stats: { orders_count: number; lifetime_spend_cents: number; reward_points: number; tier: string };
 }) {
+  const { t } = useTranslation("account");
   const { ids: wishlist } = useWishlist();
   const lifetimeSpend = euroFromCents(stats.lifetime_spend_cents);
   const nextTierSpend = Math.max(0, 7000 - lifetimeSpend);
@@ -187,16 +185,16 @@ function Overview({
         <div>
           <div className="eyebrow">
             <span className="dot" />
-            Member since 2024 ✦ {stats.tier} Tier
+            {t("overview.memberSince", { tier: stats.tier })}
           </div>
           <h1>
-            <span>Welcome back, </span>
-            <span className="gold">{userName.split(" ")[0] || "Member"}</span>
+            <span>{t("overview.welcome")}</span>
+            <span className="gold">{userName.split(" ")[0] || t("overview.member")}</span>
             <span>.</span>
           </h1>
         </div>
         <div className="ts">
-          ✦ Last login
+          {t("overview.lastLogin")}
           <br />
           {formatLastLogin(lastLoginAt)}
         </div>
@@ -204,24 +202,24 @@ function Overview({
 
       <div className="stats-row">
         <div className="stat-card">
-          <span className="lbl">Total orders</span>
+          <span className="lbl">{t("overview.stats.totalOrders")}</span>
           <span className="val">{stats.orders_count}</span>
-          <span className="delta">Synced from backend</span>
+          <span className="delta">{t("overview.stats.synced")}</span>
         </div>
         <div className="stat-card gold">
-          <span className="lbl">Lifetime spend</span>
+          <span className="lbl">{t("overview.stats.lifetimeSpend")}</span>
           <span className="val">{formatPrice(lifetimeSpend)}</span>
-          <span className="delta">{stats.tier} tier unlocked</span>
+          <span className="delta">{t("overview.stats.tierUnlocked", { tier: stats.tier })}</span>
         </div>
         <div className="stat-card">
-          <span className="lbl">Reward points</span>
+          <span className="lbl">{t("overview.stats.rewardPoints")}</span>
           <span className="val">{stats.reward_points}</span>
-          <span className="delta">+€48 credit available</span>
+          <span className="delta">{t("overview.stats.credit")}</span>
         </div>
         <div className="stat-card">
-          <span className="lbl">Wishlist</span>
+          <span className="lbl">{t("overview.stats.wishlist")}</span>
           <span className="val">{wishlist.length}</span>
-          <span className="delta">3 back in stock</span>
+          <span className="delta">{t("overview.stats.backInStock")}</span>
         </div>
       </div>
 
@@ -229,31 +227,31 @@ function Overview({
         <div className="info">
           <span className="tag">
             <span className="dot" />
-            Inner Circle ✦ Gold
+            {t("overview.tier.tag")}
           </span>
-          <h3>You're {formatPrice(nextTierSpend)} from Onyx tier.</h3>
-          <p>
-            Onyx unlocks 24h early access to every drop, a personal stylist via WhatsApp, and the
-            FW26 archive jacket as a welcome gift. Limited to 200 members worldwide.
-          </p>
+          <h3>{t("overview.tier.title", { amount: formatPrice(nextTierSpend) })}</h3>
+          <p>{t("overview.tier.text")}</p>
         </div>
         <div className="progress">
           <div className="meta">
-            <span className="gold">{formatPrice(lifetimeSpend)}</span> / €7,000
+            <span className="gold">{formatPrice(lifetimeSpend)}</span> / {formatPrice(7000)}
           </div>
           <div className="bar">
             <div />
           </div>
-          <div className="meta">{Math.min(100, Math.round((lifetimeSpend / 7000) * 100))}% to Onyx</div>
+          <div className="meta">
+            {t("overview.tier.progress", { percent: Math.min(100, Math.round((lifetimeSpend / 7000) * 100)) })}
+          </div>
         </div>
       </div>
 
       <div className="acc-section-head">
         <h3>
-          Recent orders <span className="ct">— Last 30 days</span>
+          {t("overview.recent")}
+          <span className="ct">{t("overview.recentRange")}</span>
         </h3>
         <button type="button" className="section-link" onClick={() => goTo("orders")}>
-          View all <Icon.Arrow />
+          {t("overview.viewAll")} <Icon.Arrow />
         </button>
       </div>
       <div className="orders-list">
@@ -266,6 +264,7 @@ function Overview({
 }
 
 function Orders({ productMap }: { productMap: ProductMap }) {
+  const { t } = useTranslation("account");
   const { data: orders = [], isPending, isError } = useOrders();
   const [filter, setFilter] = useState<"all" | "shipped" | "delivered" | "cancelled">("all");
   const filtered =
@@ -281,10 +280,11 @@ function Orders({ productMap }: { productMap: ProductMap }) {
         <div>
           <div className="eyebrow">
             <span className="dot" />
-            ✦ {orders.length} orders · {formatPrice(total)} total
+            {t("orders.summary", { count: orders.length, total: formatPrice(total) })}
           </div>
           <h1>
-            Your <span className="gold">orders</span>
+            {t("orders.title1")}
+            <span className="gold">{t("orders.title2")}</span>
           </h1>
         </div>
       </div>
@@ -293,10 +293,10 @@ function Orders({ productMap }: { productMap: ProductMap }) {
         <div className="left">
           {(
             [
-              ["all", `All (${orders.length})`],
-              ["shipped", `In transit (${transitCount})`],
-              ["delivered", `Delivered (${deliveredCount})`],
-              ["cancelled", `Cancelled (${cancelledCount})`],
+              ["all", t("orders.filters.all", { n: orders.length })],
+              ["shipped", t("orders.filters.shipped", { n: transitCount })],
+              ["delivered", t("orders.filters.delivered", { n: deliveredCount })],
+              ["cancelled", t("orders.filters.cancelled", { n: cancelledCount })],
             ] as const
           ).map(([k, l]) => (
             <button
@@ -316,8 +316,8 @@ function Orders({ productMap }: { productMap: ProductMap }) {
       </div>
 
       <div className="orders-list">
-        {isPending && <div className="data-error">Loading your orders…</div>}
-        {isError && <div className="data-error">Couldn't load your orders.</div>}
+        {isPending && <div className="data-error">{t("orders.loading")}</div>}
+        {isError && <div className="data-error">{t("orders.error")}</div>}
         {!isPending &&
           !isError &&
           filtered.map((o) => (
@@ -332,6 +332,7 @@ function Orders({ productMap }: { productMap: ProductMap }) {
 }
 
 function WishlistView({ productMap }: { productMap: ProductMap }) {
+  const { t } = useTranslation("account");
   const navigate = useNavigate();
   const { ids, remove } = useWishlist();
   const { add } = useCart();
@@ -342,10 +343,12 @@ function WishlistView({ productMap }: { productMap: ProductMap }) {
         <div className="account-hello">
           <div>
             <div className="eyebrow">
-              <span className="dot" />✦ Saved pieces
+              <span className="dot" />
+              {t("wishlist.eyebrowEmpty")}
             </div>
             <h1>
-              Your <span className="gold">wishlist</span>
+              {t("wishlist.title1")}
+            <span className="gold">{t("wishlist.title2")}</span>
             </h1>
           </div>
         </div>
@@ -353,13 +356,10 @@ function WishlistView({ productMap }: { productMap: ProductMap }) {
           <div className="icon">
             <Icon.Heart />
           </div>
-          <h4>Nothing saved yet</h4>
-          <p>
-            Tap the heart on any piece to save it here. We'll let you know when items go on sale
-            or come back in stock.
-          </p>
+          <h4>{t("wishlist.empty.title")}</h4>
+          <p>{t("wishlist.empty.text")}</p>
           <button type="button" className="btn btn-primary" onClick={() => navigate("/shop/new")}>
-            Explore the drop <Icon.Arrow />
+            {t("wishlist.empty.cta")} <Icon.Arrow />
           </button>
         </div>
       </>
@@ -371,14 +371,16 @@ function WishlistView({ productMap }: { productMap: ProductMap }) {
       <div className="account-hello">
         <div>
           <div className="eyebrow">
-            <span className="dot" />✦ {ids.length} saved · 3 back in stock
+            <span className="dot" />
+            {t("wishlist.eyebrow", { n: ids.length })}
           </div>
           <h1>
-            Your <span className="gold">wishlist</span>
+            {t("wishlist.title1")}
+            <span className="gold">{t("wishlist.title2")}</span>
           </h1>
         </div>
         <button type="button" className="btn">
-          Share wishlist ↗
+          {t("wishlist.share")}
         </button>
       </div>
 
@@ -396,7 +398,7 @@ function WishlistView({ productMap }: { productMap: ProductMap }) {
                     e.stopPropagation();
                     remove(product.id);
                   }}
-                  title="Remove from wishlist"
+                  title={t("wishlist.removeFromWishlist")}
                 >
                   <Icon.Heart />
                 </button>
@@ -419,13 +421,13 @@ function WishlistView({ productMap }: { productMap: ProductMap }) {
                 </div>
                 <div className="actions">
                   <button type="button" className="btn-add" onClick={() => add(product)}>
-                    Add to bag — {formatPrice(product.price)}
+                    {t("wishlist.addToBag", { price: formatPrice(product.price) })}
                   </button>
                   <button
                     type="button"
                     className="remove"
                     onClick={() => remove(product.id)}
-                    title="Remove"
+                    title={t("wishlist.remove")}
                   >
                     <Icon.Close />
                   </button>
@@ -440,6 +442,7 @@ function WishlistView({ productMap }: { productMap: ProductMap }) {
 }
 
 function Addresses() {
+  const { t } = useTranslation("account");
   const { data: account, isPending, isError } = useAccount();
   const createAddress = useCreateAddress();
   const updateAddress = useUpdateAddress();
@@ -453,7 +456,11 @@ function Addresses() {
   const startNew = () =>
     setEditing({
       id: null,
-      values: emptyAddress(account?.user.name ?? "Obsidian Member", accountAddresses.length === 0),
+      values: emptyAddress(
+        account?.user.name ?? t("addresses.defaultName"),
+        accountAddresses.length === 0,
+        t("addresses.form.labelPlaceholder"),
+      ),
     });
 
   const startEdit = (address: ApiAddressDTO) =>
@@ -486,10 +493,12 @@ function Addresses() {
       <div className="account-hello">
         <div>
           <div className="eyebrow">
-            <span className="dot" />✦ Shipping &amp; billing
+            <span className="dot" />
+            {t("addresses.eyebrow")}
           </div>
           <h1>
-            Your <span className="gold">addresses</span>
+            {t("addresses.title1")}
+            <span className="gold">{t("addresses.title2")}</span>
           </h1>
         </div>
       </div>
@@ -497,22 +506,22 @@ function Addresses() {
       {editing && (
         <form className="address-form settings-section" onSubmit={saveEditing}>
           <div className="head">
-            <h4>{editing.id === null ? "New address" : "Edit address"}</h4>
-            <p>Saved to your authenticated Obsidian account.</p>
+            <h4>{editing.id === null ? t("addresses.form.new") : t("addresses.form.edit")}</h4>
+            <p>{t("addresses.form.saved")}</p>
           </div>
           <div>
             <div className="field-row">
               <div className="field">
-                <label>Label</label>
+                <label>{t("addresses.form.label")}</label>
                 <input
                   type="text"
                   value={editing.values.label ?? ""}
                   onChange={(e) => patchEditing({ label: e.target.value })}
-                  placeholder="Home"
+                  placeholder={t("addresses.form.labelPlaceholder")}
                 />
               </div>
               <div className="field">
-                <label>Full name</label>
+                <label>{t("addresses.form.fullName")}</label>
                 <input
                   type="text"
                   value={editing.values.full_name}
@@ -522,7 +531,7 @@ function Addresses() {
               </div>
             </div>
             <div className="field">
-              <label>Address line 1</label>
+              <label>{t("addresses.form.line1")}</label>
               <input
                 type="text"
                 value={editing.values.line1}
@@ -531,7 +540,7 @@ function Addresses() {
               />
             </div>
             <div className="field">
-              <label>Address line 2</label>
+              <label>{t("addresses.form.line2")}</label>
               <input
                 type="text"
                 value={editing.values.line2 ?? ""}
@@ -540,7 +549,7 @@ function Addresses() {
             </div>
             <div className="field-row">
               <div className="field">
-                <label>City</label>
+                <label>{t("addresses.form.city")}</label>
                 <input
                   type="text"
                   value={editing.values.city}
@@ -549,7 +558,7 @@ function Addresses() {
                 />
               </div>
               <div className="field">
-                <label>Region</label>
+                <label>{t("addresses.form.region")}</label>
                 <input
                   type="text"
                   value={editing.values.region ?? ""}
@@ -559,7 +568,7 @@ function Addresses() {
             </div>
             <div className="field-row">
               <div className="field">
-                <label>Postal code</label>
+                <label>{t("addresses.form.postalCode")}</label>
                 <input
                   type="text"
                   value={editing.values.postal_code}
@@ -568,7 +577,7 @@ function Addresses() {
                 />
               </div>
               <div className="field">
-                <label>Country code</label>
+                <label>{t("addresses.form.country")}</label>
                 <input
                   type="text"
                   value={editing.values.country}
@@ -579,7 +588,7 @@ function Addresses() {
               </div>
             </div>
             <div className="field">
-              <label>Phone</label>
+              <label>{t("addresses.form.phone")}</label>
               <input
                 type="tel"
                 value={editing.values.phone ?? ""}
@@ -594,14 +603,14 @@ function Addresses() {
                 onChange={(e) => patchEditing({ is_default: e.target.checked })}
                 style={{ display: "none" }}
               />
-              <span>Use as default shipping address.</span>
+              <span>{t("addresses.form.default")}</span>
             </label>
             <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
               <button type="submit" className="btn btn-primary" disabled={isSaving}>
-                {isSaving ? "Saving..." : "Save address"} <Icon.Arrow />
+                {isSaving ? t("addresses.form.saving") : t("addresses.form.save")} <Icon.Arrow />
               </button>
               <button type="button" className="btn" onClick={() => setEditing(null)}>
-                Cancel
+                {t("addresses.form.cancel")}
               </button>
             </div>
           </div>
@@ -609,12 +618,12 @@ function Addresses() {
       )}
 
       <div className="addr-grid">
-        {isPending && <div className="data-error">Loading your addresses…</div>}
-        {isError && <div className="data-error">Couldn't load your addresses.</div>}
+        {isPending && <div className="data-error">{t("addresses.loading")}</div>}
+        {isError && <div className="data-error">{t("addresses.error")}</div>}
         {accountAddresses.map((a) => (
           <div key={a.id} className={`addr-card ${a.is_default ? "default" : ""}`}>
-            {a.is_default && <span className="badge">Default</span>}
-            <h4>{a.label ?? "Address"}</h4>
+            {a.is_default && <span className="badge">{t("addresses.badge")}</span>}
+            <h4>{a.label ?? t("addresses.fallbackLabel")}</h4>
             <div className="name">{a.full_name}</div>
             <div className="lines">
               {addressLines(a).map((l, i) => (
@@ -622,19 +631,21 @@ function Addresses() {
               ))}
             </div>
             <div className="actions">
-              <a onClick={() => startEdit(a)}>Edit</a>
+              <a onClick={() => startEdit(a)}>{t("addresses.edit")}</a>
               {!a.is_default && (
                 <a onClick={() => updateAddress.mutate({ id: a.id, payload: { is_default: true } })}>
-                  Set default
+                  {t("addresses.setDefault")}
                 </a>
               )}
-              <a style={{ color: "var(--accent-warn)" }} onClick={() => deleteAddress.mutate(a.id)}>Remove</a>
+              <a style={{ color: "var(--accent-warn)" }} onClick={() => deleteAddress.mutate(a.id)}>
+                {t("addresses.remove")}
+              </a>
             </div>
           </div>
         ))}
         <div className="addr-card add-new" onClick={startNew}>
           <span className="plus-big">+</span>
-          <span>Add new address</span>
+          <span>{t("addresses.addNew")}</span>
         </div>
       </div>
     </>
@@ -642,6 +653,7 @@ function Addresses() {
 }
 
 function Settings() {
+  const { t } = useTranslation("account");
   const { data: user } = useUser();
   const updateUser = useUpdateUser();
   const [name, setName] = useState(user?.name ?? "");
@@ -655,12 +667,13 @@ function Settings() {
     birthday: true,
   });
 
-  const NOTIFICATIONS: { key: keyof typeof toggles; title: string; channels: string }[] = [
-    { key: "drops", title: "Drop notifications", channels: "SMS · Email" },
-    { key: "updates", title: "Order updates", channels: "Email · WhatsApp" },
-    { key: "backInStock", title: "Back-in-stock alerts", channels: "Email" },
-    { key: "newsletter", title: "Newsletter ✦ Lookbook", channels: "Email" },
-    { key: "birthday", title: "Birthday gift reminder", channels: "Email" },
+  // The title of each one is in account.json, under "settings.notifications".
+  const NOTIFICATIONS: { key: keyof typeof toggles; channels: string }[] = [
+    { key: "drops", channels: "SMS · Email" },
+    { key: "updates", channels: "Email · WhatsApp" },
+    { key: "backInStock", channels: "Email" },
+    { key: "newsletter", channels: "Email" },
+    { key: "birthday", channels: "Email" },
   ];
 
   useEffect(() => {
@@ -677,11 +690,11 @@ function Settings() {
     e.preventDefault();
     setProfileMessage(null);
     try {
-      await updateUser.mutateAsync({ name: name.trim() || "Obsidian Member", email });
-      setProfileMessage("Profile saved.");
+      await updateUser.mutateAsync({ name: name.trim() || t("addresses.defaultName"), email });
+      setProfileMessage(t("settings.profile.saved"));
     } catch {
       // The shared demo account can't change its name or email (API answers 403).
-      setProfileMessage(user?.is_demo ? "The demo account details can't be changed." : "Could not save the profile.");
+      setProfileMessage(user?.is_demo ? t("settings.profile.demoLocked") : t("settings.profile.saveFailed"));
     }
   };
 
@@ -690,10 +703,11 @@ function Settings() {
       <div className="account-hello">
         <div>
           <div className="eyebrow">
-            <span className="dot" />✦ Profile &amp; preferences
+            <span className="dot" />
+            {t("settings.eyebrow")}
           </div>
           <h1>
-            <span className="gold">Settings</span>
+            <span className="gold">{t("settings.title")}</span>
           </h1>
         </div>
       </div>
@@ -702,13 +716,13 @@ function Settings() {
 
       <form className="settings-section" onSubmit={submitProfile}>
         <div className="head">
-          <h4>Profile</h4>
-          <p>This is the name printed on shipping documents and used for sizing recommendations.</p>
+          <h4>{t("settings.profile.title")}</h4>
+          <p>{t("settings.profile.text")}</p>
         </div>
         <div>
           <div className="field-row">
             <div className="field">
-              <label>First name</label>
+              <label>{t("settings.profile.firstName")}</label>
               <input
                 type="text"
                 value={firstName}
@@ -717,7 +731,7 @@ function Settings() {
               />
             </div>
             <div className="field">
-              <label>Last name</label>
+              <label>{t("settings.profile.lastName")}</label>
               <input
                 type="text"
                 value={lastName}
@@ -726,18 +740,18 @@ function Settings() {
             </div>
           </div>
           <div className="field">
-            <label>Email</label>
+            <label>{t("settings.profile.email")}</label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
           <div className="field">
-            <label>Phone</label>
+            <label>{t("settings.profile.phone")}</label>
             <input type="tel" placeholder="+34 612 345 678" disabled />
           </div>
           {profileMessage && <div className="auth-error" style={{ color: "var(--gold)" }}>{profileMessage}</div>}
-          {updateUser.isError && <div className="auth-error">Couldn't save profile. Email may already be in use.</div>}
+          {updateUser.isError && <div className="auth-error">{t("settings.profile.error")}</div>}
           <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
             <button type="submit" className="btn btn-primary" disabled={updateUser.isPending}>
-              {updateUser.isPending ? "Saving..." : "Save profile"} <Icon.Arrow />
+              {updateUser.isPending ? t("settings.profile.saving") : t("settings.profile.save")} <Icon.Arrow />
             </button>
           </div>
         </div>
@@ -745,8 +759,8 @@ function Settings() {
 
       <div className="settings-section">
         <div className="head">
-          <h4>Notifications</h4>
-          <p>How and when we reach you. Inner Circle members get a private SMS before public drops.</p>
+          <h4>{t("settings.notifications.title")}</h4>
+          <p>{t("settings.notifications.text")}</p>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {NOTIFICATIONS.map((n) => (
@@ -761,7 +775,7 @@ function Settings() {
               }}
             >
               <div>
-                <div style={{ fontSize: 14, fontWeight: 500 }}>{n.title}</div>
+                <div style={{ fontSize: 14, fontWeight: 500 }}>{t(`settings.notifications.${n.key}`)}</div>
                 <div
                   style={{
                     fontFamily: "var(--font-mono)",
@@ -779,7 +793,7 @@ function Settings() {
                 type="button"
                 className={`toggle ${toggles[n.key] ? "on" : ""}`}
                 aria-pressed={toggles[n.key]}
-                onClick={() => setToggles((t) => ({ ...t, [n.key]: !t[n.key] }))}
+                onClick={() => setToggles((current) => ({ ...current, [n.key]: !current[n.key] }))}
               />
             </div>
           ))}
@@ -792,7 +806,7 @@ function Settings() {
           className="btn"
           style={{ color: "var(--accent-warn)", borderColor: "rgba(217,100,70,0.3)" }}
         >
-          Delete account
+          {t("settings.deleteAccount")}
         </button>
       </div>
     </>
@@ -800,35 +814,40 @@ function Settings() {
 }
 
 function Rewards() {
+  const { t } = useTranslation("account");
   const tiers = [
     {
       tier: "Silver",
-      spend: "€0 — €2,000",
-      perks: ["Free shipping over €100", "30-day returns", "Newsletter access"],
+      spend: `${formatPrice(0)} — ${formatPrice(2000)}`,
+      perks: [
+        t("rewards.tiers.silver.perk1"),
+        t("rewards.tiers.silver.perk2"),
+        t("rewards.tiers.silver.perk3"),
+      ],
       active: false,
       locked: false,
     },
     {
       tier: "Gold",
-      spend: "€2,000 — €7,000",
+      spend: `${formatPrice(2000)} — ${formatPrice(7000)}`,
       perks: [
-        "12h early access to drops",
-        "Free shipping always",
-        "−15% birthday gift",
-        "Priority support",
+        t("rewards.tiers.gold.perk1"),
+        t("rewards.tiers.gold.perk2"),
+        t("rewards.tiers.gold.perk3"),
+        t("rewards.tiers.gold.perk4"),
       ],
       active: true,
       locked: false,
     },
     {
       tier: "Onyx",
-      spend: "€7,000+",
+      spend: `${formatPrice(7000)}+`,
       perks: [
-        "24h early access",
-        "Private SMS line",
-        "FW archive jacket gift",
-        "Personal stylist",
-        "Limited to 200 members",
+        t("rewards.tiers.onyx.perk1"),
+        t("rewards.tiers.onyx.perk2"),
+        t("rewards.tiers.onyx.perk3"),
+        t("rewards.tiers.onyx.perk4"),
+        t("rewards.tiers.onyx.perk5"),
       ],
       active: false,
       locked: true,
@@ -840,7 +859,8 @@ function Rewards() {
       <div className="account-hello">
         <div>
           <div className="eyebrow">
-            <span className="dot" />✦ Members only · Gold tier
+            <span className="dot" />
+            {t("rewards.eyebrow")}
           </div>
           <h1>
             Inner <span className="gold">Circle</span>
@@ -852,39 +872,37 @@ function Rewards() {
         <div className="info">
           <span className="tag">
             <span className="dot" />
-            Current ✦ Gold
+            {t("rewards.current")}
           </span>
-          <h3>2,180 points · €48 credit available</h3>
-          <p>
-            Spend €4 to earn 1 point. Redeem 100 points = €2 off. Points never expire while your
-            tier is active.
-          </p>
+          <h3>{t("rewards.points")}</h3>
+          <p>{t("rewards.text")}</p>
         </div>
         <div className="progress">
           <div className="meta">
-            <span className="gold">2,180</span> / 3,200 to Onyx
+            <span className="gold">{(2180).toLocaleString(currentLocale())}</span>
+            {t("rewards.progress")}
           </div>
           <div className="bar">
             <div />
           </div>
           <button type="button" className="btn btn-primary" style={{ marginTop: 8 }}>
-            Redeem points <Icon.Arrow />
+            {t("rewards.redeem")} <Icon.Arrow />
           </button>
         </div>
       </div>
 
       <div className="acc-section-head">
-        <h3>Tier benefits</h3>
+        <h3>{t("rewards.benefits")}</h3>
       </div>
       <div className="addr-grid">
-        {tiers.map((t) => (
+        {tiers.map((tier) => (
           <div
-            key={t.tier}
-            className={`addr-card ${t.active ? "default" : ""}`}
-            style={t.locked ? { opacity: 0.7 } : {}}
+            key={tier.tier}
+            className={`addr-card ${tier.active ? "default" : ""}`}
+            style={tier.locked ? { opacity: 0.7 } : {}}
           >
-            {t.active && <span className="badge">Current</span>}
-            {t.locked && (
+            {tier.active && <span className="badge">{t("rewards.badgeCurrent")}</span>}
+            {tier.locked && (
               <span
                 className="badge"
                 style={{
@@ -893,15 +911,15 @@ function Rewards() {
                   border: "1px solid var(--gold)",
                 }}
               >
-                Locked
+                {t("rewards.badgeLocked")}
               </span>
             )}
-            <h4>{t.tier}</h4>
-            <div className="name">{t.spend}</div>
+            <h4>{tier.tier}</h4>
+            <div className="name">{tier.spend}</div>
             <div className="lines" style={{ marginTop: 12 }}>
-              {t.perks.map((p, i) => (
+              {tier.perks.map((p, i) => (
                 <div key={i} style={{ display: "flex", gap: 8, alignItems: "baseline" }}>
-                  <span style={{ color: t.active ? "var(--gold)" : "var(--fg-mute)" }}>✦</span>
+                  <span style={{ color: tier.active ? "var(--gold)" : "var(--fg-mute)" }}>✦</span>
                   <span>{p}</span>
                 </div>
               ))}
@@ -921,6 +939,7 @@ function Rewards() {
  * so the user can deep-link or refresh without losing context.
  */
 export function Account() {
+  const { t } = useTranslation("account");
   const { section } = useParams<{ section?: Section }>();
   const navigate = useNavigate();
   const { data: user } = useUser();
@@ -975,12 +994,12 @@ export function Account() {
   const addressCount = account?.addresses.length ?? 0;
 
   const items: { id: Section; label: string; ct?: number | string }[] = [
-    { id: "overview", label: "Overview" },
-    { id: "orders", label: "Orders", ct: orders.length },
-    { id: "wishlist", label: "Wishlist", ct: wishlist.length },
-    { id: "addresses", label: "Addresses", ct: addressCount },
-    { id: "settings", label: "Settings" },
-    { id: "rewards", label: "Inner Circle", ct: "✦" },
+    { id: "overview", label: t("nav.overview") },
+    { id: "orders", label: t("nav.orders"), ct: orders.length },
+    { id: "wishlist", label: t("nav.wishlist"), ct: wishlist.length },
+    { id: "addresses", label: t("nav.addresses"), ct: addressCount },
+    { id: "settings", label: t("nav.settings") },
+    { id: "rewards", label: t("nav.rewards"), ct: "✦" },
   ];
 
   return (
@@ -994,7 +1013,7 @@ export function Account() {
             <div className="name">{displayName}</div>
             <div className="tier">
               <span className="dot" />
-              Inner Circle · Gold
+              {t("nav.tier")}
             </div>
           </div>
         </div>
@@ -1018,7 +1037,7 @@ export function Account() {
               disabled={logoutMutation.isPending}
               style={{ color: "var(--fg-mute)" }}
             >
-              {logoutMutation.isPending ? "Signing out..." : "Sign out"}
+              {logoutMutation.isPending ? t("nav.signingOut") : t("nav.signOut")}
             </button>
           </li>
         </ul>

@@ -1,5 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useLogout, useUser } from "../../hooks/queries";
 import { authKeys } from "../../hooks/queries/useAuth";
@@ -10,18 +11,20 @@ import { canSee, LOGISTICS_NAV, MAIN_NAV, type NavItem } from "../navigation";
 import { LanguageSwitch } from "../../components/ui/LanguageSwitch";
 import { AdminIcon } from "./AdminIcon";
 
+/** Tooltip of the number next to a section (translation keys). */
+const BADGE_TITLES: Record<string, string> = {
+  "/admin/orders": "nav.badges.orders",
+  "/admin/products": "nav.badges.products",
+  "/admin/returns": "nav.badges.returns",
+};
+
 /**
  * Admin shell: sidebar on the left, top bar, and the current page
  * (<Outlet />) in the middle. On small screens the sidebar becomes
  * a drawer opened with the menu button.
  */
-const BADGE_TITLES: Record<string, string> = {
-  "/admin/orders": "Orders to prepare",
-  "/admin/products": "Variants with low stock",
-  "/admin/returns": "Returns to review",
-};
-
 export function AdminLayout() {
+  const { t } = useTranslation("admin");
   const { data: user } = useUser();
   const logout = useLogout();
   const navigate = useNavigate();
@@ -77,16 +80,16 @@ export function AdminLayout() {
         onClick={() => setMenuOpen(false)}
       >
         <Icon />
-        <span>{item.label}</span>
+        <span>{t(item.label)}</span>
         {badges[item.path] > 0 && (
           <span
             className={`adm-nav-count${item.path === "/admin/products" ? " is-warn" : ""}`}
-            title={BADGE_TITLES[item.path]}
+            title={t(BADGE_TITLES[item.path])}
           >
             {badges[item.path]}
           </span>
         )}
-        {item.soon && <span className="adm-nav-soon">Soon</span>}
+        {item.soon && <span className="adm-nav-soon">{t("nav.soon")}</span>}
       </NavLink>
     );
   }
@@ -102,20 +105,20 @@ export function AdminLayout() {
           <em>Admin</em>
         </Link>
 
-        <nav className="adm-nav" aria-label="Admin sections">
+        <nav className="adm-nav" aria-label={t("nav.sections")}>
           {MAIN_NAV.filter((item) => canSee(permissions, item)).map(renderLink)}
 
           {logistics.length > 0 && (
             <>
-              <div className="adm-nav-title">Logistics</div>
+              <div className="adm-nav-title">{t("nav.logistics")}</div>
               {logistics.map(renderLink)}
             </>
           )}
 
-          <div className="adm-nav-title">Store</div>
+          <div className="adm-nav-title">{t("nav.store")}</div>
           <Link to="/" className="adm-nav-link">
             <AdminIcon.Store />
-            <span>View store</span>
+            <span>{t("nav.viewStore")}</span>
           </Link>
         </nav>
 
@@ -125,9 +128,9 @@ export function AdminLayout() {
           </div>
           <div className="adm-user-info">
             <strong>{user.name}</strong>
-            <span>{ROLE_LABELS[user.role]}</span>
+            <span>{t(ROLE_LABELS[user.role])}</span>
           </div>
-          <button type="button" className="adm-icon-btn" onClick={handleLogout} aria-label="Log out" title="Log out">
+          <button type="button" className="adm-icon-btn" onClick={handleLogout} aria-label={t("layout.logOut")} title={t("layout.logOut")}>
             <AdminIcon.LogOut />
           </button>
         </div>
@@ -138,7 +141,7 @@ export function AdminLayout() {
 
       <div className="adm-main">
         <div className="adm-topbar">
-          <button type="button" className="adm-icon-btn adm-menu-btn" onClick={() => setMenuOpen(true)} aria-label="Open menu">
+          <button type="button" className="adm-icon-btn adm-menu-btn" onClick={() => setMenuOpen(true)} aria-label={t("layout.openMenu")}>
             <AdminIcon.Menu />
           </button>
 
@@ -149,14 +152,14 @@ export function AdminLayout() {
                 type="search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search orders, customers…"
-                aria-label="Search orders"
+                placeholder={t("layout.searchPlaceholder")}
+                aria-label={t("layout.searchLabel")}
               />
             </form>
           )}
 
           <LanguageSwitch className="adm-lang" />
-          <span className="adm-demo-tag">Demo data</span>
+          <span className="adm-demo-tag">{t("layout.demoTag")}</span>
         </div>
 
         <main className="adm-content">

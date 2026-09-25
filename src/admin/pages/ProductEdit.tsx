@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
 import { useUser } from "../../hooks/queries";
@@ -17,16 +18,17 @@ import { useAdminProduct, useSaveProduct } from "../hooks";
  * and can only change the stock (the StockTable at the bottom).
  */
 export function ProductEdit() {
+  const { t } = useTranslation("admin");
   const { slug } = useParams();
   const { data: product, isPending, isError } = useAdminProduct(slug);
 
-  if (slug && isPending) return <div className="adm-loading">Loading product…</div>;
+  if (slug && isPending) return <div className="adm-loading">{t("productEdit.loading")}</div>;
   if (slug && (isError || !product)) {
     return (
       <div className="adm-empty">
-        <strong>Product not found</strong>
+        <strong>{t("productEdit.notFound")}</strong>
         <Link to="/admin/products" className="adm-link">
-          Back to products
+          {t("productEdit.back")}
         </Link>
       </div>
     );
@@ -76,6 +78,7 @@ function toCents(value: string): number | null {
 }
 
 function ProductForm({ product }: { product?: AdminProduct }) {
+  const { t } = useTranslation("admin");
   const navigate = useNavigate();
   const { push } = useToast();
   const { data: user } = useUser();
@@ -132,11 +135,11 @@ function ProductForm({ product }: { product?: AdminProduct }) {
     if (!file) return;
 
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      setError("Use a JPG, PNG or WebP image.");
+      setError(t("productEdit.wrongType"));
       return;
     }
     if (file.size > PRODUCT_IMAGE_MAX_MB * 1024 * 1024) {
-      setError(`The image is too big. The limit is ${PRODUCT_IMAGE_MAX_MB} MB.`);
+      setError(t("productEdit.tooBig", { mb: PRODUCT_IMAGE_MAX_MB }));
       return;
     }
 
@@ -145,7 +148,7 @@ function ProductForm({ product }: { product?: AdminProduct }) {
     try {
       set(field, await uploadProductImage(file));
     } catch (err) {
-      setError(errorMessage(err, "Could not upload the image."));
+      setError(errorMessage(err, t("productEdit.uploadError")));
     } finally {
       setUploading(null);
     }
@@ -171,27 +174,27 @@ function ProductForm({ product }: { product?: AdminProduct }) {
 
     save.mutate(payload, {
       onSuccess: (saved) => {
-        push(product ? "Product saved." : "Product created. Now add its stock.");
+        push(product ? t("productEdit.saved") : t("productEdit.created"));
         // After creating, go to its page so the stock can be filled in.
         if (!product) navigate(`/admin/products/${saved.slug}`, { replace: true });
       },
-      onError: (err) => setError(errorMessage(err, "Could not save the product.")),
+      onError: (err) => setError(errorMessage(err, t("productEdit.saveError"))),
     });
   }
 
   return (
     <>
       <Link to="/admin/products" className="adm-back">
-        <AdminIcon.ArrowLeft /> Products
+        <AdminIcon.ArrowLeft /> {t("productEdit.backShort")}
       </Link>
 
       <header className="adm-page-header">
         <div>
-          <h1>{product ? product.name : "New product"}</h1>
+          <h1>{product ? product.name : t("productEdit.newTitle")}</h1>
           {product && (
             <p>
               <a href={`/product/${product.slug}`} target="_blank" rel="noreferrer" className="adm-link">
-                View in store ↗
+                {t("productEdit.viewInStore")}
               </a>
             </p>
           )}
@@ -199,7 +202,7 @@ function ProductForm({ product }: { product?: AdminProduct }) {
       </header>
 
       {!canEdit && (
-        <div className="adm-note">Your role can change the stock, but not the product details.</div>
+        <div className="adm-note">{t("productEdit.readOnly")}</div>
       )}
 
       <form className="adm-detail" onSubmit={handleSubmit}>
@@ -207,19 +210,19 @@ function ProductForm({ product }: { product?: AdminProduct }) {
         <fieldset className="adm-detail-main adm-fieldset" disabled={!canEdit}>
           <section className="adm-card adm-form">
             <div className="adm-card-head">
-              <h2>Details</h2>
+              <h2>{t("productEdit.details")}</h2>
             </div>
             <label>
-              Name
+              {t("productEdit.name")}
               <input className="adm-input" value={values.name} onChange={(e) => set("name", e.target.value)} required maxLength={120} />
             </label>
             <label>
-              Subtitle <small>e.g. "Hoodie · Urban Man"</small>
+              {t("productEdit.subtitle")} <small>{t("productEdit.subtitleHint")}</small>
               <input className="adm-input" value={values.sub_label} onChange={(e) => set("sub_label", e.target.value)} maxLength={120} />
             </label>
             <div className="adm-form-row">
               <label>
-                Price (€)
+                {t("productEdit.price")}
                 <input
                   className="adm-input"
                   type="number"
@@ -231,7 +234,7 @@ function ProductForm({ product }: { product?: AdminProduct }) {
                 />
               </label>
               <label>
-                Price before sale (€) <small>optional</small>
+                {t("productEdit.oldPrice")} <small>{t("productEdit.optional")}</small>
                 <input
                   className="adm-input"
                   type="number"
@@ -242,13 +245,13 @@ function ProductForm({ product }: { product?: AdminProduct }) {
                 />
               </label>
               <label>
-                Tag <small>e.g. NEW</small>
+                {t("productEdit.tag")} <small>{t("productEdit.tagHint")}</small>
                 <input className="adm-input" value={values.tag} onChange={(e) => set("tag", e.target.value)} maxLength={30} />
               </label>
             </div>
 
             <div className="adm-field">
-              <span>Categories</span>
+              <span>{t("productEdit.categories")}</span>
               <div className="adm-checks">
                 {categories.map((category) => (
                   <label key={category.slug} className="adm-check">
@@ -265,50 +268,50 @@ function ProductForm({ product }: { product?: AdminProduct }) {
 
             <label className="adm-check">
               <input type="checkbox" checked={values.is_active} onChange={(e) => set("is_active", e.target.checked)} />
-              Visible in the store <small>(uncheck to archive it)</small>
+              {t("productEdit.visible")} <small>{t("productEdit.visibleHint")}</small>
             </label>
           </section>
 
           <section className="adm-card adm-form">
             <div className="adm-card-head">
-              <h2>Colours & sizes</h2>
+              <h2>{t("productEdit.coloursAndSizes")}</h2>
             </div>
             <div className="adm-field">
-              <span>Colours</span>
+              <span>{t("productEdit.colours")}</span>
               {values.colors.map((color, index) => (
                 <div key={index} className="adm-color-row">
                   <input
                     type="color"
                     value={color.hex}
                     onChange={(e) => updateColor(index, "hex", e.target.value)}
-                    aria-label="Colour"
+                    aria-label={t("productEdit.colour")}
                   />
-                  <input className="adm-input adm-mono" value={color.hex} onChange={(e) => updateColor(index, "hex", e.target.value)} aria-label="Hex code" />
+                  <input className="adm-input adm-mono" value={color.hex} onChange={(e) => updateColor(index, "hex", e.target.value)} aria-label={t("productEdit.hexCode")} />
                   <input
                     className="adm-input"
                     value={color.name}
                     onChange={(e) => updateColor(index, "name", e.target.value)}
-                    placeholder="Name, e.g. Onyx"
-                    aria-label="Colour name"
+                    placeholder={t("productEdit.colourNamePlaceholder")}
+                    aria-label={t("productEdit.colourName")}
                   />
                   <button
                     type="button"
                     className="adm-icon-btn"
                     onClick={() => set("colors", values.colors.filter((_, i) => i !== index))}
                     disabled={values.colors.length === 1}
-                    aria-label="Remove colour"
+                    aria-label={t("productEdit.removeColour")}
                   >
                     ×
                   </button>
                 </div>
               ))}
               <button type="button" className="adm-btn" onClick={() => set("colors", [...values.colors, { hex: "#3a3a3a", name: "" }])}>
-                + Add colour
+                {t("productEdit.addColour")}
               </button>
             </div>
 
             <div className="adm-field">
-              <span>Sizes</span>
+              <span>{t("productEdit.sizes")}</span>
               <div className="adm-chips">
                 {values.sizes.map((size) => (
                   <span key={size} className="adm-chip">
@@ -317,7 +320,7 @@ function ProductForm({ product }: { product?: AdminProduct }) {
                       type="button"
                       onClick={() => set("sizes", values.sizes.filter((s) => s !== size))}
                       disabled={values.sizes.length === 1}
-                      aria-label={`Remove size ${size}`}
+                      aria-label={t("productEdit.removeSize", { size })}
                     >
                       ×
                     </button>
@@ -329,15 +332,15 @@ function ProductForm({ product }: { product?: AdminProduct }) {
                   onChange={(e) => setNewSize(e.target.value)}
                   onKeyDown={handleSizeKey}
                   onBlur={addSize}
-                  placeholder="+ size"
+                  placeholder={t("productEdit.sizePlaceholder")}
                   maxLength={10}
-                  aria-label="New size"
+                  aria-label={t("productEdit.newSize")}
                 />
               </div>
             </div>
             {product && (
               <p className="adm-muted adm-small">
-                Adding a colour or size creates its variants with 0 units. Removing one deletes its stock.
+                {t("productEdit.variantsHint")}
               </p>
             )}
           </section>
@@ -346,15 +349,15 @@ function ProductForm({ product }: { product?: AdminProduct }) {
         <aside className="adm-detail-side">
           <section className="adm-card adm-form">
             <div className="adm-card-head">
-              <h2>Images</h2>
+              <h2>{t("productEdit.images")}</h2>
             </div>
             {values.img && <img className="adm-preview" src={mediaUrl(values.img)} alt="" />}
             <fieldset className="adm-fieldset adm-form" disabled={!canEdit}>
               {(["img", "img_alt"] as const).map((field) => (
                 <div key={field} className="adm-field">
                   <label>
-                    {field === "img" ? "Main image" : "Hover image"}{" "}
-                    <small>{field === "img" ? "upload a photo or paste a link" : "optional"}</small>
+                    {field === "img" ? t("productEdit.mainImage") : t("productEdit.hoverImage")}{" "}
+                    <small>{field === "img" ? t("productEdit.mainImageHint") : t("productEdit.optional")}</small>
                     <input
                       className="adm-input"
                       value={values[field]}
@@ -365,7 +368,7 @@ function ProductForm({ product }: { product?: AdminProduct }) {
                   </label>
                   {canUpload && (
                     <label className="adm-btn adm-upload-btn">
-                      {uploading === field ? "Uploading…" : "Upload from computer"}
+                      {uploading === field ? t("productEdit.uploading") : t("productEdit.upload")}
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
@@ -379,9 +382,9 @@ function ProductForm({ product }: { product?: AdminProduct }) {
               ))}
               <p className="adm-muted adm-small">
                 {canUpload
-                  ? `JPG, PNG or WebP, at least 400 px, up to ${PRODUCT_IMAGE_MAX_MB} MB.`
+                  ? t("productEdit.uploadRules", { mb: PRODUCT_IMAGE_MAX_MB })
                   : canEdit
-                    ? "Photo uploads are turned off for the demo accounts. You can paste a link."
+                    ? t("productEdit.uploadsOff")
                     : null}
               </p>
             </fieldset>
@@ -391,7 +394,7 @@ function ProductForm({ product }: { product?: AdminProduct }) {
             <section className="adm-card">
               {error && <div className="adm-alert">{error}</div>}
               <button type="submit" className="adm-btn adm-btn--gold adm-btn--full" disabled={save.isPending}>
-                {save.isPending ? "Saving…" : product ? "Save changes" : "Create product"}
+                {save.isPending ? t("common.saving") : product ? t("productEdit.saveChanges") : t("productEdit.create")}
               </button>
             </section>
           )}

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 import { useToast } from "../../context/ToastContext";
@@ -21,6 +22,7 @@ const FLAT_SHIPPING = 8;
  * `CartContext`, which is flipped to `true` when a product is added.
  */
 export function CartDrawer() {
+  const { t } = useTranslation();
   const { items, isOpen, close, subtotal, updateQty, remove } = useCart();
   const { data: user, isPending: isUserPending } = useUser();
   const checkout = useCheckout();
@@ -44,7 +46,7 @@ export function CartDrawer() {
 
   const handleCheckout = () => {
     if (!user) {
-      push("Sign in to finish checkout");
+      push(t("cart.signInToCheckout"));
       close();
       navigate(`/auth?returnTo=${encodeURIComponent(location.pathname)}`);
       return;
@@ -52,12 +54,12 @@ export function CartDrawer() {
 
     checkout.mutate(undefined, {
       onSuccess: (order) => {
-        push(`Order ${order.number} placed`);
+        push(t("cart.orderPlaced", { number: order.number }));
         close();
         navigate("/account/orders");
       },
       onError: (error) => {
-        push(checkoutErrorMessage(error), "warn");
+        push(checkoutErrorMessage(error) ?? t("cart.failed"), "warn");
       },
     });
   };
@@ -65,13 +67,13 @@ export function CartDrawer() {
   return (
     <>
       <div className={`drawer-backdrop ${isOpen ? "open" : ""}`} onClick={close} />
-      <aside className={`drawer ${isOpen ? "open" : ""}`} aria-hidden={!isOpen} aria-label="Shopping bag">
+      <aside className={`drawer ${isOpen ? "open" : ""}`} aria-hidden={!isOpen} aria-label={t("cart.label")}>
         <div className="drawer-head">
           <h3>
-            Your Bag <span className="ct">({items.length})</span>
+            {t("cart.title")} <span className="ct">({items.length})</span>
           </h3>
           <button type="button" className="drawer-close" onClick={close}>
-            Close ✕
+            {t("cart.close")}
           </button>
         </div>
 
@@ -80,8 +82,8 @@ export function CartDrawer() {
             <div className="row">
               <span>
                 {remaining > 0
-                  ? `${formatPrice(remaining)} until free shipping`
-                  : "Free shipping unlocked"}
+                  ? t("cart.untilFree", { amount: formatPrice(remaining) })
+                  : t("cart.freeUnlocked")}
               </span>
               <span className="pct">{Math.round(pct)}%</span>
             </div>
@@ -94,8 +96,8 @@ export function CartDrawer() {
         <div className="drawer-items">
           {items.length === 0 ? (
             <div className="cart-empty">
-              <div className="title">Your bag is empty</div>
-              <div className="sub">Pieces are waiting in the drop</div>
+              <div className="title">{t("cart.empty.title")}</div>
+              <div className="sub">{t("cart.empty.sub")}</div>
             </div>
           ) : (
             items.map((line, i) => (
@@ -104,14 +106,14 @@ export function CartDrawer() {
                 <div className="info">
                   <div className="nm">{line.name}</div>
                   <div className="meta">
-                    Size {line.size} · {line.colorName || "Default"}
+                    {t("cart.size", { size: line.size })} · {line.colorName || t("cart.defaultColor")}
                   </div>
                   <div className="qty">
-                    <button type="button" onClick={() => updateQty(i, -1)} aria-label="Decrease quantity">
+                    <button type="button" onClick={() => updateQty(i, -1)} aria-label={t("cart.decrease")}>
                       −
                     </button>
                     <span>{line.qty}</span>
-                    <button type="button" onClick={() => updateQty(i, +1)} aria-label="Increase quantity">
+                    <button type="button" onClick={() => updateQty(i, +1)} aria-label={t("cart.increase")}>
                       +
                     </button>
                   </div>
@@ -119,7 +121,7 @@ export function CartDrawer() {
                 <div className="price">
                   <span>{formatPrice(line.price * line.qty)}</span>
                   <button type="button" className="remove" onClick={() => remove(i)}>
-                    Remove
+                    {t("cart.remove")}
                   </button>
                 </div>
               </div>
@@ -130,15 +132,15 @@ export function CartDrawer() {
         {items.length > 0 && (
           <div className="drawer-foot">
             <div className="row">
-              <span>Subtotal</span>
+              <span>{t("cart.subtotal")}</span>
               <span>{formatPrice(subtotal)}</span>
             </div>
             <div className="row">
-              <span>Shipping</span>
-              <span>{remaining > 0 ? formatPrice(FLAT_SHIPPING) : "FREE"}</span>
+              <span>{t("cart.shipping")}</span>
+              <span>{remaining > 0 ? formatPrice(FLAT_SHIPPING) : t("cart.free")}</span>
             </div>
             <div className="row total">
-              <span>Total</span>
+              <span>{t("cart.total")}</span>
               <span className="val">{formatPrice(total)}</span>
             </div>
             <button
@@ -147,10 +149,10 @@ export function CartDrawer() {
               onClick={handleCheckout}
               disabled={checkout.isPending || isUserPending}
             >
-              {checkout.isPending ? "Placing order..." : "Checkout"} <Icon.Arrow />
+              {checkout.isPending ? t("cart.placing") : t("cart.checkout")} <Icon.Arrow />
             </button>
             <div className="free-ship">
-              Basic checkout · <span className="gold">Stripe later</span>
+              {t("cart.note")}<span className="gold">{t("cart.noteGold")}</span>
             </div>
           </div>
         )}
@@ -159,13 +161,14 @@ export function CartDrawer() {
   );
 }
 
-function checkoutErrorMessage(error: unknown): string {
+/** The error message sent by the API, or undefined to show our own. */
+function checkoutErrorMessage(error: unknown): string | undefined {
   if (error instanceof ApiError && isApiErrorPayload(error.payload)) {
     const firstError = Object.values(error.payload.errors ?? {})[0]?.[0];
-    return firstError ?? error.payload.message ?? "Checkout failed. Try again.";
+    return firstError ?? error.payload.message;
   }
 
-  return "Checkout failed. Try again.";
+  return undefined;
 }
 
 function isApiErrorPayload(

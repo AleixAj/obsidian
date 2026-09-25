@@ -2,29 +2,35 @@
  * Small display helpers for the admin panel.
  */
 
+import { currentLocale } from "../i18n";
 import type { OrderStatus, ReturnStatus, Role } from "./api";
 
-const euros = new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR" });
-const eurosShort = new Intl.NumberFormat("en-IE", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 0,
-});
+// The Intl formatters are created inside each function, so they always
+// use the language chosen right now (EN or ES).
 
-/** 12950 → "€129.50" */
+/** 12950 → "€129.50" (EN) or "129,50 €" (ES) */
 export function money(cents: number): string {
-  return euros.format(cents / 100);
+  return new Intl.NumberFormat(currentLocale(), { style: "currency", currency: "EUR" }).format(cents / 100);
 }
 
 /** 16216500 → "€162,165" (no decimals, for big KPI numbers) */
 export function moneyShort(cents: number): string {
-  return eurosShort.format(cents / 100);
+  return new Intl.NumberFormat(currentLocale(), {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(cents / 100);
+}
+
+/** 1240 → "1,240" (EN) or "1240" (ES) */
+export function count(value: number): string {
+  return value.toLocaleString(currentLocale());
 }
 
 /** "2026-09-24T10:15:00Z" → "24 Sep 2026, 10:15" */
 export function dateTime(iso: string | null): string {
   if (!iso) return "—";
-  return new Intl.DateTimeFormat("en-GB", {
+  return new Intl.DateTimeFormat(currentLocale(), {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -35,28 +41,39 @@ export function dateTime(iso: string | null): string {
 
 /** "2026-09-24T10:15:00Z" → "24 Sep" */
 export function shortDate(iso: string): string {
-  return new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short" }).format(new Date(iso));
+  return new Intl.DateTimeFormat(currentLocale(), { day: "2-digit", month: "short" }).format(new Date(iso));
 }
 
 /** "2025-09-11T10:15:00Z" → "Sep 2025" */
 export function monthYear(iso: string): string {
-  return new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric" }).format(new Date(iso));
+  return new Intl.DateTimeFormat(currentLocale(), { month: "short", year: "numeric" }).format(new Date(iso));
 }
 
+/** Label under the sales chart: "26 Aug", or "14:00" when the chart is by hour. */
+export function chartLabel(iso: string, byHour: boolean): string {
+  const options: Intl.DateTimeFormatOptions = byHour
+    ? { hour: "2-digit", minute: "2-digit" }
+    : { day: "numeric", month: "short" };
+  return new Intl.DateTimeFormat(currentLocale(), options).format(new Date(iso));
+}
+
+// The label maps below store translation keys (admin.json), not texts.
+// Components show them with t(), e.g. t(STATUS_LABELS.paid) → "Paid" / "Pagado".
+
 export const STATUS_LABELS: Record<OrderStatus, string> = {
-  pending: "Pending",
-  paid: "Paid",
-  preparing: "Preparing",
-  shipped: "Shipped",
-  delivered: "Delivered",
-  returned: "Returned",
-  cancelled: "Cancelled",
+  pending: "status.pending",
+  paid: "status.paid",
+  preparing: "status.preparing",
+  shipped: "status.shipped",
+  delivered: "status.delivered",
+  returned: "status.returned",
+  cancelled: "status.cancelled",
 };
 
 export const ROLE_LABELS: Record<Role, string> = {
-  admin: "Administrator",
-  warehouse: "Warehouse",
-  support: "Customer support",
+  admin: "roles.admin",
+  warehouse: "roles.warehouse",
+  support: "roles.support",
 };
 
 /** "Aleix Auqué" → "AA" (for the avatar circle) */
@@ -70,19 +87,19 @@ export function initials(name: string): string {
 }
 
 export const RETURN_STATUS_LABELS: Record<ReturnStatus, string> = {
-  requested: "To review",
-  approved: "Approved",
-  rejected: "Rejected",
-  refunded: "Refunded",
+  requested: "returnStatus.requested",
+  approved: "returnStatus.approved",
+  rejected: "returnStatus.rejected",
+  refunded: "returnStatus.refunded",
 };
 
 /** Names of the permissions, for the roles table in "Users & roles". */
 export const PERMISSION_LABELS: Record<string, string> = {
-  dashboard: "Overview",
-  orders: "Orders",
-  stock: "Stock",
-  products: "Edit products",
-  customers: "Customers",
-  returns: "Returns & refunds",
-  users: "Users & roles",
+  dashboard: "permissions.dashboard",
+  orders: "permissions.orders",
+  stock: "permissions.stock",
+  products: "permissions.products",
+  customers: "permissions.customers",
+  returns: "permissions.returns",
+  users: "permissions.users",
 };

@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { useTranslation } from "react-i18next";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { Layout } from "./components/layout/Layout";
@@ -19,11 +20,12 @@ const Product = lazy(() => import("./pages/Product").then((module) => ({ default
 const Shop = lazy(() => import("./pages/Shop").then((module) => ({ default: module.Shop })));
 
 function RouteFallback() {
+  const { t } = useTranslation();
   return (
     <main className="fade-in">
       <div className="data-error" style={{ borderStyle: "solid", borderColor: "var(--line-2)" }}>
-        <div className="title" style={{ color: "var(--gold)" }}>Loading Obsidian…</div>
-        <div>Preparing the next view.</div>
+        <div className="title" style={{ color: "var(--gold)" }}>{t("loading.title")}</div>
+        <div>{t("loading.sub")}</div>
       </div>
     </main>
   );

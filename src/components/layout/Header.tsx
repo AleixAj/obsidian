@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
@@ -14,13 +15,15 @@ import { Logo } from "../ui/Logo";
  * Desktop layout: 3-column grid (nav · logo · tools).
  * On tablet/mobile the inline nav collapses behind a hamburger that
  * opens a full-height drawer.
+ *
+ * `label` is a translation key (nav.*).
  */
 const NAV_ITEMS: { to: string; label: string; end?: boolean }[] = [
-  { to: "/", label: "Home", end: true },
-  { to: "/shop/new", label: "New" },
-  { to: "/shop/men", label: "Men" },
-  { to: "/shop/women", label: "Women" },
-  { to: "/lookbook", label: "Lookbook" },
+  { to: "/", label: "home", end: true },
+  { to: "/shop/new", label: "new" },
+  { to: "/shop/men", label: "men" },
+  { to: "/shop/women", label: "women" },
+  { to: "/lookbook", label: "lookbook" },
 ];
 
 /** Scrolls the page to the top instantly. Used on logo/home clicks. */
@@ -29,6 +32,7 @@ function scrollTop() {
 }
 
 export function Header() {
+  const { t } = useTranslation();
   const { totalCount, open: openCart } = useCart();
   const { count: wishlistCount } = useWishlist();
   const { data: user } = useUser();
@@ -122,7 +126,7 @@ export function Header() {
     <>
       <header className="header">
         <div className="header-inner">
-          <nav className="header-nav" aria-label="Primary">
+          <nav className="header-nav" aria-label={t("nav.label")}>
             {NAV_ITEMS.map((item) => (
               <NavLink
                 key={item.to}
@@ -131,7 +135,7 @@ export function Header() {
                 className={({ isActive }) => (isActive ? "active" : "")}
                 onClick={scrollTop}
               >
-                {item.label}
+                {t(`nav.${item.label}`)}
               </NavLink>
             ))}
           </nav>
@@ -139,7 +143,7 @@ export function Header() {
           <button
             type="button"
             className={`hamburger ${mobileOpen ? "open" : ""}`}
-            aria-label="Toggle menu"
+            aria-label={t("header.toggleMenu")}
             aria-expanded={mobileOpen}
             onClick={() => setMobileOpen((v) => !v)}
           >
@@ -152,13 +156,13 @@ export function Header() {
 
           <div className="header-tools">
             <LanguageSwitch className="header-lang" />
-            <button type="button" aria-label="Search" onClick={openSearch}>
-              <Icon.Search /> <span className="tool-label">Search</span>
+            <button type="button" aria-label={t("header.search")} onClick={openSearch}>
+              <Icon.Search /> <span className="tool-label">{t("header.search")}</span>
             </button>
             <button
               type="button"
               className={`wishlist-tool ${isWishlistPage ? "active" : ""}`}
-              aria-label="Wishlist"
+              aria-label={t("header.wishlist")}
               aria-pressed={isWishlistPage}
               onClick={() => navigate("/account/wishlist")}
             >
@@ -169,11 +173,11 @@ export function Header() {
               <button
                 type="button"
                 className={`account-tool ${isAccountPage ? "active" : ""}`}
-                aria-label="Account"
+                aria-label={t("header.account")}
                 aria-pressed={isAccountPage}
                 onClick={() => navigate(user ? "/account" : "/auth")}
               >
-                <Icon.User /> <span className="tool-label">{user ? "Account" : "Sign in"}</span>
+                <Icon.User /> <span className="tool-label">{user ? t("header.account") : t("header.signIn")}</span>
               </button>
               {user && (
                 <div className="account-menu-panel" role="menu">
@@ -184,13 +188,13 @@ export function Header() {
                     disabled={logoutMutation.isPending}
                   >
                     <Icon.LogOut />
-                    <span>{logoutMutation.isPending ? "Signing out..." : "Sign out"}</span>
+                    <span>{logoutMutation.isPending ? t("header.signingOut") : t("header.signOut")}</span>
                   </button>
                 </div>
               )}
             </div>
-            <button type="button" aria-label="Bag" onClick={openCart}>
-              <Icon.Bag /> <span className="tool-label">Bag</span>
+            <button type="button" aria-label={t("header.bag")} onClick={openCart}>
+              <Icon.Bag /> <span className="tool-label">{t("header.bag")}</span>
               {totalCount > 0 && <span className="bag-count">{totalCount}</span>}
             </button>
           </div>
@@ -206,32 +210,32 @@ export function Header() {
             className={({ isActive }) => (isActive ? "active" : "")}
             onClick={scrollTop}
           >
-            {item.label}
+            {t(`nav.${item.label}`)}
           </NavLink>
         ))}
         <div className="tools">
           <LanguageSwitch />
           <button type="button" onClick={() => navigate(user ? "/account" : "/auth")}>
-            {user ? "Account" : "Sign in / Create account"}
+            {user ? t("header.account") : t("header.signInOrCreate")}
           </button>
           <button type="button" onClick={() => navigate("/account")}>
-            Account
+            {t("header.account")}
           </button>
           <button type="button" onClick={openSearch}>
-            Search
+            {t("header.search")}
           </button>
         </div>
       </div>
 
       <div className={`search-overlay ${searchOpen ? "open" : ""}`} aria-hidden={!searchOpen}>
-        <button type="button" className="search-backdrop" aria-label="Close search" onClick={closeSearch} />
-        <section className="search-panel" role="dialog" aria-modal="true" aria-label="Search products">
+        <button type="button" className="search-backdrop" aria-label={t("search.close")} onClick={closeSearch} />
+        <section className="search-panel" role="dialog" aria-modal="true" aria-label={t("search.dialog")}>
           <div className="search-panel-head">
             <div>
-              <div className="section-eyebrow">Search ✦ Catalogue</div>
-              <h2>Find your piece</h2>
+              <div className="section-eyebrow">{t("search.eyebrow")}</div>
+              <h2>{t("search.title")}</h2>
             </div>
-            <button type="button" className="search-close" aria-label="Close search" onClick={closeSearch}>
+            <button type="button" className="search-close" aria-label={t("search.close")} onClick={closeSearch}>
               <Icon.Close />
             </button>
           </div>
@@ -243,7 +247,7 @@ export function Header() {
               type="search"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search hoodie, outerwear, men..."
+              placeholder={t("search.placeholder")}
             />
           </div>
 
@@ -266,9 +270,9 @@ export function Header() {
               ))
             ) : (
               <div className="search-empty">
-                No pieces found.
+                {t("search.empty")}
                 <br />
-                Try "hoodie", "outerwear" or "women".
+                {t("search.emptyHint")}
               </div>
             )}
           </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Icon } from "../components/ui/Icon";
 import { Placeholder } from "../components/ui/Placeholder";
@@ -12,21 +13,23 @@ import { BRAND, TEMPLATES } from "../data/products";
  * back to the shop.
  */
 export function Lookbook() {
+  const { t } = useTranslation("shop");
+  // `label` is a translation key (lookbook.frames.*).
   const frames = [
     {
-      label: "FRAME 01 · COMMUNITY",
+      label: "community",
       img: TEMPLATES.t3,
       palette: "warm" as const,
       ratio: "16 / 9",
     },
     {
-      label: "FRAME 02 · EDITORIAL",
+      label: "editorial",
       img: TEMPLATES.t4,
       palette: "gold" as const,
       ratio: "16 / 9",
     },
     {
-      label: "FRAME 03 · MIDNIGHT TAILORING",
+      label: "tailoring",
       img: TEMPLATES.t1,
       palette: "warm" as const,
       ratio: "3 / 2",
@@ -42,22 +45,18 @@ export function Lookbook() {
         }}
       >
         <div className="lookbook-hero-inner">
-          <div className="section-eyebrow">Lookbook 04 ✦ FW26 ✦ Aurum</div>
+          <div className="section-eyebrow">{t("lookbook.eyebrow")}</div>
           <h1
             className="hero-title"
             style={{ fontSize: "clamp(60px, 10vw, 160px)", margin: "16px 0 24px" }}
           >
-            <span className="outline">Born in the</span>
-            <span className="gold-fill">City.</span>
+            <span className="outline">{t("lookbook.line1")}</span>
+            <span className="gold-fill">{t("lookbook.line2")}</span>
             <span className="outline italic" style={{ fontSize: "0.65em" }}>
-              Forged in Gold.
+              {t("lookbook.line3")}
             </span>
           </h1>
-          <p>
-            Shot across three nights in Barcelona, Lookbook 04 captures the FW26 collection as it
-            lives — under sodium light, on slick streets, between last trains. Cast from our
-            resident community of artists, athletes and night-walkers.
-          </p>
+          <p>{t("lookbook.intro")}</p>
         </div>
       </section>
 
@@ -65,7 +64,7 @@ export function Lookbook() {
         {frames.map((f, i) => (
           <Reveal key={f.label} delay={i * 80}>
             <Placeholder
-              label={f.label}
+              label={t(`lookbook.frames.${f.label}`)}
               palette={f.palette}
               img={f.img}
               style={{ aspectRatio: f.ratio, width: "100%" }}
@@ -79,17 +78,17 @@ export function Lookbook() {
         style={{ paddingInline: 32, borderTop: "1px solid var(--line)" }}
       >
         <h2 className="quote-text">
-          <span>"Gold is not a colour. </span>
-          <span className="gold">It's a temperature</span>
-          <span>."</span>
+          <span>{t("lookbook.quote.before")}</span>
+          <span className="gold">{t("lookbook.quote.gold")}</span>
+          <span>{t("lookbook.quote.after")}</span>
         </h2>
-        <div className="quote-byline">— Aleix Auqué, Creative Director</div>
+        <div className="quote-byline">{t("home.quote.byline")}</div>
         <Link
           to="/shop/new"
           className="btn btn-primary"
           style={{ marginTop: 32, display: "inline-flex" }}
         >
-          Shop the drop <Icon.Arrow />
+          {t("cta.shopDrop")} <Icon.Arrow />
         </Link>
       </section>
     </main>

@@ -11,11 +11,12 @@ export const STATE_COLORS: Record<LocationState, string> = {
   empty: "#3a3630", // grey: nothing stored here
 };
 
+/** Translation keys (admin.json), shown with t(STATE_LABELS[state]). */
 export const STATE_LABELS: Record<LocationState, string> = {
-  ok: "In stock",
-  low: "Low stock",
-  out: "Out of stock",
-  empty: "Free",
+  ok: "warehouse.states.ok",
+  low: "warehouse.states.low",
+  out: "warehouse.states.out",
+  empty: "warehouse.states.empty",
 };
 
 /** How full the location is, from 0 to 1 (used for the box height and the bars). */

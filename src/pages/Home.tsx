@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { ProductCard } from "../components/product/ProductCard";
 import { ProductGridSkeleton } from "../components/product/ProductCardSkeleton";
@@ -18,6 +19,7 @@ import { pad } from "../utils/format";
  * variants of the same word stacked on top of each other.
  */
 function Hero() {
+  const { t } = useTranslation("shop");
   const navigate = useNavigate();
   return (
     <section className="hero">
@@ -31,16 +33,16 @@ function Hero() {
       <div className="hero-bg" />
 
       <div className="hero-stats" aria-hidden="true">
-        <span>FW 26 ✦ Vol. 04</span>
+        <span>{t("home.hero.stats1")}</span>
         <span style={{ color: "var(--gold)" }}>—</span>
-        <span>14 Pieces ✦ Limited</span>
+        <span>{t("home.hero.stats2")}</span>
       </div>
 
       <div className="hero-content">
         <div className="hero-meta">
           <div className="row">
             <span className="dot" />
-            FW 26 / Drop 04 — Now Live
+            {t("home.hero.live")}
           </div>
           <h1 className="hero-title">
             <span className="outline">Obsidian</span>
@@ -49,20 +51,17 @@ function Hero() {
           </h1>
         </div>
         <div className="hero-side">
-          <p>
-            A study in shadow and shine. Heavyweight knitwear, gold-cast hardware, and tailored
-            silhouettes carved for the after-hours city.
-          </p>
+          <p>{t("home.hero.text")}</p>
           <div className="hero-cta-row">
             <button
               type="button"
               className="btn btn-primary"
               onClick={() => navigate("/shop/new")}
             >
-              Shop the drop <Icon.Arrow />
+              {t("cta.shopDrop")} <Icon.Arrow />
             </button>
             <button type="button" className="btn" onClick={() => navigate("/lookbook")}>
-              Lookbook
+              {t("home.hero.lookbook")}
             </button>
           </div>
         </div>
@@ -70,7 +69,7 @@ function Hero() {
 
       <div className="scroll-cue">
         <span className="line" />
-        Scroll
+        {t("home.hero.scroll")}
       </div>
     </section>
   );
@@ -78,6 +77,7 @@ function Hero() {
 
 /** Featured grid — the first 4 products of the catalogue. */
 function FeaturedGrid() {
+  const { t } = useTranslation("shop");
   const { data: products, isPending, isError, refetch } = useProducts("new");
   const featured = useMemo(
     () =>
@@ -93,13 +93,13 @@ function FeaturedGrid() {
     <section className="section">
       <div className="section-head">
         <div>
-          <div className="section-eyebrow">Featured ✦ Drop 04</div>
+          <div className="section-eyebrow">{t("home.featured.eyebrow")}</div>
           <h2 className="section-title">
-            Core <span className="gold">pieces</span>
+            {t("home.featured.title")} <span className="gold">{t("home.featured.titleGold")}</span>
           </h2>
         </div>
         <Link to="/shop/new" className="section-link">
-          View all <Icon.Arrow />
+          {t("cta.viewAll")} <Icon.Arrow />
         </Link>
       </div>
 
@@ -107,17 +107,17 @@ function FeaturedGrid() {
         <ProductGridSkeleton count={4} />
       ) : isError ? (
         <div className="data-error">
-          <div className="title">✦ Couldn't load the drop</div>
-          <div>The catalogue API didn't answer.</div>
+          <div className="title">{t("home.featured.error")}</div>
+          <div>{t("errors.apiDown")}</div>
           <button
             type="button"
             className="btn"
             style={{ marginTop: 16 }}
             onClick={() => refetch()}
           >
-            Retry <Icon.Arrow />
+            {t("errors.retry")} <Icon.Arrow />
           </button>
-          <div className="hint">Backend offline? `php artisan serve` on :8000</div>
+          <div className="hint">{t("errors.hint")}</div>
         </div>
       ) : (
         <div className="product-grid">
@@ -134,11 +134,12 @@ function FeaturedGrid() {
 
 /** Editorial split: a tall image next to a campaign blurb. */
 function Lookbook() {
+  const { t } = useTranslation("shop");
   return (
     <section className="lookbook">
       <Reveal>
         <Placeholder
-          label="LOOKBOOK · FRAME 03 · MIDNIGHT TAILORING"
+          label={t("home.lookbook.frame")}
           palette="warm"
           className="lookbook-img"
           img={TEMPLATES.t1}
@@ -146,33 +147,29 @@ function Lookbook() {
       </Reveal>
       <Reveal delay={120}>
         <div className="lookbook-text">
-          <div className="section-eyebrow">Lookbook 04 ✦ Director Aleix</div>
+          <div className="section-eyebrow">{t("home.lookbook.eyebrow")}</div>
           <h2 className="lookbook-title">
-            <span className="outline">Born in the</span>
+            <span className="outline">{t("home.lookbook.line1")}</span>
             <br />
-            <span>City. </span>
-            <span className="gold">Forged</span>
+            <span>{t("home.lookbook.line2")}</span>
+            <span className="gold">{t("home.lookbook.line3")}</span>
             <br />
-            <span className="outline">in Gold.</span>
+            <span className="outline">{t("home.lookbook.line4")}</span>
           </h2>
-          <p>
-            Shot across three nights in Barcelona, Lookbook 04 captures the FW26 collection as it
-            lives — under sodium light, on slick streets, between last trains. Cast from our
-            resident community of artists, athletes and night-walkers.
-          </p>
+          <p>{t("lookbook.intro")}</p>
           <div className="lookbook-meta">
             <div className="stat">
-              <span className="val">14</span>Pieces
+              <span className="val">14</span>{t("home.lookbook.pieces")}
             </div>
             <div className="stat">
-              <span className="val">03</span>Cities
+              <span className="val">03</span>{t("home.lookbook.cities")}
             </div>
             <div className="stat">
-              <span className="val">11</span>Cast
+              <span className="val">11</span>{t("home.lookbook.cast")}
             </div>
           </div>
           <Link to="/lookbook" className="btn" style={{ alignSelf: "flex-start" }}>
-            Enter Lookbook <Icon.Arrow />
+            {t("home.lookbook.enter")} <Icon.Arrow />
           </Link>
         </div>
       </Reveal>
@@ -188,6 +185,7 @@ function Lookbook() {
  * freezing the counter. The interval is cleared on unmount.
  */
 function DropStrip() {
+  const { t } = useTranslation("shop");
   const target = useMemo(() => {
     const t = new Date();
     t.setDate(t.getDate() + 2);
@@ -218,16 +216,16 @@ function DropStrip() {
     >
       <div className="drop-inner">
         <div className="drop-label">
-          <span className="tag">✦ Next Release</span>
-          <span className="name">Drop 05 — Eclipse</span>
-          <span className="sub">Members early access · 12h before public</span>
+          <span className="tag">{t("home.drop.tag")}</span>
+          <span className="name">{t("home.drop.name")}</span>
+          <span className="sub">{t("home.drop.sub")}</span>
         </div>
         <div className="countdown">
           {[
-            ["Days", d],
-            ["Hours", h],
-            ["Minutes", m],
-            ["Seconds", s],
+            [t("home.drop.days"), d],
+            [t("home.drop.hours"), h],
+            [t("home.drop.minutes"), m],
+            [t("home.drop.seconds"), s],
           ].map(([label, value]) => (
             <div className="unit" key={label}>
               <div className="num">{pad(Number(value))}</div>
@@ -237,9 +235,9 @@ function DropStrip() {
         </div>
         <div className="drop-side">
           <button type="button" className="btn btn-primary">
-            Notify me <Icon.Arrow />
+            {t("home.drop.notify")} <Icon.Arrow />
           </button>
-          <span className="waiting">12,847 waiting</span>
+          <span className="waiting">{t("home.drop.waiting")}</span>
         </div>
       </div>
     </section>
@@ -248,19 +246,21 @@ function DropStrip() {
 
 /** Three category cards (outerwear / knitwear / accessories). */
 function Categories() {
+  const { t } = useTranslation("shop");
+  // `name` is a translation key (home.categories.*), `count` is the number of pieces.
   const cats = [
-    { num: "01", name: "Outerwear", count: "4 pieces", palette: "warm", id: "outerwear", img: TEMPLATES.t6 },
-    { num: "02", name: "Knitwear", count: "5 pieces", palette: "gold", id: "knitwear", img: TEMPLATES.t2 },
-    { num: "03", name: "Accessories", count: "5 pieces", palette: "warm", id: "accessories", img: TEMPLATES.t5 },
+    { num: "01", name: "outerwear", count: 4, palette: "warm", id: "outerwear", img: TEMPLATES.t6 },
+    { num: "02", name: "knitwear", count: 5, palette: "gold", id: "knitwear", img: TEMPLATES.t2 },
+    { num: "03", name: "accessories", count: 5, palette: "warm", id: "accessories", img: TEMPLATES.t5 },
   ] as const;
 
   return (
     <>
       <div className="section-head categories-head">
         <div>
-          <div className="section-eyebrow">Categories ✦ FW26</div>
+          <div className="section-eyebrow">{t("home.categories.eyebrow")}</div>
           <h2 className="section-title">
-            Shop by <span className="gold">category</span>
+            {t("home.categories.title")} <span className="gold">{t("home.categories.titleGold")}</span>
           </h2>
         </div>
       </div>
@@ -275,9 +275,9 @@ function Categories() {
               />
               <div className="overlay">
                 <span className="num">{c.num} / 03</span>
-                <span className="name">{c.name}</span>
+                <span className="name">{t(`home.categories.${c.name}`)}</span>
                 <span className="count">
-                  <span>{c.count}</span>
+                  <span>{t("home.categories.pieces", { count: c.count })}</span>
                   <span className="arrow">
                     <Icon.Arrow />
                   </span>
@@ -297,40 +297,38 @@ function Categories() {
  * rhythm of grids with a single cinematic image.
  */
 function BrandStatement() {
+  const { t } = useTranslation("shop");
   const navigate = useNavigate();
   return (
     <Reveal>
       <section
         className="brand-statement"
         style={{ backgroundImage: `url(${BRAND.street})` }}
-        aria-label="Obsidian — graffiti wall"
+        aria-label={t("home.statement.label")}
       >
         <div className="brand-statement-overlay">
-          <div className="section-eyebrow">Obsidian ✦ In the wild</div>
+          <div className="section-eyebrow">{t("home.statement.eyebrow")}</div>
           <h2 className="brand-statement-title">
-            Worn <span className="gold">where</span> the
-            city
+            {t("home.statement.before")} <span className="gold">{t("home.statement.gold")}</span>{" "}
+            {t("home.statement.after")}
             <br />
-            forgets itself.
+            {t("home.statement.line2")}
           </h2>
-          <p>
-            From sodium-lit alleys to last-train platforms — Obsidian lives where the day
-            never quite makes it. Every piece numbered, every drop final.
-          </p>
+          <p>{t("home.statement.text")}</p>
           <div className="brand-statement-cta">
             <button
               type="button"
               className="btn btn-primary"
               onClick={() => navigate("/shop/new")}
             >
-              Shop the drop <Icon.Arrow />
+              {t("cta.shopDrop")} <Icon.Arrow />
             </button>
             <button
               type="button"
               className="btn"
               onClick={() => navigate("/lookbook")}
             >
-              See the lookbook
+              {t("home.statement.seeLookbook")}
             </button>
           </div>
         </div>
@@ -340,19 +338,20 @@ function BrandStatement() {
 }
 
 function QuoteStrip() {
+  const { t } = useTranslation("shop");
   return (
     <Reveal>
       <section className="quote">
         <h2 className="quote-text">
-          <span>"We don't dress for daylight. </span>
-          <span className="gold">We dress</span>
-          <span> for the hour after — </span>
+          <span>{t("home.quote.part1")}</span>
+          <span className="gold">{t("home.quote.gold1")}</span>
+          <span>{t("home.quote.part2")}</span>
           <br />
-          <span>when the city </span>
-          <span className="gold">forgets</span>
-          <span> itself."</span>
+          <span>{t("home.quote.part3")}</span>
+          <span className="gold">{t("home.quote.gold2")}</span>
+          <span>{t("home.quote.part4")}</span>
         </h2>
-        <div className="quote-byline">— Aleix Auqué, Creative Director</div>
+        <div className="quote-byline">{t("home.quote.byline")}</div>
       </section>
     </Reveal>
   );
@@ -360,6 +359,7 @@ function QuoteStrip() {
 
 /** Composed home page. */
 export function Home() {
+  const { t } = useTranslation("shop");
   return (
     <main className="fade-in">
       <Hero />
@@ -367,12 +367,12 @@ export function Home() {
       <div className="announce" style={{ borderTop: "1px solid var(--line)", borderBottom: "1px solid var(--line)" }}>
         <Marquee
           items={[
-            "Free shipping over €200",
-            "FW 26 — Drop 04 Live Now",
-            "Members early access",
-            "Cast in gold · Worn after midnight",
-            "Hand-finished in Los Angeles",
-            "Limited to 200 units",
+            t("home.marquee.shipping"),
+            t("home.marquee.live"),
+            t("home.marquee.early"),
+            t("home.marquee.cast"),
+            t("home.marquee.handFinished"),
+            t("home.marquee.limited"),
           ]}
         />
       </div>

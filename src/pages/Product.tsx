@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 import { ProductCard } from "../components/product/ProductCard";
 import { ProductGridSkeleton } from "../components/product/ProductCardSkeleton";
@@ -14,39 +15,25 @@ import { ApiError } from "../lib/api";
 import { formatPrice } from "../utils/format";
 import { NotFound } from "./NotFound";
 
-/** Shared product gallery used temporarily across every PDP. */
-const VIEW_LABELS = ["FRONT", "BACK", "FULL LOOK"] as const;
+/**
+ * Shared product gallery used temporarily across every PDP.
+ * Each view is a translation key (product.views.*).
+ */
+const VIEW_LABELS = ["front", "back", "fullLook"] as const;
 
+/** `key` is also the translation key for the name (product.colors.*). */
 const MODEL_COLORS = [
-  { key: "black", name: "Black", hex: "#0a0a0a" },
-  { key: "grey", name: "Grey", hex: "#7b7b78" },
-  { key: "red", name: "Red", hex: "#8f1f22" },
-  { key: "white", name: "White", hex: "#f5efe2" },
+  { key: "black", hex: "#0a0a0a" },
+  { key: "grey", hex: "#7b7b78" },
+  { key: "red", hex: "#8f1f22" },
+  { key: "white", hex: "#f5efe2" },
 ] as const;
 
-/** Static accordion content — would come from a CMS in a real app. */
-const ACCORDION = [
-  {
-    id: "details",
-    h: "Composition & Care",
-    b: "100% organic Portuguese cotton, 580gsm. Garment-dyed and stone-washed for depth. Wash inside-out at 30°C with similar tones. Reshape and dry flat. Avoid direct sunlight when drying — the gold fades faster than you do.",
-  },
-  {
-    id: "fit",
-    h: "Fit & Sizing",
-    b: "Relaxed boxy fit through the body with a dropped shoulder. Model is 184cm, wearing size M. Garment is true-to-size — size down for a closer cut. Hem sits 4cm below the natural waist on the size M.",
-  },
-  {
-    id: "ship",
-    h: "Shipping & Returns",
-    b: "Free EU shipping on orders above €200. 2-3 business days with DHL Express. Free returns within 30 days — original tags must be attached. Final sale items marked at checkout.",
-  },
-  {
-    id: "story",
-    h: "The Story",
-    b: "Drop 04 ✦ Aurum is our heaviest collection to date. Designed in Barcelona between February and May, sampled in Los Angeles with our partners since 2022. Limited to 200 units per piece — each tagged with its own number.",
-  },
-];
+/**
+ * Static accordion sections — would come from a CMS in a real app.
+ * The title and text of each id live in the translations (product.accordion.*).
+ */
+const ACCORDION = ["details", "fit", "ship", "story"];
 
 /**
  * Product Detail Page.
@@ -56,6 +43,7 @@ const ACCORDION = [
  * data.
  */
 export function Product() {
+  const { t } = useTranslation("shop");
   const { id } = useParams<{ id: string }>();
   const {
     data: product,
@@ -94,8 +82,8 @@ export function Product() {
     return (
       <main className="fade-in pdp">
         <div className="data-error" style={{ borderStyle: "solid", borderColor: "var(--line-2)" }}>
-          <div className="title" style={{ color: "var(--gold)" }}>✦ Loading product…</div>
-          <div>Fetching from the catalogue.</div>
+          <div className="title" style={{ color: "var(--gold)" }}>{t("product.loading")}</div>
+          <div>{t("product.loadingSub")}</div>
         </div>
       </main>
     );
@@ -105,24 +93,24 @@ export function Product() {
     return (
       <main className="fade-in pdp">
         <div className="data-error">
-          <div className="title">✦ Couldn't load this product</div>
-          <div>The catalogue API didn't answer.</div>
+          <div className="title">{t("product.error")}</div>
+          <div>{t("errors.apiDown")}</div>
           <button
             type="button"
             className="btn"
             style={{ marginTop: 16 }}
             onClick={() => refetch()}
           >
-            Retry <Icon.Arrow />
+            {t("errors.retry")} <Icon.Arrow />
           </button>
-          <div className="hint">Backend offline? `php artisan serve` on :8000</div>
+          <div className="hint">{t("errors.hint")}</div>
         </div>
       </main>
     );
   }
 
   const selectedColor = MODEL_COLORS[colorIdx] ?? MODEL_COLORS[0];
-  const colorName = selectedColor.name;
+  const colorName = t(`product.colors.${selectedColor.key}`);
   const pdpImages = VIEW_LABELS.map((_, i) => `/model${i + 1}-${selectedColor.key}.webp`);
 
   const handleAdd = () => {
@@ -135,13 +123,13 @@ export function Product() {
 
   const handleWishlist = () => {
     toggle(product.id);
-    push(has(product.id) ? "Removed from wishlist" : "Added to wishlist");
+    push(has(product.id) ? t("toast.removedWishlist", { ns: "common" }) : t("toast.addedWishlist", { ns: "common" }));
   };
 
   return (
     <main className="fade-in pdp">
       <div className="pdp-breadcrumb">
-        <Link to="/">Home</Link>
+        <Link to="/">{t("product.home")}</Link>
         <span className="sep">/</span>
         <Link to="/shop/new">{product.cat.split("·")[0].trim()}</Link>
         <span className="sep">/</span>
@@ -167,7 +155,7 @@ export function Product() {
           </div>
           <div className="main-img">
             <Placeholder
-              label={`${product.id.toUpperCase()} ✦ ${VIEW_LABELS[activeImg]}`}
+              label={`${product.id.toUpperCase()} ✦ ${t(`product.views.${VIEW_LABELS[activeImg]}`)}`}
               palette={
                 activeImg === 0
                   ? product.palette
@@ -183,7 +171,7 @@ export function Product() {
         <div className="pdp-info">
           <div className="pdp-meta">
             <span className="dot" />
-            {product.tag || "FW26 ✦ Drop 04"} · In Stock
+            {product.tag || t("product.defaultTag")} · {t("product.inStock")}
           </div>
 
           <h1 className="pdp-title">{product.name}</h1>
@@ -194,27 +182,23 @@ export function Product() {
               <>
                 <span className="old">{formatPrice(product.old)}</span>
                 <span className="save">
-                  Save {Math.round((1 - product.price / product.old) * 100)}%
+                  {t("product.save", { percent: Math.round((1 - product.price / product.old) * 100) })}
                 </span>
               </>
             )}
           </div>
 
-          <p className="pdp-desc">
-            Cut from 580 gsm Portuguese loopback cotton, garment-dyed for depth and faded into a
-            charcoal patina. Brass eyelets, custom 24k-plated zip pull, and an inner lining
-            embroidered with the Obsidian sigil. Built to outlast every winter you have left.
-          </p>
+          <p className="pdp-desc">{t("product.description")}</p>
 
           {/* `pdp-section-color` lets the stacked layout pull the swatches up
               under the gallery — tapping one has to show the photo change. */}
           <div className="pdp-section pdp-section-color">
             <h4>
               <span>
-                Color · <span style={{ color: "var(--gold)" }}>{colorName}</span>
+                {t("product.color")} · <span style={{ color: "var(--gold)" }}>{colorName}</span>
               </span>
               <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--fg-dim)" }}>
-                {MODEL_COLORS.length} colors
+                {t("product.colorCount", { count: MODEL_COLORS.length })}
               </span>
             </h4>
             <div className="color-row">
@@ -224,7 +208,7 @@ export function Product() {
                   className={`chip ${colorIdx === i ? "active" : ""}`}
                   style={{ background: color.hex }}
                   onClick={() => setColorIdx(i)}
-                  title={color.name}
+                  title={t(`product.colors.${color.key}`)}
                 />
               ))}
             </div>
@@ -233,9 +217,9 @@ export function Product() {
           <div className="pdp-section">
             <h4>
               <span>
-                Size {size && <span style={{ color: "var(--gold)" }}>· {size}</span>}
+                {t("product.size")} {size && <span style={{ color: "var(--gold)" }}>· {size}</span>}
               </span>
-              <span className="extra">Size guide ↗</span>
+              <span className="extra">{t("product.sizeGuide")}</span>
             </h4>
             <div className="size-row">
               {product.sizes.map((s) => (
@@ -252,19 +236,19 @@ export function Product() {
             </div>
             {product.sold_out.length > 0 && (
               <div className="size-note">
-                {product.sold_out.join(", ")} sold out · Notify me ↗
+                {t("product.soldOut", { sizes: product.sold_out.join(", ") })}
               </div>
             )}
           </div>
 
           <div className="pdp-cta-row">
             <button type="button" className="btn btn-primary" onClick={handleAdd}>
-              {size ? "Add to bag" : "Add to bag · default size"} <Icon.Arrow />
+              {size ? t("product.addToBag") : t("product.addToBagDefault")} <Icon.Arrow />
             </button>
             <button
               type="button"
               className={`icon-btn ${has(product.id) ? "active" : ""}`}
-              title="Wishlist"
+              title={t("product.wishlist")}
               aria-pressed={has(product.id)}
               onClick={handleWishlist}
             >
@@ -274,37 +258,37 @@ export function Product() {
 
           <div className="pdp-perks">
             <div className="perk">
-              <span className="lbl">✦ Shipping</span>
-              <span className="val">Free over €200 · 2-day EU</span>
+              <span className="lbl">{t("product.perks.shippingLabel")}</span>
+              <span className="val">{t("product.perks.shippingValue")}</span>
             </div>
             <div className="perk">
-              <span className="lbl">✦ Returns</span>
-              <span className="val">30 days · No questions asked</span>
+              <span className="lbl">{t("product.perks.returnsLabel")}</span>
+              <span className="val">{t("product.perks.returnsValue")}</span>
             </div>
             <div className="perk">
-              <span className="lbl">✦ Made in</span>
-              <span className="val">Barcelona, Spain · Hand-finished</span>
+              <span className="lbl">{t("product.perks.madeInLabel")}</span>
+              <span className="val">{t("product.perks.madeInValue")}</span>
             </div>
             <div className="perk">
-              <span className="lbl">✦ Material</span>
-              <span className="val">580gsm Portuguese loopback</span>
+              <span className="lbl">{t("product.perks.materialLabel")}</span>
+              <span className="val">{t("product.perks.materialValue")}</span>
             </div>
           </div>
 
           <div className="pdp-accordion">
-            {ACCORDION.map((item) => (
+            {ACCORDION.map((id) => (
               <div
-                key={item.id}
-                className={`acc-item ${openAcc === item.id ? "open" : ""}`}
-                onClick={() => setOpenAcc(openAcc === item.id ? null : item.id)}
+                key={id}
+                className={`acc-item ${openAcc === id ? "open" : ""}`}
+                onClick={() => setOpenAcc(openAcc === id ? null : id)}
               >
                 <div className="acc-head">
-                  <span>{item.h}</span>
+                  <span>{t(`product.accordion.${id}.title`)}</span>
                   <span className="plus">
                     <Icon.Plus />
                   </span>
                 </div>
-                <div className="acc-body">{item.b}</div>
+                <div className="acc-body">{t(`product.accordion.${id}.body`)}</div>
               </div>
             ))}
           </div>
@@ -314,13 +298,13 @@ export function Product() {
       <section className="complete">
         <div className="section-head">
           <div>
-            <div className="section-eyebrow">Styled with ✦ Recommended</div>
+            <div className="section-eyebrow">{t("product.complete.eyebrow")}</div>
             <h2 className="section-title">
-              Complete <span className="gold">the look</span>
+              {t("product.complete.title")} <span className="gold">{t("product.complete.titleGold")}</span>
             </h2>
           </div>
           <Link to="/shop/new" className="section-link">
-            View all <Icon.Arrow />
+            {t("cta.viewAll")} <Icon.Arrow />
           </Link>
         </div>
         {related.length === 0 ? (

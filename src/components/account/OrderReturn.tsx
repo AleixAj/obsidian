@@ -1,28 +1,18 @@
 import { useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { useRequestReturn } from "../../hooks/queries";
 import { ApiError, type ApiOrderDTO, type ReturnRequestPayload } from "../../lib/api";
 import { formatPrice } from "../../utils/format";
 
-const REASONS: { value: ReturnRequestPayload["reason"]; label: string }[] = [
-  { value: "wrong_size", label: "Wrong size" },
-  { value: "damaged", label: "Arrived damaged" },
-  { value: "not_as_described", label: "Not as described" },
-  { value: "changed_mind", label: "Changed my mind" },
-  { value: "other", label: "Other" },
-];
-
-const STATUS_TEXT: Record<NonNullable<ApiOrderDTO["return"]>["status"], string> = {
-  requested: "We received your return request. We'll review it in 1–2 days.",
-  approved: "Return approved. Send the parcel and we'll refund you when it arrives.",
-  rejected: "We couldn't accept this return.",
-  refunded: "Refund done",
-};
+// The label of each reason is in account.json, under "returns.reasons".
+const REASONS: ReturnRequestPayload["reason"][] = ["wrong_size", "damaged", "not_as_described", "changed_mind", "other"];
 
 /**
  * Under each order in "Your orders": the return status, or a
  * "Request a return" button that opens a small form.
  */
 export function OrderReturn({ order }: { order: ApiOrderDTO }) {
+  const { t } = useTranslation("account");
   const [open, setOpen] = useState(false);
   // Units to send back, by order item id. Starts with everything.
   const [units, setUnits] = useState<Record<number, number>>(() =>
@@ -35,10 +25,10 @@ export function OrderReturn({ order }: { order: ApiOrderDTO }) {
 
   // A return already exists: show where it is.
   if (order.return && !order.can_return) {
-    const text = STATUS_TEXT[order.return.status];
+    const text = t(`returns.status.${order.return.status}`);
     return (
       <div className={`order-return is-${order.return.status}`}>
-        <strong>Return {order.return.number}</strong> · {text}
+        <strong>{t("returns.return", { number: order.return.number })}</strong> · {text}
         {order.return.status === "refunded" && ` · ${formatPrice(order.return.refund_cents / 100)}`}
         {order.return.status === "rejected" && order.return.staff_note && <em> “{order.return.staff_note}”</em>}
       </div>
@@ -51,9 +41,9 @@ export function OrderReturn({ order }: { order: ApiOrderDTO }) {
     return (
       <div className="order-return">
         <button type="button" className="order-return-link" onClick={() => setOpen(true)}>
-          Request a return ↗
+          {t("returns.request")}
         </button>
-        <span> Free returns within 30 days of delivery.</span>
+        <span>{t("returns.freeReturns")}</span>
       </div>
     );
   }
@@ -67,7 +57,7 @@ export function OrderReturn({ order }: { order: ApiOrderDTO }) {
       .map(([id, quantity]) => ({ order_item_id: Number(id), quantity }));
 
     if (items.length === 0) {
-      setError("Choose at least one piece to send back.");
+      setError(t("returns.errors.noItems"));
       return;
     }
 
@@ -77,7 +67,7 @@ export function OrderReturn({ order }: { order: ApiOrderDTO }) {
         onSuccess: () => setOpen(false),
         onError: (err) => {
           const payload = err instanceof ApiError ? (err.payload as { message?: string } | undefined) : undefined;
-          setError(payload?.message ?? "Could not send the request. Try again.");
+          setError(payload?.message ?? t("returns.errors.failed"));
         },
       },
     );
@@ -85,16 +75,16 @@ export function OrderReturn({ order }: { order: ApiOrderDTO }) {
 
   return (
     <form className="order-return-form" onSubmit={handleSubmit}>
-      <div className="order-return-title">Which pieces are you sending back?</div>
+      <div className="order-return-title">{t("returns.form.title")}</div>
       {order.items.map((item) => (
         <label key={item.id} className="order-return-line">
           <span>
-            {item.product_name} <small>· size {item.size_label ?? "—"}</small>
+            {item.product_name} <small>{t("returns.form.size", { size: item.size_label ?? "—" })}</small>
           </span>
           <select
             value={units[item.id]}
             onChange={(e) => setUnits({ ...units, [item.id]: Number(e.target.value) })}
-            aria-label={`Units of ${item.product_name}`}
+            aria-label={t("returns.form.units", { name: item.product_name })}
           >
             {Array.from({ length: item.quantity + 1 }, (_, n) => (
               <option key={n} value={n}>
@@ -106,17 +96,17 @@ export function OrderReturn({ order }: { order: ApiOrderDTO }) {
       ))}
 
       <label className="order-return-field">
-        Reason
+        {t("returns.form.reason")}
         <select value={reason} onChange={(e) => setReason(e.target.value as ReturnRequestPayload["reason"])}>
-          {REASONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
+          {REASONS.map((value) => (
+            <option key={value} value={value}>
+              {t(`returns.reasons.${value}`)}
             </option>
           ))}
         </select>
       </label>
       <label className="order-return-field">
-        Comment <small>(optional)</small>
+        {t("returns.form.comment")}<small>{t("returns.form.optional")}</small>
         <textarea value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} rows={2} />
       </label>
 
@@ -128,10 +118,10 @@ export function OrderReturn({ order }: { order: ApiOrderDTO }) {
 
       <div className="order-return-actions">
         <button type="submit" className="btn-submit" disabled={request.isPending}>
-          {request.isPending ? "Sending…" : "Send request"}
+          {request.isPending ? t("returns.form.sending") : t("returns.form.send")}
         </button>
         <button type="button" className="social-btn" onClick={() => setOpen(false)}>
-          Cancel
+          {t("returns.form.cancel")}
         </button>
       </div>
     </form>

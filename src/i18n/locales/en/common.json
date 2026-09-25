@@ -3,5 +3,124 @@
     "label": "Language",
     "en": "English",
     "es": "Español"
+  },
+  "loading": {
+    "title": "Loading Obsidian…",
+    "sub": "Preparing the next view."
+  },
+  "session": {
+    "checking": "✦ Checking session…",
+    "sub": "Looking for your Obsidian member cookie."
+  },
+  "announce": {
+    "drop": "✦ Drop 04 — Aurum Live Now",
+    "shipping": "Free shipping over €200",
+    "innerCircle": "Inner Circle ✦ Early access",
+    "madeIn": "Made in Barcelona · Cast in gold",
+    "limited": "Limited to 200 units per piece"
+  },
+  "logo": {
+    "home": "Obsidian home"
+  },
+  "nav": {
+    "label": "Primary",
+    "home": "Home",
+    "new": "New",
+    "men": "Men",
+    "women": "Women",
+    "lookbook": "Lookbook"
+  },
+  "header": {
+    "toggleMenu": "Toggle menu",
+    "search": "Search",
+    "wishlist": "Wishlist",
+    "account": "Account",
+    "signIn": "Sign in",
+    "signInOrCreate": "Sign in / Create account",
+    "signOut": "Sign out",
+    "signingOut": "Signing out...",
+    "bag": "Bag"
+  },
+  "search": {
+    "close": "Close search",
+    "dialog": "Search products",
+    "eyebrow": "Search ✦ Catalogue",
+    "title": "Find your piece",
+    "placeholder": "Search hoodie, outerwear, men...",
+    "empty": "No pieces found.",
+    "emptyHint": "Try \"hoodie\", \"outerwear\" or \"women\"."
+  },
+  "footer": {
+    "tagline": "Heavyweight goods cast in gold. Designed in Barcelona, crafted in Los Angeles, worn after midnight in every city that matters.",
+    "columns": {
+      "shop": "Shop",
+      "about": "About",
+      "service": "Service"
+    },
+    "links": {
+      "newIn": "New In",
+      "outerwear": "Outerwear",
+      "knitwear": "Knitwear",
+      "accessories": "Accessories",
+      "archive": "Archive Sale",
+      "story": "Story",
+      "lookbook": "Lookbook",
+      "materials": "Materials",
+      "stockists": "Stockists",
+      "journal": "Journal",
+      "shipping": "Shipping",
+      "returns": "Returns",
+      "sizeGuide": "Size guide",
+      "contact": "Contact",
+      "faq": "FAQ"
+    },
+    "newsletter": {
+      "title": "Join the Inner Circle",
+      "text": "Early access to drops, exclusive pieces, and private events.",
+      "placeholder": "your@email.com",
+      "subscribe": "Subscribe →"
+    },
+    "copyright": "© {{year}} Aleix Auqué · Barcelona / Los Angeles / Tokyo",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "cookies": "Cookies"
+  },
+  "cart": {
+    "label": "Shopping bag",
+    "title": "Your Bag",
+    "close": "Close ✕",
+    "untilFree": "{{amount}} until free shipping",
+    "freeUnlocked": "Free shipping unlocked",
+    "empty": {
+      "title": "Your bag is empty",
+      "sub": "Pieces are waiting in the drop"
+    },
+    "size": "Size {{size}}",
+    "defaultColor": "Default",
+    "decrease": "Decrease quantity",
+    "increase": "Increase quantity",
+    "remove": "Remove",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "free": "FREE",
+    "total": "Total",
+    "checkout": "Checkout",
+    "placing": "Placing order...",
+    "note": "Basic checkout · ",
+    "noteGold": "Stripe later",
+    "signInToCheckout": "Sign in to finish checkout",
+    "orderPlaced": "Order {{number}} placed",
+    "failed": "Checkout failed. Try again."
+  },
+  "productCard": {
+    "addWishlist": "Add to wishlist",
+    "removeWishlist": "Remove from wishlist",
+    "front": "Front",
+    "back": "Back",
+    "quickAdd": "Quick add ✦ {{price}}"
+  },
+  "toast": {
+    "addedWishlist": "Added to wishlist",
+    "removedWishlist": "Removed from wishlist"
   }
 }

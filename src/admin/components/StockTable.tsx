@@ -1,16 +1,10 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useToast } from "../../context/ToastContext";
 import type { AdminProduct } from "../api";
 import { errorMessage } from "../errors";
 import { dateTime } from "../format";
 import { useUpdateStock } from "../hooks";
-
-const REASON_LABELS: Record<string, string> = {
-  sale: "Sale",
-  adjustment: "Adjustment",
-  restock: "Restock",
-  return: "Return",
-};
 
 /**
  * Stock grid of one product: a row per colour, a column per size.
@@ -21,6 +15,7 @@ export function StockTable({ product }: { product: AdminProduct }) {
   const variants = product.variants ?? [];
   const colors = product.colors ?? [];
   const sizes = product.sizes ?? [];
+  const { t } = useTranslation("admin");
   const { push } = useToast();
   const updateStock = useUpdateStock(product.slug);
 
@@ -53,9 +48,9 @@ export function StockTable({ product }: { product: AdminProduct }) {
       {
         onSuccess: () => {
           setNote("");
-          push("Stock saved.");
+          push(t("stock.saved"));
         },
-        onError: (error) => push(errorMessage(error, "Could not save the stock."), "warn"),
+        onError: (error) => push(errorMessage(error, t("stock.saveError")), "warn"),
       },
     );
   }
@@ -64,14 +59,14 @@ export function StockTable({ product }: { product: AdminProduct }) {
     <div className="adm-detail">
       <section className="adm-card adm-detail-main">
         <div className="adm-card-head">
-          <h2>Stock · {total} units</h2>
+          <h2>{t("stock.title", { units: total })}</h2>
         </div>
 
         <div className="adm-table-scroll">
           <table className="adm-table adm-table--plain adm-stock-grid">
             <thead>
               <tr>
-                <th>Colour</th>
+                <th>{t("common.colour")}</th>
                 {sizes.map((size) => (
                   <th key={size} className="num">
                     {size}
@@ -100,7 +95,7 @@ export function StockTable({ product }: { product: AdminProduct }) {
                           min="0"
                           value={stock[variant.id] ?? ""}
                           onChange={(e) => setStock({ ...stock, [variant.id]: e.target.value })}
-                          aria-label={`Stock ${color.name ?? color.hex} ${size}`}
+                          aria-label={t("stock.inputLabel", { colour: color.name ?? color.hex, size })}
                           title={variant.sku}
                         />
                       </td>
@@ -114,31 +109,32 @@ export function StockTable({ product }: { product: AdminProduct }) {
 
         <div className="adm-stock-footer">
           <label>
-            Alert when stock ≤
+            {t("stock.alertAt")}
             <input className="adm-input adm-stock-input" type="number" min="0" value={lowAt} onChange={(e) => setLowAt(e.target.value)} />
           </label>
           <input
             className="adm-input"
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Note (optional), e.g. supplier delivery"
+            placeholder={t("stock.notePlaceholder")}
             maxLength={255}
-            aria-label="Note"
+            aria-label={t("common.note")}
           />
           <button type="button" className="adm-btn adm-btn--gold" onClick={handleSave} disabled={!hasChanges || updateStock.isPending}>
-            {updateStock.isPending ? "Saving…" : "Save stock"}
+            {updateStock.isPending ? t("common.saving") : t("stock.save")}
           </button>
         </div>
         <p className="adm-muted adm-small">
-          <span className="adm-legend-dot is-low" /> low stock <span className="adm-legend-dot is-out" /> out of stock
+          <span className="adm-legend-dot is-low" /> {t("stock.legendLow")} <span className="adm-legend-dot is-out" />{" "}
+          {t("stock.legendOut")}
         </p>
       </section>
 
       <aside className="adm-card adm-detail-side">
         <div className="adm-card-head">
-          <h2>Stock history</h2>
+          <h2>{t("stock.history")}</h2>
         </div>
-        {(product.recent_movements ?? []).length === 0 && <p className="adm-muted">No stock changes yet.</p>}
+        {(product.recent_movements ?? []).length === 0 && <p className="adm-muted">{t("stock.noHistory")}</p>}
         <ul className="adm-movements">
           {product.recent_movements?.map((movement) => (
             <li key={movement.id}>
@@ -150,7 +146,8 @@ export function StockTable({ product }: { product: AdminProduct }) {
                 <span className="adm-mono">{movement.sku}</span>
               </div>
               <small className="adm-muted">
-                {REASON_LABELS[movement.reason] ?? movement.reason} · {movement.by} · {dateTime(movement.at)}
+                {/* Unknown reasons show the code as it comes from the API. */}
+                {t(`stock.reasons.${movement.reason}`, { defaultValue: movement.reason })} · {movement.by} · {dateTime(movement.at)}
               </small>
               {movement.note && <em>“{movement.note}”</em>}
             </li>

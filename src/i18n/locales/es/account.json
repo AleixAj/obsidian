@@ -1,1 +1,308 @@
-{}
+{
+  "auth": {
+    "errors": {
+      "oauth": "El acceso con redes sociales aún no está configurado. Añade las credenciales del proveedor en el .env de Laravel.",
+      "acceptTerms": "Acepta las condiciones antes de crear la cuenta.",
+      "invalid": "Datos incorrectos o email ya registrado.",
+      "failed": "No se ha podido entrar. Inténtalo de nuevo.",
+      "demo": "No se ha podido abrir la cuenta demo. Inténtalo de nuevo en un momento."
+    },
+    "side": {
+      "badge": "FW 26 ✦ Miembros del Inner Circle",
+      "title": {
+        "the": "La ",
+        "night": "noche",
+        "is": " es",
+        "onlyFor": "solo para ",
+        "members": "miembros",
+        "end": "."
+      },
+      "perks": {
+        "earlyAccess1": "Acceso anticipado",
+        "earlyAccess2": "a cada drop",
+        "birthday1": "Descuento",
+        "birthday2": "de cumpleaños",
+        "returns1": "Devoluciones",
+        "returns2": "gratis"
+      }
+    },
+    "eyebrow": {
+      "signin": "✦ Hola de nuevo",
+      "signup": "✦ Únete a Obsidian"
+    },
+    "title": {
+      "signin1": "Iniciar ",
+      "signin2": "sesión",
+      "signup1": "Crear ",
+      "signup2": "cuenta"
+    },
+    "demo": {
+      "title": "✦ ¿Estás revisando este proyecto?",
+      "text": "Sáltate el registro. Explóralo con datos de ejemplo en un clic.",
+      "opening": "Abriendo…",
+      "customer": "Cliente demo",
+      "admin": "Panel de administración ↗"
+    },
+    "tabs": {
+      "signin": "Iniciar sesión",
+      "signup": "Crear cuenta"
+    },
+    "fields": {
+      "firstName": "Nombre",
+      "lastName": "Apellidos",
+      "email": "Email",
+      "emailPlaceholder": "tu@email.com",
+      "password": "Contraseña",
+      "forgot": "¿La has olvidado?",
+      "passwordPlaceholder": "Mín. 8 caracteres"
+    },
+    "agree": {
+      "start": "Acepto las ",
+      "terms": "Condiciones",
+      "and": " y la ",
+      "privacy": "Política de privacidad",
+      "end": ". Suscríbeme a la newsletter del Inner Circle para recibir drops anticipados y piezas exclusivas."
+    },
+    "submit": {
+      "working": "Un momento...",
+      "signin": "Iniciar sesión",
+      "signup": "Crear cuenta"
+    },
+    "divider": "O continúa con",
+    "foot": {
+      "newHere": "¿Eres nuevo?",
+      "createAccount": "Crea una cuenta ↗",
+      "alreadyMember": "¿Ya eres miembro?",
+      "signIn": "Inicia sesión ↗",
+      "guest": "← Seguir como invitado"
+    }
+  },
+  "status": {
+    "pending": "Pendiente",
+    "paid": "Pagado",
+    "preparing": "En preparación",
+    "shipped": "En camino",
+    "delivered": "Entregado",
+    "returned": "Devuelto",
+    "cancelled": "Cancelado"
+  },
+  "dates": {
+    "pending": "Pendiente",
+    "pendingSync": "Pendiente de sincronizar",
+    "today": "Hoy · {{time}} Barcelona",
+    "day": "{{day}} · {{time}} Barcelona"
+  },
+  "nav": {
+    "overview": "Resumen",
+    "orders": "Pedidos",
+    "wishlist": "Favoritos",
+    "addresses": "Direcciones",
+    "settings": "Ajustes",
+    "rewards": "Inner Circle",
+    "tier": "Inner Circle · Gold",
+    "signingOut": "Cerrando sesión...",
+    "signOut": "Cerrar sesión"
+  },
+  "orderRow": {
+    "order": "Pedido",
+    "pieces_one": "{{count}} pieza",
+    "pieces_other": "{{count}} piezas",
+    "shipping": "2 días · DHL Express",
+    "view": "Ver pedido {{number}}"
+  },
+  "overview": {
+    "memberSince": "Miembro desde 2024 ✦ Nivel {{tier}}",
+    "welcome": "Hola de nuevo, ",
+    "member": "miembro",
+    "lastLogin": "✦ Último acceso",
+    "stats": {
+      "totalOrders": "Pedidos totales",
+      "synced": "Sincronizado con el servidor",
+      "lifetimeSpend": "Gasto total",
+      "tierUnlocked": "Nivel {{tier}} desbloqueado",
+      "rewardPoints": "Puntos",
+      "credit": "+48 € de saldo disponible",
+      "wishlist": "Favoritos",
+      "backInStock": "3 de nuevo en stock"
+    },
+    "tier": {
+      "tag": "Inner Circle ✦ Gold",
+      "title": "Te faltan {{amount}} para el nivel Onyx.",
+      "text": "Onyx te da acceso 24 h antes a cada drop, un estilista personal por WhatsApp y la chaqueta de archivo FW26 como regalo de bienvenida. Limitado a 200 miembros en todo el mundo.",
+      "progress": "{{percent}}% hacia Onyx"
+    },
+    "recent": "Pedidos recientes ",
+    "recentRange": "— Últimos 30 días",
+    "viewAll": "Ver todos"
+  },
+  "orders": {
+    "summary_one": "✦ {{count}} pedido · {{total}} en total",
+    "summary_other": "✦ {{count}} pedidos · {{total}} en total",
+    "title1": "Tus ",
+    "title2": "pedidos",
+    "filters": {
+      "all": "Todos ({{n}})",
+      "shipped": "En camino ({{n}})",
+      "delivered": "Entregados ({{n}})",
+      "cancelled": "Cancelados ({{n}})"
+    },
+    "loading": "Cargando tus pedidos…",
+    "error": "No se han podido cargar tus pedidos."
+  },
+  "wishlist": {
+    "eyebrowEmpty": "✦ Piezas guardadas",
+    "eyebrow": "✦ {{n}} guardadas · 3 de nuevo en stock",
+    "title1": "Tus ",
+    "title2": "favoritos",
+    "empty": {
+      "title": "Aún no has guardado nada",
+      "text": "Toca el corazón de cualquier pieza para guardarla aquí. Te avisaremos cuando baje de precio o vuelva a estar en stock.",
+      "cta": "Explorar el drop"
+    },
+    "share": "Compartir favoritos ↗",
+    "removeFromWishlist": "Quitar de favoritos",
+    "addToBag": "Añadir a la bolsa — {{price}}",
+    "remove": "Quitar"
+  },
+  "addresses": {
+    "eyebrow": "✦ Envío y facturación",
+    "title1": "Tus ",
+    "title2": "direcciones",
+    "form": {
+      "new": "Nueva dirección",
+      "edit": "Editar dirección",
+      "saved": "Se guarda en tu cuenta de Obsidian.",
+      "label": "Nombre",
+      "labelPlaceholder": "Casa",
+      "fullName": "Nombre completo",
+      "line1": "Dirección (línea 1)",
+      "line2": "Dirección (línea 2)",
+      "city": "Ciudad",
+      "region": "Provincia",
+      "postalCode": "Código postal",
+      "country": "Código de país",
+      "phone": "Teléfono",
+      "default": "Usar como dirección de envío principal.",
+      "saving": "Guardando...",
+      "save": "Guardar dirección",
+      "cancel": "Cancelar"
+    },
+    "defaultName": "Miembro de Obsidian",
+    "loading": "Cargando tus direcciones…",
+    "error": "No se han podido cargar tus direcciones.",
+    "badge": "Principal",
+    "fallbackLabel": "Dirección",
+    "edit": "Editar",
+    "setDefault": "Hacer principal",
+    "remove": "Eliminar",
+    "addNew": "Añadir dirección"
+  },
+  "settings": {
+    "eyebrow": "✦ Perfil y preferencias",
+    "title": "Ajustes",
+    "profile": {
+      "title": "Perfil",
+      "text": "Es el nombre que aparece en los documentos de envío y el que usamos para recomendarte tallas.",
+      "firstName": "Nombre",
+      "lastName": "Apellidos",
+      "email": "Email",
+      "phone": "Teléfono",
+      "saved": "Perfil guardado.",
+      "demoLocked": "Los datos de la cuenta demo no se pueden cambiar.",
+      "saveFailed": "No se ha podido guardar el perfil.",
+      "error": "No se ha podido guardar el perfil. Puede que el email ya esté en uso.",
+      "saving": "Guardando...",
+      "save": "Guardar perfil"
+    },
+    "notifications": {
+      "title": "Notificaciones",
+      "text": "Cómo y cuándo te escribimos. Los miembros del Inner Circle reciben un SMS privado antes de cada drop público.",
+      "drops": "Avisos de drops",
+      "updates": "Novedades de tus pedidos",
+      "backInStock": "Avisos de reposición",
+      "newsletter": "Newsletter ✦ Lookbook",
+      "birthday": "Recordatorio del regalo de cumpleaños"
+    },
+    "deleteAccount": "Eliminar cuenta"
+  },
+  "rewards": {
+    "eyebrow": "✦ Solo miembros · Nivel Gold",
+    "current": "Actual ✦ Gold",
+    "points": "2180 puntos · 48 € de saldo disponible",
+    "text": "Gana 1 punto por cada 4 € que gastes. Canjea 100 puntos = 2 € de descuento. Los puntos no caducan mientras tu nivel siga activo.",
+    "progress": " / 3200 para Onyx",
+    "redeem": "Canjear puntos",
+    "benefits": "Ventajas de cada nivel",
+    "badgeCurrent": "Actual",
+    "badgeLocked": "Bloqueado",
+    "tiers": {
+      "silver": {
+        "perk1": "Envío gratis a partir de 100 €",
+        "perk2": "Devoluciones en 30 días",
+        "perk3": "Acceso a la newsletter"
+      },
+      "gold": {
+        "perk1": "Acceso a los drops 12 h antes",
+        "perk2": "Envío siempre gratis",
+        "perk3": "Regalo de cumpleaños de −15%",
+        "perk4": "Atención prioritaria"
+      },
+      "onyx": {
+        "perk1": "Acceso 24 h antes",
+        "perk2": "Línea de SMS privada",
+        "perk3": "Regalo: chaqueta de archivo FW",
+        "perk4": "Estilista personal",
+        "perk5": "Limitado a 200 miembros"
+      }
+    }
+  },
+  "photo": {
+    "title": "Foto de perfil",
+    "google": "Usamos tu foto de Google. Puedes cambiarla por una tuya.",
+    "shown": "Se muestra en tu cuenta.",
+    "formats": "JPG, PNG o WebP, hasta {{mb}} MB.",
+    "demo": "La subida de fotos está desactivada en la cuenta demo.",
+    "uploading": "Subiendo…",
+    "upload": "Subir foto",
+    "useGoogle": "Usar foto de Google",
+    "remove": "Quitar foto",
+    "errors": {
+      "type": "Usa una imagen JPG, PNG o WebP.",
+      "size": "La imagen pesa demasiado. El límite es {{mb}} MB.",
+      "upload": "No se ha podido subir la foto. Inténtalo de nuevo."
+    }
+  },
+  "returns": {
+    "reasons": {
+      "wrong_size": "Talla incorrecta",
+      "damaged": "Llegó dañado",
+      "not_as_described": "No es como se describía",
+      "changed_mind": "He cambiado de opinión",
+      "other": "Otro"
+    },
+    "status": {
+      "requested": "Hemos recibido tu solicitud de devolución. La revisaremos en 1–2 días.",
+      "approved": "Devolución aprobada. Envía el paquete y te devolveremos el dinero cuando llegue.",
+      "rejected": "No hemos podido aceptar esta devolución.",
+      "refunded": "Reembolso hecho"
+    },
+    "return": "Devolución {{number}}",
+    "request": "Solicitar una devolución ↗",
+    "freeReturns": " Devoluciones gratis durante 30 días desde la entrega.",
+    "form": {
+      "title": "¿Qué piezas vas a devolver?",
+      "size": "· talla {{size}}",
+      "units": "Unidades de {{name}}",
+      "reason": "Motivo",
+      "comment": "Comentario ",
+      "optional": "(opcional)",
+      "sending": "Enviando…",
+      "send": "Enviar solicitud",
+      "cancel": "Cancelar"
+    },
+    "errors": {
+      "noItems": "Elige al menos una pieza para devolver.",
+      "failed": "No se ha podido enviar la solicitud. Inténtalo de nuevo."
+    }
+  }
+}

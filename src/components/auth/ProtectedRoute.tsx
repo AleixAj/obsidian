@@ -8,6 +8,7 @@
  */
 
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { Navigate, useLocation } from "react-router-dom";
 import { useUser } from "../../hooks/queries";
 
@@ -16,6 +17,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
+  const { t } = useTranslation();
   const location = useLocation();
   const { data: user, isPending, isError } = useUser();
 
@@ -24,8 +26,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
       <main className="fade-in account">
         <div className="account-main" style={{ gridColumn: "1 / -1" }}>
           <div className="data-error" style={{ borderStyle: "solid", borderColor: "var(--line-2)" }}>
-            <div className="title" style={{ color: "var(--gold)" }}>✦ Checking session…</div>
-            <div>Looking for your Obsidian member cookie.</div>
+            <div className="title" style={{ color: "var(--gold)" }}>{t("session.checking")}</div>
+            <div>{t("session.sub")}</div>
           </div>
         </div>
       </main>

@@ -1,16 +1,22 @@
 /**
  * Small formatting helpers reused across the app.
- * Keeping them isolated makes them easy to test and tweak
- * (eg. swap locale, currency).
+ * Keeping them isolated makes them easy to test and tweak.
  */
+import { currentLocale } from "../i18n";
 
 /**
- * Formats a numeric price in euros using the EU separator convention.
+ * Formats a price in euros for the current language.
  *
- * @example formatPrice(1240) → "€1,240"
+ * @example formatPrice(1240) → "€1,240" (English) or "1240 €" (Spanish)
  */
 export function formatPrice(value: number): string {
-  return "€" + value.toLocaleString("en-US", { minimumFractionDigits: 0 });
+  return value.toLocaleString(currentLocale(), {
+    style: "currency",
+    currency: "EUR",
+    // Whole prices show no decimals, others show up to 2.
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
 }
 
 /**

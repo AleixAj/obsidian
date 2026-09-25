@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
 import { mediaUrl } from "../../lib/api";
@@ -18,6 +19,7 @@ interface PanelProps {
  *   - free it, or put a product in it when it's free
  */
 export function LocationPanel({ location, onClose }: PanelProps) {
+  const { t } = useTranslation("admin");
   const { push } = useToast();
   const restock = useRestockLocation();
   const assign = useAssignLocation();
@@ -40,8 +42,8 @@ export function LocationPanel({ location, onClose }: PanelProps) {
 
   function handleRestock() {
     restock.mutate(location.id, {
-      onSuccess: () => push(`${location.code} restocked with ${missing} units.`),
-      onError: (error) => push(errorMessage(error, "Could not restock."), "warn"),
+      onSuccess: () => push(t("warehouse.panel.restocked", { code: location.code, units: missing })),
+      onError: (error) => push(errorMessage(error, t("warehouse.panel.restockError")), "warn"),
     });
   }
 
@@ -51,28 +53,28 @@ export function LocationPanel({ location, onClose }: PanelProps) {
       {
         onSuccess: () => {
           setVariantId("");
-          push(id ? `Product placed in ${location.code}.` : `${location.code} is free now.`);
+          push(id ? t("warehouse.panel.placed", { code: location.code }) : t("warehouse.panel.freed", { code: location.code }));
         },
-        onError: (error) => push(errorMessage(error, "Could not update the location."), "warn"),
+        onError: (error) => push(errorMessage(error, t("warehouse.panel.updateError")), "warn"),
       },
     );
   }
 
   return (
-    <section ref={panelRef} className="adm-card wh-panel" aria-label={`Location ${location.code}`}>
+    <section ref={panelRef} className="adm-card wh-panel" aria-label={t("warehouse.panel.region", { code: location.code })}>
       <div className="adm-card-head">
-        <h2>Location</h2>
-        <button type="button" className="adm-icon-btn" onClick={onClose} aria-label="Close details">
+        <h2>{t("warehouse.panel.title")}</h2>
+        <button type="button" className="adm-icon-btn" onClick={onClose} aria-label={t("warehouse.panel.close")}>
           ×
         </button>
       </div>
 
       <div className="wh-panel-code">
         <strong className="adm-mono">{location.code}</strong>
-        <span className={`wh-state is-${location.state}`}>{STATE_LABELS[location.state]}</span>
+        <span className={`wh-state is-${location.state}`}>{t(STATE_LABELS[location.state])}</span>
       </div>
       <p className="adm-muted adm-small">
-        Aisle {location.aisle} · bay {location.bay} · level {location.level}
+        {t("warehouse.panel.position", { aisle: location.aisle, bay: location.bay, level: location.level })}
       </p>
 
       {location.variant ? (
@@ -85,14 +87,14 @@ export function LocationPanel({ location, onClose }: PanelProps) {
               </Link>
               <small className="adm-cell-sub adm-mono">{location.variant.sku}</small>
               <small className="adm-cell-sub">
-                <span className="adm-swatch" style={{ background: location.variant.color_hex }} /> size{" "}
-                {location.variant.size_label}
+                <span className="adm-swatch" style={{ background: location.variant.color_hex }} />{" "}
+                {t("warehouse.panel.size", { size: location.variant.size_label })}
               </small>
             </div>
           </div>
 
           <div className="wh-panel-units">
-            <span>Units</span>
+            <span>{t("common.units")}</span>
             <strong className="adm-mono">
               {location.stock} / {location.capacity}
             </strong>
@@ -100,31 +102,31 @@ export function LocationPanel({ location, onClose }: PanelProps) {
           <span className="wh-bar wh-bar--big">
             <span className={`is-${location.state}`} style={{ width: `${fillRatio(location) * 100}%` }} />
           </span>
-          <p className="adm-muted adm-small">Alert when {location.variant.low_stock_at} units or fewer.</p>
+          <p className="adm-muted adm-small">{t("warehouse.panel.alertAt", { units: location.variant.low_stock_at })}</p>
 
           <div className="adm-actions">
             <button type="button" className="adm-btn adm-btn--gold" onClick={handleRestock} disabled={busy || missing <= 0}>
-              {missing > 0 ? `Restock +${missing} units` : "Location is full"}
+              {missing > 0 ? t("warehouse.panel.restock", { units: missing }) : t("warehouse.panel.full")}
             </button>
             <button type="button" className="adm-btn" onClick={() => handleAssign(null)} disabled={busy}>
-              Free this location
+              {t("warehouse.panel.free")}
             </button>
           </div>
         </>
       ) : (
         <div className="adm-form">
-          <p className="adm-muted">This location is free. Place a product that has no location yet:</p>
+          <p className="adm-muted">{t("warehouse.panel.isFree")}</p>
           {unplaced.length === 0 ? (
-            <p className="adm-muted adm-small">Every product already has a place.</p>
+            <p className="adm-muted adm-small">{t("warehouse.panel.allPlaced")}</p>
           ) : (
             <>
               <select
                 className="adm-input"
                 value={variantId}
                 onChange={(e) => setVariantId(e.target.value)}
-                aria-label="Product to place"
+                aria-label={t("warehouse.panel.productToPlace")}
               >
-                <option value="">Choose a product…</option>
+                <option value="">{t("warehouse.panel.choose")}</option>
                 {unplaced.map((variant) => (
                   <option key={variant.id} value={variant.id}>
                     {variant.product_name} · {variant.size_label} · {variant.sku}
@@ -137,7 +139,7 @@ export function LocationPanel({ location, onClose }: PanelProps) {
                 onClick={() => handleAssign(Number(variantId))}
                 disabled={!variantId || busy}
               >
-                Place here
+                {t("warehouse.panel.placeHere")}
               </button>
             </>
           )}

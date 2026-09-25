@@ -1,1 +1,308 @@
-{}
+{
+  "auth": {
+    "errors": {
+      "oauth": "Social login is not configured yet. Add provider credentials in the Laravel .env.",
+      "acceptTerms": "Please accept the terms before creating an account.",
+      "invalid": "Invalid credentials or email already in use.",
+      "failed": "Auth failed. Try again.",
+      "demo": "Could not open the demo account. Try again in a moment."
+    },
+    "side": {
+      "badge": "FW 26 ✦ Inner Circle Members",
+      "title": {
+        "the": "The ",
+        "night": "night",
+        "is": " is",
+        "onlyFor": "only for ",
+        "members": "members",
+        "end": "."
+      },
+      "perks": {
+        "earlyAccess1": "Early access",
+        "earlyAccess2": "to every drop",
+        "birthday1": "Birthday",
+        "birthday2": "discount",
+        "returns1": "Free",
+        "returns2": "returns"
+      }
+    },
+    "eyebrow": {
+      "signin": "✦ Welcome back",
+      "signup": "✦ Join Obsidian"
+    },
+    "title": {
+      "signin1": "Sign ",
+      "signin2": "in",
+      "signup1": "Create ",
+      "signup2": "account"
+    },
+    "demo": {
+      "title": "✦ Reviewing this project?",
+      "text": "Skip the sign up. Explore it with sample data in one click.",
+      "opening": "Opening…",
+      "customer": "Demo customer",
+      "admin": "Admin panel ↗"
+    },
+    "tabs": {
+      "signin": "Sign in",
+      "signup": "Create account"
+    },
+    "fields": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "emailPlaceholder": "you@email.com",
+      "password": "Password",
+      "forgot": "Forgot?",
+      "passwordPlaceholder": "Min. 8 characters"
+    },
+    "agree": {
+      "start": "I agree to the ",
+      "terms": "Terms",
+      "and": " and ",
+      "privacy": "Privacy Policy",
+      "end": ". Subscribe me to the Inner Circle newsletter for early drops and exclusive pieces."
+    },
+    "submit": {
+      "working": "Working...",
+      "signin": "Sign in",
+      "signup": "Create account"
+    },
+    "divider": "Or continue with",
+    "foot": {
+      "newHere": "New here?",
+      "createAccount": "Create an account ↗",
+      "alreadyMember": "Already a member?",
+      "signIn": "Sign in ↗",
+      "guest": "← Continue as guest"
+    }
+  },
+  "status": {
+    "pending": "Pending",
+    "paid": "Paid",
+    "preparing": "Preparing",
+    "shipped": "In transit",
+    "delivered": "Delivered",
+    "returned": "Returned",
+    "cancelled": "Cancelled"
+  },
+  "dates": {
+    "pending": "Pending",
+    "pendingSync": "Pending sync",
+    "today": "Today · {{time}} Barcelona",
+    "day": "{{day}} · {{time}} Barcelona"
+  },
+  "nav": {
+    "overview": "Overview",
+    "orders": "Orders",
+    "wishlist": "Wishlist",
+    "addresses": "Addresses",
+    "settings": "Settings",
+    "rewards": "Inner Circle",
+    "tier": "Inner Circle · Gold",
+    "signingOut": "Signing out...",
+    "signOut": "Sign out"
+  },
+  "orderRow": {
+    "order": "Order",
+    "pieces_one": "{{count}} piece",
+    "pieces_other": "{{count}} pieces",
+    "shipping": "2 days · DHL Express",
+    "view": "View order {{number}}"
+  },
+  "overview": {
+    "memberSince": "Member since 2024 ✦ {{tier}} Tier",
+    "welcome": "Welcome back, ",
+    "member": "Member",
+    "lastLogin": "✦ Last login",
+    "stats": {
+      "totalOrders": "Total orders",
+      "synced": "Synced from backend",
+      "lifetimeSpend": "Lifetime spend",
+      "tierUnlocked": "{{tier}} tier unlocked",
+      "rewardPoints": "Reward points",
+      "credit": "+€48 credit available",
+      "wishlist": "Wishlist",
+      "backInStock": "3 back in stock"
+    },
+    "tier": {
+      "tag": "Inner Circle ✦ Gold",
+      "title": "You're {{amount}} from Onyx tier.",
+      "text": "Onyx unlocks 24h early access to every drop, a personal stylist via WhatsApp, and the FW26 archive jacket as a welcome gift. Limited to 200 members worldwide.",
+      "progress": "{{percent}}% to Onyx"
+    },
+    "recent": "Recent orders ",
+    "recentRange": "— Last 30 days",
+    "viewAll": "View all"
+  },
+  "orders": {
+    "summary_one": "✦ {{count}} order · {{total}} total",
+    "summary_other": "✦ {{count}} orders · {{total}} total",
+    "title1": "Your ",
+    "title2": "orders",
+    "filters": {
+      "all": "All ({{n}})",
+      "shipped": "In transit ({{n}})",
+      "delivered": "Delivered ({{n}})",
+      "cancelled": "Cancelled ({{n}})"
+    },
+    "loading": "Loading your orders…",
+    "error": "Couldn't load your orders."
+  },
+  "wishlist": {
+    "eyebrowEmpty": "✦ Saved pieces",
+    "eyebrow": "✦ {{n}} saved · 3 back in stock",
+    "title1": "Your ",
+    "title2": "wishlist",
+    "empty": {
+      "title": "Nothing saved yet",
+      "text": "Tap the heart on any piece to save it here. We'll let you know when items go on sale or come back in stock.",
+      "cta": "Explore the drop"
+    },
+    "share": "Share wishlist ↗",
+    "removeFromWishlist": "Remove from wishlist",
+    "addToBag": "Add to bag — {{price}}",
+    "remove": "Remove"
+  },
+  "addresses": {
+    "eyebrow": "✦ Shipping & billing",
+    "title1": "Your ",
+    "title2": "addresses",
+    "form": {
+      "new": "New address",
+      "edit": "Edit address",
+      "saved": "Saved to your authenticated Obsidian account.",
+      "label": "Label",
+      "labelPlaceholder": "Home",
+      "fullName": "Full name",
+      "line1": "Address line 1",
+      "line2": "Address line 2",
+      "city": "City",
+      "region": "Region",
+      "postalCode": "Postal code",
+      "country": "Country code",
+      "phone": "Phone",
+      "default": "Use as default shipping address.",
+      "saving": "Saving...",
+      "save": "Save address",
+      "cancel": "Cancel"
+    },
+    "defaultName": "Obsidian Member",
+    "loading": "Loading your addresses…",
+    "error": "Couldn't load your addresses.",
+    "badge": "Default",
+    "fallbackLabel": "Address",
+    "edit": "Edit",
+    "setDefault": "Set default",
+    "remove": "Remove",
+    "addNew": "Add new address"
+  },
+  "settings": {
+    "eyebrow": "✦ Profile & preferences",
+    "title": "Settings",
+    "profile": {
+      "title": "Profile",
+      "text": "This is the name printed on shipping documents and used for sizing recommendations.",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "phone": "Phone",
+      "saved": "Profile saved.",
+      "demoLocked": "The demo account details can't be changed.",
+      "saveFailed": "Could not save the profile.",
+      "error": "Couldn't save profile. Email may already be in use.",
+      "saving": "Saving...",
+      "save": "Save profile"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "text": "How and when we reach you. Inner Circle members get a private SMS before public drops.",
+      "drops": "Drop notifications",
+      "updates": "Order updates",
+      "backInStock": "Back-in-stock alerts",
+      "newsletter": "Newsletter ✦ Lookbook",
+      "birthday": "Birthday gift reminder"
+    },
+    "deleteAccount": "Delete account"
+  },
+  "rewards": {
+    "eyebrow": "✦ Members only · Gold tier",
+    "current": "Current ✦ Gold",
+    "points": "2,180 points · €48 credit available",
+    "text": "Spend €4 to earn 1 point. Redeem 100 points = €2 off. Points never expire while your tier is active.",
+    "progress": " / 3,200 to Onyx",
+    "redeem": "Redeem points",
+    "benefits": "Tier benefits",
+    "badgeCurrent": "Current",
+    "badgeLocked": "Locked",
+    "tiers": {
+      "silver": {
+        "perk1": "Free shipping over €100",
+        "perk2": "30-day returns",
+        "perk3": "Newsletter access"
+      },
+      "gold": {
+        "perk1": "12h early access to drops",
+        "perk2": "Free shipping always",
+        "perk3": "−15% birthday gift",
+        "perk4": "Priority support"
+      },
+      "onyx": {
+        "perk1": "24h early access",
+        "perk2": "Private SMS line",
+        "perk3": "FW archive jacket gift",
+        "perk4": "Personal stylist",
+        "perk5": "Limited to 200 members"
+      }
+    }
+  },
+  "photo": {
+    "title": "Profile photo",
+    "google": "We use your Google photo. You can replace it with your own.",
+    "shown": "Shown in your account.",
+    "formats": "JPG, PNG or WebP, up to {{mb}} MB.",
+    "demo": "Photo uploads are turned off for the demo account.",
+    "uploading": "Uploading…",
+    "upload": "Upload photo",
+    "useGoogle": "Use Google photo",
+    "remove": "Remove photo",
+    "errors": {
+      "type": "Use a JPG, PNG or WebP image.",
+      "size": "The image is too big. The limit is {{mb}} MB.",
+      "upload": "Could not upload the photo. Try again."
+    }
+  },
+  "returns": {
+    "reasons": {
+      "wrong_size": "Wrong size",
+      "damaged": "Arrived damaged",
+      "not_as_described": "Not as described",
+      "changed_mind": "Changed my mind",
+      "other": "Other"
+    },
+    "status": {
+      "requested": "We received your return request. We'll review it in 1–2 days.",
+      "approved": "Return approved. Send the parcel and we'll refund you when it arrives.",
+      "rejected": "We couldn't accept this return.",
+      "refunded": "Refund done"
+    },
+    "return": "Return {{number}}",
+    "request": "Request a return ↗",
+    "freeReturns": " Free returns within 30 days of delivery.",
+    "form": {
+      "title": "Which pieces are you sending back?",
+      "size": "· size {{size}}",
+      "units": "Units of {{name}}",
+      "reason": "Reason",
+      "comment": "Comment ",
+      "optional": "(optional)",
+      "sending": "Sending…",
+      "send": "Send request",
+      "cancel": "Cancel"
+    },
+    "errors": {
+      "noItems": "Choose at least one piece to send back.",
+      "failed": "Could not send the request. Try again."
+    }
+  }
+}

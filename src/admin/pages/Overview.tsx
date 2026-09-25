@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { useUser } from "../../hooks/queries";
 import type { Range } from "../api";
@@ -6,38 +7,30 @@ import { KpiCard } from "../components/KpiCard";
 import { PageHeader } from "../components/PageHeader";
 import { SalesChart } from "../components/SalesChart";
 import { StatusBadge } from "../components/StatusBadge";
-import { money, moneyShort, shortDate } from "../format";
+import { count, money, moneyShort, shortDate } from "../format";
 import { useDashboard } from "../hooks";
 
-const RANGES: { value: Range; label: string }[] = [
-  { value: "today", label: "Today" },
-  { value: "7d", label: "7 days" },
-  { value: "30d", label: "30 days" },
-];
-
-const RANGE_TITLES: Record<Range, string> = {
-  today: "Sales · today by hour",
-  "7d": "Sales · last 7 days",
-  "30d": "Sales · last 30 days",
-};
+// Button texts and chart titles are in admin.json: "overview.ranges.7d", "overview.chartTitles.7d"...
+const RANGES: Range[] = ["today", "7d", "30d"];
 
 /** First page of the panel: KPIs, sales chart, best sellers and latest orders. */
 export function Overview() {
+  const { t } = useTranslation("admin");
   const [range, setRange] = useState<Range>("30d");
   const { data, isPending, isError } = useDashboard(range);
   const { data: user } = useUser();
   const canSeeStock = user?.permissions.includes("stock") ?? false;
 
   const rangeSwitch = (
-    <div className="adm-segmented" role="group" aria-label="Period">
+    <div className="adm-segmented" role="group" aria-label={t("overview.period")}>
       {RANGES.map((option) => (
         <button
-          key={option.value}
+          key={option}
           type="button"
-          className={range === option.value ? "is-active" : ""}
-          onClick={() => setRange(option.value)}
+          className={range === option ? "is-active" : ""}
+          onClick={() => setRange(option)}
         >
-          {option.label}
+          {t(`overview.ranges.${option}`)}
         </button>
       ))}
     </div>
@@ -46,8 +39,8 @@ export function Overview() {
   if (isError) {
     return (
       <>
-        <PageHeader title="Overview" actions={rangeSwitch} />
-        <div className="adm-empty">Could not load the dashboard.</div>
+        <PageHeader title={t("overview.title")} actions={rangeSwitch} />
+        <div className="adm-empty">{t("overview.loadError")}</div>
       </>
     );
   }
@@ -55,8 +48,8 @@ export function Overview() {
   if (isPending) {
     return (
       <>
-        <PageHeader title="Overview" actions={rangeSwitch} />
-        <div className="adm-loading">Loading numbers…</div>
+        <PageHeader title={t("overview.title")} actions={rangeSwitch} />
+        <div className="adm-loading">{t("overview.loading")}</div>
       </>
     );
   }
@@ -66,32 +59,32 @@ export function Overview() {
 
   return (
     <>
-      <PageHeader title="Overview" subtitle="How the store is doing" actions={rangeSwitch} />
+      <PageHeader title={t("overview.title")} subtitle={t("overview.subtitle")} actions={rangeSwitch} />
 
       <section className="adm-kpis">
-        <KpiCard label="Sales" kpi={data.kpis.sales_cents} format={moneyShort} />
-        <KpiCard label="Orders" kpi={data.kpis.orders} format={(value) => value.toLocaleString("en")} />
-        <KpiCard label="Average ticket" kpi={data.kpis.average_ticket_cents} format={money} />
-        <KpiCard label="Return rate" kpi={data.kpis.return_rate} format={(value) => `${value}%`} lowerIsBetter />
+        <KpiCard label={t("overview.kpis.sales")} kpi={data.kpis.sales_cents} format={moneyShort} />
+        <KpiCard label={t("overview.kpis.orders")} kpi={data.kpis.orders} format={count} />
+        <KpiCard label={t("overview.kpis.averageTicket")} kpi={data.kpis.average_ticket_cents} format={money} />
+        <KpiCard label={t("overview.kpis.returnRate")} kpi={data.kpis.return_rate} format={(value) => `${count(value)}%`} lowerIsBetter />
       </section>
 
       <section className="adm-card adm-chart-card">
         <div className="adm-card-head">
-          <h2>{RANGE_TITLES[range]}</h2>
+          <h2>{t(`overview.chartTitles.${range}`)}</h2>
           <div className="adm-legend">
-            <span className="is-current">This period</span>
-            <span className="is-previous">Previous</span>
+            <span className="is-current">{t("chart.thisPeriod")}</span>
+            <span className="is-previous">{t("chart.previous")}</span>
           </div>
         </div>
-        <SalesChart points={data.chart} />
+        <SalesChart points={data.chart} byHour={range === "today"} />
       </section>
 
       <section className="adm-grid-2">
         <div className="adm-card">
           <div className="adm-card-head">
-            <h2>Best sellers</h2>
+            <h2>{t("overview.bestSellers")}</h2>
           </div>
-          {data.top_products.length === 0 && <p className="adm-muted">No sales in this period yet.</p>}
+          {data.top_products.length === 0 && <p className="adm-muted">{t("overview.noSales")}</p>}
           <ul className="adm-top-list">
             {data.top_products.map((product) => (
               <li key={product.slug}>
@@ -99,7 +92,7 @@ export function Overview() {
                   <span>{product.name}</span>
                   <strong>{moneyShort(product.revenue_cents)}</strong>
                 </div>
-                <div className="adm-top-meta">{product.units} units</div>
+                <div className="adm-top-meta">{t("overview.units", { count: product.units })}</div>
                 <div className="adm-bar">
                   <span style={{ width: `${(product.revenue_cents / topRevenue) * 100}%` }} />
                 </div>
@@ -110,9 +103,9 @@ export function Overview() {
 
         <div className="adm-card">
           <div className="adm-card-head">
-            <h2>Recent orders</h2>
+            <h2>{t("overview.recentOrders")}</h2>
             <Link to="/admin/orders" className="adm-link">
-              See all
+              {t("overview.seeAll")}
             </Link>
           </div>
           <ul className="adm-recent-list">
@@ -137,9 +130,9 @@ export function Overview() {
       {canSeeStock && data.low_stock.length > 0 && (
         <section className="adm-card">
           <div className="adm-card-head">
-            <h2>Low stock · {data.badges.low_stock} variants</h2>
+            <h2>{t("overview.lowStock", { count: data.badges.low_stock })}</h2>
             <Link to="/admin/products?stock=low" className="adm-link">
-              See all
+              {t("overview.seeAll")}
             </Link>
           </div>
           <ul className="adm-low-list">
@@ -150,11 +143,11 @@ export function Overview() {
                   <span className="adm-recent-name">
                     {item.product_name}
                     <small className="adm-mono">
-                      {item.sku} · size {item.size_label}
+                      {t("overview.sizeLine", { sku: item.sku, size: item.size_label })}
                     </small>
                   </span>
                   <strong className={item.stock === 0 ? "adm-stock-out" : "adm-stock-low"}>
-                    {item.stock === 0 ? "Out" : `${item.stock} left`}
+                    {item.stock === 0 ? t("overview.out") : t("overview.left", { units: item.stock })}
                   </strong>
                 </Link>
               </li>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 /**
@@ -15,8 +16,9 @@ interface LogoProps {
 }
 
 export function Logo({ markOnly = false, className = "", onClick }: LogoProps) {
+  const { t } = useTranslation();
   return (
-    <Link to="/" className={`logo ${className}`} aria-label="Obsidian home" onClick={onClick}>
+    <Link to="/" className={`logo ${className}`} aria-label={t("logo.home")} onClick={onClick}>
       <img src="/obsidian-logo.png" alt="" aria-hidden="true" />
       {!markOnly && <span>OBSIDIAN</span>}
     </Link>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 import { ProductCard } from "../components/product/ProductCard";
 import { ProductGridSkeleton } from "../components/product/ProductCardSkeleton";
@@ -9,43 +10,35 @@ import { compareNewCollectionOrder } from "../constants/catalog";
 import { useCategories, useProducts } from "../hooks/queries";
 import type { CategoryMeta } from "../lib/api";
 import type { Category } from "../types";
+import { formatPrice } from "../utils/format";
 
 /**
  * Fallback used when the categories endpoint hasn't responded yet or
  * the route param doesn't map to a known slug (e.g. `/shop/archive`,
  * which still isn't seeded server-side). Keeps the header rendering
  * something on-brand instead of flashing empty text.
+ * The texts live in the translations (listing.defaultMeta.*), so the
+ * object is built inside the component.
  */
-const DEFAULT_META: CategoryMeta = {
-  eyebrow: "FW 26 ✦ Drop 04",
-  title: "arrivals",
-  goldWord: "New",
-  count: 0,
-};
 
 /** Sort modes the user can pick. */
 type SortMode = "featured" | "newest" | "priceAsc" | "priceDesc" | "best";
 type PriceHandle = "min" | "max";
 
-/** Color filter options shown in the sidebar. */
+/** Color filter options shown in the sidebar. `name` is a translation key (listing.colors.*). */
 const COLOR_FILTERS: { hex: string; name: string }[] = [
-  { hex: "#0a0a0a", name: "Obsidian" },
-  { hex: "#d4af37", name: "Gold" },
-  { hex: "#3a342a", name: "Tobacco" },
-  { hex: "#f5efe2", name: "Bone" },
-  { hex: "#5a4a2a", name: "Bronze" },
-  { hex: "#1a1818", name: "Charcoal" },
+  { hex: "#0a0a0a", name: "obsidian" },
+  { hex: "#d4af37", name: "gold" },
+  { hex: "#3a342a", name: "tobacco" },
+  { hex: "#f5efe2", name: "bone" },
+  { hex: "#5a4a2a", name: "bronze" },
+  { hex: "#1a1818", name: "charcoal" },
 ];
 
 const SIZE_FILTERS = ["XS", "S", "M", "L", "XL", "XXL", "28", "30", "32", "34"];
 
-const SORT_OPTIONS: { value: SortMode; label: string }[] = [
-  { value: "featured", label: "Sort: Featured" },
-  { value: "newest", label: "Sort: Newest" },
-  { value: "priceAsc", label: "Sort: Price: Low to High" },
-  { value: "priceDesc", label: "Sort: Price: High to Low" },
-  { value: "best", label: "Sort: Best Sellers" },
-];
+/** Each sort mode is also its translation key (listing.sort.*). */
+const SORT_OPTIONS: SortMode[] = ["featured", "newest", "priceAsc", "priceDesc", "best"];
 
 const PRICE_MIN = 0;
 const PRICE_MAX = 890;
@@ -59,6 +52,7 @@ const PRICE_MAX = 890;
  * (size · colour · sort) once react-query hands it the list.
  */
 export function Shop() {
+  const { t } = useTranslation("shop");
   const { cat = "new" } = useParams<{ cat: Category }>();
 
   const {
@@ -69,7 +63,13 @@ export function Shop() {
   } = useProducts(cat);
   const { data: categoryMap } = useCategories();
 
-  const meta = categoryMap?.[cat] ?? DEFAULT_META;
+  const defaultMeta: CategoryMeta = {
+    eyebrow: t("listing.defaultMeta.eyebrow"),
+    title: t("listing.defaultMeta.title"),
+    goldWord: t("listing.defaultMeta.goldWord"),
+    count: 0,
+  };
+  const meta = categoryMap?.[cat] ?? defaultMeta;
 
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [color, setColor] = useState<string | null>(null);
@@ -203,9 +203,9 @@ export function Shop() {
     <main className="fade-in">
       <section className="plp-head">
         <div className="breadcrumb">
-          <Link to="/">Home</Link>
+          <Link to="/">{t("listing.home")}</Link>
           <span className="sep">/</span>
-          <span>Shop</span>
+          <span>{t("listing.shop")}</span>
           <span className="sep">/</span>
           <span className="here">{cat.toUpperCase()}</span>
         </div>
@@ -234,24 +234,24 @@ export function Shop() {
         onClick={() => setFiltersOpen((v) => !v)}
         aria-expanded={filtersOpen}
       >
-        {filtersOpen ? "Hide filters" : "Show filters"} <Icon.ArrowDown />
+        {filtersOpen ? t("listing.hideFilters") : t("listing.showFilters")} <Icon.ArrowDown />
       </button>
 
       <div className="plp-body">
-        <aside className={`filters ${filtersOpen ? "open" : ""}`} aria-label="Filters">
+        <aside className={`filters ${filtersOpen ? "open" : ""}`} aria-label={t("listing.filters")}>
           <div className="filter-group">
             <h4>
-              Sort by <Icon.ArrowDown />
+              {t("listing.sortBy")} <Icon.ArrowDown />
             </h4>
             <ul className="filter-list">
-              {SORT_OPTIONS.map((opt) => (
-                <li key={opt.value}>
+              {SORT_OPTIONS.map((option) => (
+                <li key={option}>
                   <label
-                    className={sort === opt.value ? "active" : ""}
-                    onClick={() => setSort(opt.value)}
+                    className={sort === option ? "active" : ""}
+                    onClick={() => setSort(option)}
                   >
-                    <span className="box">{sort === opt.value && "✓"}</span>
-                    {opt.label.replace("Sort: ", "")}
+                    <span className="box">{sort === option && "✓"}</span>
+                    {t(`listing.sort.${option}`)}
                   </label>
                 </li>
               ))}
@@ -259,7 +259,7 @@ export function Shop() {
           </div>
 
           <div className="filter-group">
-            <h4>Size</h4>
+            <h4>{t("listing.size")}</h4>
             <div className="size-chips">
               {SIZE_FILTERS.map((s) => (
                 <button
@@ -275,7 +275,7 @@ export function Shop() {
           </div>
 
           <div className="filter-group">
-            <h4>Color</h4>
+            <h4>{t("listing.color")}</h4>
             <div className="color-chips">
               {COLOR_FILTERS.map((c) => (
                 <span
@@ -283,16 +283,16 @@ export function Shop() {
                   className={`color-chip ${color === c.hex ? "active" : ""}`}
                   style={{ background: c.hex }}
                   onClick={() => setColor(color === c.hex ? null : c.hex)}
-                  title={c.name}
+                  title={t(`listing.colors.${c.name}`)}
                 />
               ))}
             </div>
           </div>
 
           <div className="filter-group">
-            <h4>Price</h4>
+            <h4>{t("listing.price")}</h4>
             <div className="price-range-label">
-              €{minPrice} — €{maxPrice}
+              {formatPrice(minPrice)} — {formatPrice(maxPrice)}
             </div>
             <div className="price-range" ref={priceRangeRef} onPointerDown={startNearestPriceDrag}>
               <div className="price-range-track" />
@@ -303,7 +303,7 @@ export function Shop() {
               <div
                 className="price-range-thumb"
                 role="slider"
-                aria-label="Minimum price"
+                aria-label={t("listing.minPrice")}
                 aria-valuemin={PRICE_MIN}
                 aria-valuemax={maxPrice}
                 aria-valuenow={minPrice}
@@ -313,7 +313,7 @@ export function Shop() {
               <div
                 className="price-range-thumb"
                 role="slider"
-                aria-label="Maximum price"
+                aria-label={t("listing.maxPrice")}
                 aria-valuemin={minPrice}
                 aria-valuemax={PRICE_MAX}
                 aria-valuenow={maxPrice}
@@ -324,7 +324,7 @@ export function Shop() {
           </div>
 
           <button type="button" className="clear-filters" onClick={clearFilters}>
-            Clear filters
+            {t("listing.clearFilters")}
           </button>
         </aside>
 
@@ -333,30 +333,30 @@ export function Shop() {
             <div className="left">
               <span>
                 {productsPending
-                  ? "Loading…"
-                  : `${visible.length} ${visible.length === 1 ? "result" : "results"}`}
+                  ? t("listing.loading")
+                  : t("listing.results", { count: visible.length })}
               </span>
               {selectedSizes.map((selectedSize) => (
                 <button type="button" className="chip" key={selectedSize} onClick={() => toggleSize(selectedSize)}>
-                  Size: {selectedSize} ✕
+                  {t("listing.chipSize", { size: selectedSize })}
                 </button>
               ))}
               {(minPrice !== PRICE_MIN || maxPrice !== PRICE_MAX) && (
                 <button type="button" className="chip" onClick={() => setPriceRange([PRICE_MIN, PRICE_MAX])}>
-                  Price: €{minPrice} — €{maxPrice} ✕
+                  {t("listing.chipPrice", { min: formatPrice(minPrice), max: formatPrice(maxPrice) })}
                 </button>
               )}
               {color && (
                 <button type="button" className="chip" onClick={() => setColor(null)}>
-                  Color ✕
+                  {t("listing.chipColor")}
                 </button>
               )}
             </div>
             <div className="right">
               <select value={sort} onChange={(e) => setSort(e.target.value as SortMode)}>
-                {SORT_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
+                {SORT_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {t("listing.sortOption", { label: t(`listing.sort.${option}`) })}
                   </option>
                 ))}
               </select>
@@ -367,17 +367,17 @@ export function Shop() {
             <ProductGridSkeleton count={6} className="plp-grid" />
           ) : productsError ? (
             <div className="data-error">
-              <div className="title">✦ Couldn't load this category</div>
-              <div>The catalogue API didn't answer.</div>
+              <div className="title">{t("listing.error")}</div>
+              <div>{t("errors.apiDown")}</div>
               <button
                 type="button"
                 className="btn"
                 style={{ marginTop: 16 }}
                 onClick={() => refetchProducts()}
               >
-                Retry <Icon.Arrow />
+                {t("errors.retry")} <Icon.Arrow />
               </button>
-              <div className="hint">Backend offline? `php artisan serve` on :8000</div>
+              <div className="hint">{t("errors.hint")}</div>
             </div>
           ) : visible.length > 0 ? (
             <div className="plp-grid">
@@ -389,14 +389,14 @@ export function Shop() {
             </div>
           ) : (
             <div className="plp-empty">
-              No pieces match your filters.
+              {t("listing.empty")}
               <br />
               <button
                 type="button"
                 onClick={clearFilters}
                 style={{ color: "var(--gold)", textDecoration: "underline", marginTop: 12 }}
               >
-                Clear filters
+                {t("listing.clearFilters")}
               </button>
             </div>
           )}

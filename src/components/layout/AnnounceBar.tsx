@@ -1,18 +1,14 @@
+import { useTranslation } from "react-i18next";
 import { Marquee } from "../ui/Marquee";
 
-/** Thin marquee strip at the very top of the page. */
-const TOP_MESSAGES = [
-  "✦ Drop 04 — Aurum Live Now",
-  "Free shipping over €200",
-  "Inner Circle ✦ Early access",
-  "Made in Barcelona · Cast in gold",
-  "Limited to 200 units per piece",
-];
+/** Thin marquee strip at the very top of the page. Stores translation keys (announce.*). */
+const TOP_MESSAGES = ["drop", "shipping", "innerCircle", "madeIn", "limited"];
 
 export function AnnounceBar() {
+  const { t } = useTranslation();
   return (
     <div className="announce">
-      <Marquee items={TOP_MESSAGES} />
+      <Marquee items={TOP_MESSAGES.map((key) => t(`announce.${key}`))} />
     </div>
   );
 }

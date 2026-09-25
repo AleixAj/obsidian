@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
 import { useUser } from "../../hooks/queries";
@@ -9,19 +10,9 @@ import { StatusBadge } from "../components/StatusBadge";
 import { dateTime, money, STATUS_LABELS } from "../format";
 import { useAdminOrder, useUpdateOrderStatus } from "../hooks";
 
-/** Text for the buttons that move an order forward. */
-const ACTION_LABELS: Record<OrderStatus, string> = {
-  pending: "Mark as pending",
-  paid: "Mark as paid",
-  preparing: "Start preparing",
-  shipped: "Mark as shipped",
-  delivered: "Mark as delivered",
-  returned: "Mark as returned",
-  cancelled: "Cancel order",
-};
-
 /** One order: products, customer, address, status buttons and timeline. */
 export function OrderDetail() {
+  const { t } = useTranslation("admin");
   const { id } = useParams();
   const orderId = Number(id);
   const { data: user } = useUser();
@@ -30,13 +21,13 @@ export function OrderDetail() {
   const { push } = useToast();
   const [note, setNote] = useState("");
 
-  if (isPending) return <div className="adm-loading">Loading order…</div>;
+  if (isPending) return <div className="adm-loading">{t("orderDetail.loading")}</div>;
   if (isError) {
     return (
       <div className="adm-empty">
-        <strong>Order not found</strong>
+        <strong>{t("orderDetail.notFound")}</strong>
         <Link to="/admin/orders" className="adm-link">
-          Back to orders
+          {t("orderDetail.back")}
         </Link>
       </div>
     );
@@ -54,12 +45,12 @@ export function OrderDetail() {
       {
         onSuccess: () => {
           setNote("");
-          push(`Order ${order!.number} is now ${STATUS_LABELS[status].toLowerCase()}.`);
+          push(t("orderDetail.changed", { number: order!.number, status: t(STATUS_LABELS[status]).toLowerCase() }));
         },
         onError: (error) => {
           const message = error instanceof ApiError && error.status === 403
-            ? "Your role can't make this change."
-            : "Could not update the order.";
+            ? t("orderDetail.forbidden")
+            : t("orderDetail.updateError");
           push(message, "warn");
         },
       },
@@ -69,7 +60,7 @@ export function OrderDetail() {
   return (
     <>
       <Link to="/admin/orders" className="adm-back">
-        <AdminIcon.ArrowLeft /> Orders
+        <AdminIcon.ArrowLeft /> {t("orders.title")}
       </Link>
 
       <header className="adm-page-header">
@@ -77,7 +68,7 @@ export function OrderDetail() {
           <h1 className="adm-order-title">
             {order.number} <StatusBadge status={order.status} />
           </h1>
-          <p>Placed on {dateTime(order.created_at)}</p>
+          <p>{t("orderDetail.placedOn", { date: dateTime(order.created_at) })}</p>
         </div>
       </header>
 
@@ -85,18 +76,18 @@ export function OrderDetail() {
         <div className="adm-detail-main">
           <section className="adm-card">
             <div className="adm-card-head">
-              <h2>Products</h2>
+              <h2>{t("orderDetail.products")}</h2>
             </div>
             <div className="adm-table-scroll">
               <table className="adm-table adm-table--plain">
                 <thead>
                   <tr>
-                    <th>Product</th>
-                    <th>Size</th>
-                    <th>Colour</th>
-                    <th className="num">Qty</th>
-                    <th className="num">Price</th>
-                    <th className="num">Total</th>
+                    <th>{t("common.product")}</th>
+                    <th>{t("common.size")}</th>
+                    <th>{t("common.colour")}</th>
+                    <th className="num">{t("orderDetail.qty")}</th>
+                    <th className="num">{t("common.price")}</th>
+                    <th className="num">{t("common.total")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -120,15 +111,15 @@ export function OrderDetail() {
 
             <dl className="adm-totals">
               <div>
-                <dt>Subtotal</dt>
+                <dt>{t("orderDetail.subtotal")}</dt>
                 <dd>{money(order.subtotal_cents)}</dd>
               </div>
               <div>
-                <dt>Shipping</dt>
-                <dd>{order.shipping_cents === 0 ? "Free" : money(order.shipping_cents)}</dd>
+                <dt>{t("orderDetail.shipping")}</dt>
+                <dd>{order.shipping_cents === 0 ? t("orderDetail.free") : money(order.shipping_cents)}</dd>
               </div>
               <div className="is-total">
-                <dt>Total</dt>
+                <dt>{t("common.total")}</dt>
                 <dd>{money(order.total_cents)}</dd>
               </div>
             </dl>
@@ -136,7 +127,7 @@ export function OrderDetail() {
 
           <section className="adm-card">
             <div className="adm-card-head">
-              <h2>Timeline</h2>
+              <h2>{t("orderDetail.timeline")}</h2>
             </div>
             <ol className="adm-timeline">
               {[...(order.history ?? [])].reverse().map((change, index) => (
@@ -144,8 +135,8 @@ export function OrderDetail() {
                   <StatusBadge status={change.to} />
                   <div>
                     <span>
-                      {change.from ? `${STATUS_LABELS[change.from]} → ${STATUS_LABELS[change.to]}` : "Order placed"}
-                      <small> · by {change.by}</small>
+                      {change.from ? `${t(STATUS_LABELS[change.from])} → ${t(STATUS_LABELS[change.to])}` : t("orderDetail.placed")}
+                      <small> · {t("orderDetail.by", { name: change.by })}</small>
                     </span>
                     {change.note && <em>“{change.note}”</em>}
                   </div>
@@ -159,21 +150,21 @@ export function OrderDetail() {
         <aside className="adm-detail-side">
           <section className="adm-card">
             <div className="adm-card-head">
-              <h2>Update status</h2>
+              <h2>{t("orderDetail.updateStatus")}</h2>
             </div>
             {order.next_statuses.length === 0 ? (
-              <p className="adm-muted">This order is closed. No more changes.</p>
+              <p className="adm-muted">{t("orderDetail.closed")}</p>
             ) : actions.length === 0 ? (
-              <p className="adm-muted">Only customer support can mark this order as returned.</p>
+              <p className="adm-muted">{t("orderDetail.onlySupport")}</p>
             ) : (
               <>
                 <input
                   className="adm-input"
                   value={note}
                   onChange={(event) => setNote(event.target.value)}
-                  placeholder="Note (optional), e.g. tracking number"
+                  placeholder={t("orderDetail.notePlaceholder")}
                   maxLength={255}
-                  aria-label="Note"
+                  aria-label={t("common.note")}
                 />
                 <div className="adm-actions">
                   {actions.map((status) => (
@@ -184,7 +175,7 @@ export function OrderDetail() {
                       onClick={() => changeStatus(status)}
                       disabled={updateStatus.isPending}
                     >
-                      {ACTION_LABELS[status]}
+                      {t(`orderDetail.actions.${status}`)}
                     </button>
                   ))}
                 </div>
@@ -194,13 +185,13 @@ export function OrderDetail() {
 
           <section className="adm-card">
             <div className="adm-card-head">
-              <h2>Customer</h2>
+              <h2>{t("common.customer")}</h2>
             </div>
-            <p className="adm-strong">{order.customer?.name ?? "Guest"}</p>
+            <p className="adm-strong">{order.customer?.name ?? t("common.guest")}</p>
             <p className="adm-muted">{order.email}</p>
             {order.customer && user?.permissions.includes("customers") && (
               <Link to={`/admin/customers/${order.customer.id}`} className="adm-link">
-                View profile →
+                {t("common.viewProfile")}
               </Link>
             )}
           </section>
@@ -208,7 +199,7 @@ export function OrderDetail() {
           {order.shipping_address && (
             <section className="adm-card">
               <div className="adm-card-head">
-                <h2>Shipping address</h2>
+                <h2>{t("orderDetail.shippingAddress")}</h2>
               </div>
               <address className="adm-address">
                 {order.shipping_address.full_name}

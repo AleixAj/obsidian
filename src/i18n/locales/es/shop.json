@@ -1,1 +1,214 @@
-{}
+{
+  "cta": {
+    "shopDrop": "Compra el drop",
+    "viewAll": "Ver todo"
+  },
+  "errors": {
+    "apiDown": "La API del catálogo no ha respondido.",
+    "retry": "Reintentar",
+    "hint": "¿Backend apagado? `php artisan serve` en :8000"
+  },
+  "home": {
+    "hero": {
+      "stats1": "FW 26 ✦ Vol. 04",
+      "stats2": "14 piezas ✦ Edición limitada",
+      "live": "FW 26 / Drop 04 — Ya disponible",
+      "text": "Un estudio de sombra y brillo. Punto de peso, herrajes fundidos en oro y siluetas a medida para la ciudad de madrugada.",
+      "lookbook": "Lookbook",
+      "scroll": "Baja"
+    },
+    "marquee": {
+      "shipping": "Envío gratis a partir de 200 €",
+      "live": "FW 26 — Drop 04 ya disponible",
+      "early": "Acceso anticipado para miembros",
+      "cast": "Fundido en oro · Hecho para la madrugada",
+      "handFinished": "Acabado a mano en Los Ángeles",
+      "limited": "Limitado a 200 unidades"
+    },
+    "featured": {
+      "eyebrow": "Destacados ✦ Drop 04",
+      "title": "Piezas",
+      "titleGold": "clave",
+      "error": "✦ No se ha podido cargar el drop"
+    },
+    "lookbook": {
+      "frame": "LOOKBOOK · FOTO 03 · SASTRERÍA DE MEDIANOCHE",
+      "eyebrow": "Lookbook 04 ✦ Dirigido por Aleix",
+      "line1": "Nacido en la",
+      "line2": "ciudad. ",
+      "line3": "Forjado",
+      "line4": "en oro.",
+      "pieces": "Piezas",
+      "cities": "Ciudades",
+      "cast": "Modelos",
+      "enter": "Ver el lookbook"
+    },
+    "statement": {
+      "label": "Obsidian — muro de grafiti",
+      "eyebrow": "Obsidian ✦ En la calle",
+      "before": "Para llevar",
+      "gold": "donde",
+      "after": "la ciudad",
+      "line2": "se olvida de sí misma.",
+      "text": "De callejones con luz de sodio a andenes del último tren: Obsidian vive donde el día no llega. Cada pieza numerada, cada drop definitivo.",
+      "seeLookbook": "Ver el lookbook"
+    },
+    "drop": {
+      "tag": "✦ Próximo lanzamiento",
+      "name": "Drop 05 — Eclipse",
+      "sub": "Acceso anticipado para miembros · 12 h antes",
+      "days": "Días",
+      "hours": "Horas",
+      "minutes": "Minutos",
+      "seconds": "Segundos",
+      "notify": "Avísame",
+      "waiting": "12.847 esperando"
+    },
+    "categories": {
+      "eyebrow": "Categorías ✦ FW26",
+      "title": "Compra por",
+      "titleGold": "categoría",
+      "outerwear": "Abrigos",
+      "knitwear": "Punto",
+      "accessories": "Accesorios",
+      "pieces_one": "{{count}} pieza",
+      "pieces_other": "{{count}} piezas"
+    },
+    "quote": {
+      "part1": "\"No vestimos para la luz del día. ",
+      "gold1": "Vestimos",
+      "part2": " para la hora de después — ",
+      "part3": "cuando la ciudad se ",
+      "gold2": "olvida",
+      "part4": " de sí misma.\"",
+      "byline": "— Aleix Auqué, director creativo"
+    }
+  },
+  "listing": {
+    "defaultMeta": {
+      "eyebrow": "FW 26 ✦ Drop 04",
+      "title": "novedades",
+      "goldWord": "Las"
+    },
+    "home": "Inicio",
+    "shop": "Tienda",
+    "showFilters": "Mostrar filtros",
+    "hideFilters": "Ocultar filtros",
+    "filters": "Filtros",
+    "sortBy": "Ordenar por",
+    "sortOption": "Orden: {{label}}",
+    "sort": {
+      "featured": "Destacados",
+      "newest": "Lo más nuevo",
+      "priceAsc": "Precio: de menor a mayor",
+      "priceDesc": "Precio: de mayor a menor",
+      "best": "Más vendidos"
+    },
+    "size": "Talla",
+    "color": "Color",
+    "price": "Precio",
+    "minPrice": "Precio mínimo",
+    "maxPrice": "Precio máximo",
+    "colors": {
+      "obsidian": "Obsidian",
+      "gold": "Oro",
+      "tobacco": "Tabaco",
+      "bone": "Hueso",
+      "bronze": "Bronce",
+      "charcoal": "Carbón"
+    },
+    "clearFilters": "Quitar filtros",
+    "loading": "Cargando…",
+    "results_one": "{{count}} resultado",
+    "results_other": "{{count}} resultados",
+    "chipSize": "Talla: {{size}} ✕",
+    "chipPrice": "Precio: {{min}} — {{max}} ✕",
+    "chipColor": "Color ✕",
+    "error": "✦ No se ha podido cargar esta categoría",
+    "empty": "Ninguna pieza coincide con tus filtros."
+  },
+  "product": {
+    "loading": "✦ Cargando producto…",
+    "loadingSub": "Pidiéndolo al catálogo.",
+    "error": "✦ No se ha podido cargar este producto",
+    "home": "Inicio",
+    "views": {
+      "front": "DELANTE",
+      "back": "DETRÁS",
+      "fullLook": "LOOK COMPLETO"
+    },
+    "colors": {
+      "black": "Negro",
+      "grey": "Gris",
+      "red": "Rojo",
+      "white": "Blanco"
+    },
+    "defaultTag": "FW26 ✦ Drop 04",
+    "inStock": "En stock",
+    "save": "Ahorra un {{percent}} %",
+    "description": "Algodón portugués loopback de 580 g/m², teñido en prenda para dar profundidad y desgastado hasta una pátina carbón. Ojales de latón, tirador de cremallera bañado en oro de 24 k y forro interior bordado con el sello de Obsidian. Hecho para aguantar todos los inviernos que te quedan.",
+    "color": "Color",
+    "colorCount_one": "{{count}} color",
+    "colorCount_other": "{{count}} colores",
+    "size": "Talla",
+    "sizeGuide": "Guía de tallas ↗",
+    "soldOut": "{{sizes}} agotada · Avísame ↗",
+    "addToBag": "Añadir a la cesta",
+    "addToBagDefault": "Añadir a la cesta · talla por defecto",
+    "wishlist": "Favoritos",
+    "perks": {
+      "shippingLabel": "✦ Envío",
+      "shippingValue": "Gratis a partir de 200 € · 2 días en la UE",
+      "returnsLabel": "✦ Devoluciones",
+      "returnsValue": "30 días · Sin preguntas",
+      "madeInLabel": "✦ Hecho en",
+      "madeInValue": "Barcelona, España · Acabado a mano",
+      "materialLabel": "✦ Material",
+      "materialValue": "Loopback portugués de 580 g/m²"
+    },
+    "accordion": {
+      "details": {
+        "title": "Composición y cuidados",
+        "body": "100 % algodón orgánico portugués, 580 g/m². Teñido en prenda y lavado a la piedra. Lávalo del revés a 30 °C con colores parecidos. Dale forma y sécalo en plano. Evita el sol directo al secarlo: el oro se apaga antes que tú."
+      },
+      "fit": {
+        "title": "Corte y tallas",
+        "body": "Corte holgado y cuadrado con hombro caído. El modelo mide 184 cm y lleva una M. Talla normal: coge una menos si lo quieres más ajustado. En la talla M, el bajo queda 4 cm por debajo de la cintura."
+      },
+      "ship": {
+        "title": "Envíos y devoluciones",
+        "body": "Envío gratis en la UE a partir de 200 €. De 2 a 3 días laborables con DHL Express. Devoluciones gratis en 30 días, con las etiquetas originales puestas. Los artículos sin devolución se marcan al pagar."
+      },
+      "story": {
+        "title": "La historia",
+        "body": "Drop 04 ✦ Aurum es nuestra colección más pesada hasta hoy. Diseñada en Barcelona entre febrero y mayo, y producida en Los Ángeles con nuestros socios desde 2022. Limitada a 200 unidades por pieza, cada una con su propio número."
+      }
+    },
+    "complete": {
+      "eyebrow": "Combínalo con ✦ Recomendado",
+      "title": "Completa",
+      "titleGold": "el look"
+    }
+  },
+  "lookbook": {
+    "eyebrow": "Lookbook 04 ✦ FW26 ✦ Aurum",
+    "line1": "Nacido en la",
+    "line2": "ciudad.",
+    "line3": "Forjado en oro.",
+    "intro": "Rodado durante tres noches en Barcelona, el Lookbook 04 muestra la colección FW26 tal y como se vive: bajo luz de sodio, en calles mojadas, entre los últimos trenes. Con nuestra comunidad de artistas, deportistas y noctámbulos.",
+    "frames": {
+      "community": "FOTO 01 · COMUNIDAD",
+      "editorial": "FOTO 02 · EDITORIAL",
+      "tailoring": "FOTO 03 · SASTRERÍA DE MEDIANOCHE"
+    },
+    "quote": {
+      "before": "\"El oro no es un color. ",
+      "gold": "Es una temperatura",
+      "after": ".\""
+    }
+  },
+  "notFound": {
+    "text": "Esta pieza ya está en el archivo. Vamos a buscarte algo disponible.",
+    "back": "Volver al drop"
+  }
+}

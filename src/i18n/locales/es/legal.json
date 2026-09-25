@@ -1,1 +1,69 @@
-{}
+{
+  "eyebrow": "Legal ✦ Actualizado en agosto de 2026",
+  "back": "← Volver a Obsidian",
+  "privacy": {
+    "title": "Política de privacidad",
+    "intro": "Obsidian es una marca de streetwear ficticia creada como proyecto de portfolio. Aquí no se vende nada y nunca se procesa ningún pago, pero las cuentas y los pedidos que crees sí se guardan de verdad. Esta página explica exactamente qué significa eso.",
+    "sections": {
+      "who": {
+        "title": "Quién gestiona este sitio",
+        "p1": "Obsidian es un proyecto personal de demostración de Aleix Auqué. No es una empresa registrada y no realiza ninguna actividad comercial. Para cualquier pregunta sobre esta política o sobre los datos que tenemos sobre ti, escribe a aleixauque@gmail.com."
+      },
+      "collect": {
+        "title": "Qué datos recogemos",
+        "p1": "Si creas una cuenta con email y contraseña, guardamos tu nombre, tu dirección de email y una versión cifrada de forma segura (hash) de tu contraseña. La contraseña en sí nunca se guarda de forma legible.",
+        "p2": "Si inicias sesión con Google, Google nos comparte tu nombre, tu dirección de email y tu foto de perfil. Guardamos esos tres datos y un identificador que nos permite reconocerte la próxima vez. Nunca recibimos tu contraseña de Google y no podemos leer tu Gmail, tu Drive, tus contactos ni nada más de tu cuenta de Google.",
+        "p3": "También guardamos lo que haces dentro de la tienda: los artículos de tu bolsa, tus favoritos, las direcciones de envío que guardas y los pedidos simulados que realizas."
+      },
+      "never": {
+        "title": "Qué datos nunca recogemos",
+        "p1": "Ningún dato de pago. El proceso de compra es una simulación: no hay formulario de tarjeta, ni proveedor de pagos, ni ningún cargo. Los pedidos existen solo como filas en nuestra base de datos para que el área de cliente tenga algo que mostrar.",
+        "p2": "Ninguna cookie de publicidad o de seguimiento, ni analítica de terceros. La única cookie que usamos es la que mantiene tu sesión iniciada."
+      },
+      "why": {
+        "title": "Para qué los guardamos",
+        "p1": "Únicamente para que la tienda funcione: para mantener tu sesión iniciada, recordar tu bolsa entre visitas y mostrar tu historial de pedidos. Tus datos nunca se venden, alquilan ni comparten con terceros, y nunca se usan para enviarte publicidad."
+      },
+      "where": {
+        "title": "Dónde se guardan",
+        "p1": "Los datos se guardan en una base de datos alojada en Railway, en servidores situados en la Unión Europea. La web se sirve a través de Cloudflare. Ambos proveedores pueden acceder técnicamente a la infraestructura que contiene los datos, como cualquier proveedor de alojamiento."
+      },
+      "rights": {
+        "title": "Tus derechos",
+        "p1": "Puedes pedirnos que te mostremos, corrijamos o eliminemos de forma definitiva todos los datos que tenemos sobre ti, y lo haremos: escribe a aleixauque@gmail.com y cuenta con unos días para recibir respuesta. Si iniciaste sesión con Google, también puedes retirar el acceso de este sitio en cualquier momento desde la configuración de tu cuenta de Google, en 'Aplicaciones de terceros con acceso a la cuenta'.",
+        "p2": "Como se trata de un proyecto de demostración y no de un negocio, los datos pueden borrarse sin previo aviso, por ejemplo al reconstruir la base de datos. No guardes aquí nada que te importe perder."
+      },
+      "changes": {
+        "title": "Cambios",
+        "p1": "Si esta política cambia, la fecha que aparece al principio de la página cambiará con ella."
+      }
+    }
+  },
+  "terms": {
+    "title": "Condiciones del servicio",
+    "intro": "En resumen: Obsidian es una demostración de portfolio, no una tienda. Nada de lo que pidas llegará nunca, porque en realidad nada está a la venta.",
+    "sections": {
+      "notForSale": {
+        "title": "Aquí no se vende nada",
+        "p1": "Obsidian es una marca ficticia. Las prendas, los precios, el stock y las fechas de los drops son inventados para un portfolio de diseño y programación. Hacer un pedido crea un registro en una base de datos y nada más: no se cobra ningún pago, no se celebra ningún contrato y nunca se enviará ningún artículo."
+      },
+      "account": {
+        "title": "Tu cuenta",
+        "p1": "Eres responsable de mantener tus credenciales en privado. Por favor, no introduzcas información personal sensible en ninguna parte de este sitio: trátalo como una demostración pública, porque eso es lo que es.",
+        "p2": "Podemos eliminar cuentas o reiniciar la base de datos en cualquier momento y sin previo aviso."
+      },
+      "availability": {
+        "title": "Disponibilidad",
+        "p1": "El sitio se ofrece tal cual, sin ninguna garantía de que esté en línea, sea correcto o no tenga errores. Funciona con un alojamiento de nivel gratuito y puede dejar de estar disponible en cualquier momento."
+      },
+      "imagery": {
+        "title": "Imágenes y contenido",
+        "p1": "Las fotografías de producto y editoriales proceden de Unsplash y se usan conforme a la licencia de Unsplash. Las personas que aparecen en estas imágenes no tienen ninguna relación con este proyecto y no lo respaldan. El nombre Obsidian, el diseño y el código son obra de Aleix Auqué."
+      },
+      "contact": {
+        "title": "Contacto",
+        "p1": "Para preguntas o para pedir que se retire algún contenido: aleixauque@gmail.com."
+      }
+    }
+  }
+}

@@ -1,4 +1,6 @@
+import { useTranslation } from "react-i18next";
 import type { Kpi } from "../api";
+import { count } from "../format";
 
 interface KpiCardProps {
   label: string;
@@ -13,15 +15,16 @@ interface KpiCardProps {
 }
 
 export function KpiCard({ label, kpi, format, lowerIsBetter = false }: KpiCardProps) {
+  const { t } = useTranslation("admin");
   let changeText = "—";
   let direction = 0;
 
   if (lowerIsBetter) {
     const points = Math.round((kpi.value - kpi.previous) * 10) / 10;
-    changeText = `${points > 0 ? "+" : ""}${points} pts`;
+    changeText = t("kpi.points", { value: `${points > 0 ? "+" : ""}${count(points)}` });
     direction = points;
   } else if (kpi.change !== null) {
-    changeText = `${kpi.change > 0 ? "+" : ""}${kpi.change}%`;
+    changeText = `${kpi.change > 0 ? "+" : ""}${count(kpi.change)}%`;
     direction = kpi.change;
   }
 
@@ -34,7 +37,7 @@ export function KpiCard({ label, kpi, format, lowerIsBetter = false }: KpiCardPr
       <span className="adm-kpi-label">{label}</span>
       <strong className="adm-kpi-value">{format(kpi.value)}</strong>
       <span className={`adm-kpi-change ${tone}`}>
-        {changeText} <span>vs previous period</span>
+        {changeText} <span>{t("kpi.vsPrevious")}</span>
       </span>
     </div>
   );

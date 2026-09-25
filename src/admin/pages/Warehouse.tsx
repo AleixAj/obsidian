@@ -1,8 +1,10 @@
 import { lazy, Suspense } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
 import type { WarehouseLocation } from "../api";
 import { AdminIcon } from "../components/AdminIcon";
 import { PageHeader } from "../components/PageHeader";
+import { count } from "../format";
 import { useWarehouse } from "../hooks";
 import { LocationPanel } from "../warehouse/LocationPanel";
 import { matches, STATE_COLORS, STATE_LABELS, type StateFilter } from "../warehouse/states";
@@ -14,17 +16,15 @@ const WarehouseScene = lazy(() => import("../warehouse/WarehouseScene"));
 
 type View = "3d" | "plan" | "list";
 
-const VIEWS: { value: View; label: string }[] = [
-  { value: "3d", label: "3D" },
-  { value: "plan", label: "Plan" },
-  { value: "list", label: "List" },
-];
+// Texts in admin.json: "warehouse.views.3d"...
+const VIEWS: View[] = ["3d", "plan", "list"];
 
+// "label" is a translation key (admin.json).
 const FILTERS: { value: StateFilter; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "low", label: "Low stock" },
-  { value: "out", label: "Out of stock" },
-  { value: "empty", label: "Free" },
+  { value: "all", label: "common.all" },
+  { value: "low", label: STATE_LABELS.low },
+  { value: "out", label: STATE_LABELS.out },
+  { value: "empty", label: STATE_LABELS.empty },
 ];
 
 /** Some old computers or browsers can't draw 3D (WebGL). Then we start on the plan. */
@@ -51,6 +51,7 @@ const DEFAULT_VIEW: View = HAS_3D && window.innerWidth >= 640 ? "3d" : "plan";
  * so a link opens the same view and location for someone else.
  */
 export function Warehouse() {
+  const { t } = useTranslation("admin");
   const { data: warehouse, isPending, isError } = useWarehouse();
   const [params, setParams] = useSearchParams();
 
@@ -67,8 +68,8 @@ export function Warehouse() {
     setParams(next, { replace: true });
   }
 
-  if (isPending) return <div className="adm-loading">Loading the warehouse…</div>;
-  if (isError) return <div className="adm-empty">Could not load the warehouse.</div>;
+  if (isPending) return <div className="adm-loading">{t("warehouse.loading")}</div>;
+  if (isError) return <div className="adm-empty">{t("warehouse.loadError")}</div>;
 
   const { summary } = warehouse;
   // Always read the selected location from the latest data, so it updates after a restock.
@@ -79,20 +80,23 @@ export function Warehouse() {
   return (
     <>
       <PageHeader
-        title="Warehouse · Barcelona"
-        subtitle={`${warehouse.locations.length} locations · ${warehouse.layout.aisles.length} aisles`}
+        title={t("warehouse.title")}
+        subtitle={t("warehouse.subtitle", {
+          locations: warehouse.locations.length,
+          aisles: warehouse.layout.aisles.length,
+        })}
         actions={
-          <div className="adm-segmented" role="group" aria-label="View">
+          <div className="adm-segmented" role="group" aria-label={t("warehouse.view")}>
             {VIEWS.map((option) => (
               <button
-                key={option.value}
+                key={option}
                 type="button"
-                className={view === option.value ? "is-active" : ""}
-                onClick={() => setParam("view", option.value)}
-                disabled={option.value === "3d" && !HAS_3D}
-                title={option.value === "3d" && !HAS_3D ? "Your browser can't show 3D" : undefined}
+                className={view === option ? "is-active" : ""}
+                onClick={() => setParam("view", option)}
+                disabled={option === "3d" && !HAS_3D}
+                title={option === "3d" && !HAS_3D ? t("warehouse.no3d") : undefined}
               >
-                {option.label}
+                {t(`warehouse.views.${option}`)}
               </button>
             ))}
           </div>
@@ -101,29 +105,29 @@ export function Warehouse() {
 
       <section className="wh-summary">
         <div className="adm-card adm-kpi">
-          <span className="adm-kpi-label">Occupancy</span>
+          <span className="adm-kpi-label">{t("warehouse.summary.occupancy")}</span>
           <strong className="adm-kpi-value">{summary.occupancy}%</strong>
-          <span className="adm-kpi-change">{summary.units.toLocaleString("en")} units stored</span>
+          <span className="adm-kpi-change">{t("warehouse.summary.unitsStored", { units: count(summary.units) })}</span>
         </div>
         <button type="button" className="adm-card adm-kpi wh-kpi-button" onClick={() => setParam("filter", "low")}>
-          <span className="adm-kpi-label">Low stock</span>
+          <span className="adm-kpi-label">{t("warehouse.summary.lowStock")}</span>
           <strong className="adm-kpi-value wh-text-low">{summary.low}</strong>
-          <span className="adm-kpi-change">locations to restock</span>
+          <span className="adm-kpi-change">{t("warehouse.summary.toRestock")}</span>
         </button>
         <button type="button" className="adm-card adm-kpi wh-kpi-button" onClick={() => setParam("filter", "out")}>
-          <span className="adm-kpi-label">Out of stock</span>
+          <span className="adm-kpi-label">{t("warehouse.summary.outOfStock")}</span>
           <strong className="adm-kpi-value wh-text-out">{summary.out}</strong>
-          <span className="adm-kpi-change">locations with 0 units</span>
+          <span className="adm-kpi-change">{t("warehouse.summary.zeroUnits")}</span>
         </button>
         <Link to="/admin/orders?status=paid" className="adm-card adm-kpi wh-kpi-button">
-          <span className="adm-kpi-label">To pick</span>
+          <span className="adm-kpi-label">{t("warehouse.summary.toPick")}</span>
           <strong className="adm-kpi-value">{summary.orders_to_pick}</strong>
-          <span className="adm-kpi-change">orders paid or preparing</span>
+          <span className="adm-kpi-change">{t("warehouse.summary.paidOrPreparing")}</span>
         </Link>
       </section>
 
       <div className="adm-toolbar">
-        <div className="adm-tabs" role="tablist" aria-label="Filter by status">
+        <div className="adm-tabs" role="tablist" aria-label={t("warehouse.filterByStatus")}>
           {FILTERS.map((option) => (
             <button
               key={option.value}
@@ -133,7 +137,7 @@ export function Warehouse() {
               className={filter === option.value ? "is-active" : ""}
               onClick={() => setParam("filter", option.value === "all" ? null : option.value)}
             >
-              {option.label}
+              {t(option.label)}
             </button>
           ))}
         </div>
@@ -143,8 +147,8 @@ export function Warehouse() {
             type="search"
             value={search}
             onChange={(e) => setParam("q", e.target.value || null)}
-            placeholder="SKU, product or location (B-04-2)"
-            aria-label="Search the warehouse"
+            placeholder={t("warehouse.searchPlaceholder")}
+            aria-label={t("warehouse.searchLabel")}
           />
         </label>
       </div>
@@ -153,7 +157,7 @@ export function Warehouse() {
         <div className="adm-card wh-view">
           {view === "3d" && (
             <>
-              <Suspense fallback={<div className="adm-loading">Loading 3D view…</div>}>
+              <Suspense fallback={<div className="adm-loading">{t("warehouse.loading3d")}</div>}>
                 <div className="wh-canvas">
                   <WarehouseScene
                     warehouse={warehouse}
@@ -163,7 +167,7 @@ export function Warehouse() {
                   />
                 </div>
               </Suspense>
-              <p className="wh-hint adm-muted adm-small">Drag to turn · scroll to zoom · click a box to see it</p>
+              <p className="wh-hint adm-muted adm-small">{t("warehouse.hint3d")}</p>
             </>
           )}
           {view === "plan" && (
@@ -178,10 +182,10 @@ export function Warehouse() {
           )}
 
           {view !== "list" && (
-            <div className="wh-legend" aria-label="Legend">
+            <div className="wh-legend" aria-label={t("warehouse.legend")}>
               {(Object.keys(STATE_LABELS) as (keyof typeof STATE_LABELS)[]).map((state) => (
                 <span key={state}>
-                  <i style={{ background: STATE_COLORS[state] }} /> {STATE_LABELS[state]}
+                  <i style={{ background: STATE_COLORS[state] }} /> {t(STATE_LABELS[state])}
                 </span>
               ))}
             </div>

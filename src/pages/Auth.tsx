@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Icon } from "../components/ui/Icon";
 import { Placeholder } from "../components/ui/Placeholder";
@@ -20,6 +21,7 @@ import { ApiError, oauthRedirectUrl } from "../lib/api";
 type AuthMode = "signin" | "signup";
 
 export function Auth() {
+  const { t } = useTranslation("account");
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const initial = (params.get("mode") as AuthMode) || "signin";
@@ -45,7 +47,7 @@ export function Auth() {
   const authError =
     formError ??
     (oauthError
-      ? "Social login is not configured yet. Add provider credentials in the Laravel .env."
+      ? t("auth.errors.oauth")
       : null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -61,7 +63,7 @@ export function Auth() {
         await loginMutation.mutateAsync({ email, password });
       } else {
         if (!agree) {
-          setFormError("Please accept the terms before creating an account.");
+          setFormError(t("auth.errors.acceptTerms"));
           return;
         }
 
@@ -78,7 +80,7 @@ export function Auth() {
 
       navigate(returnTo, { replace: true });
     } catch (error) {
-      setFormError(error instanceof ApiError ? "Invalid credentials or email already in use." : "Auth failed. Try again.");
+      setFormError(error instanceof ApiError ? t("auth.errors.invalid") : t("auth.errors.failed"));
     }
   };
 
@@ -89,7 +91,7 @@ export function Auth() {
       await demoMutation.mutateAsync("customer");
       navigate(returnTo, { replace: true });
     } catch {
-      setFormError("Could not open the demo account. Try again in a moment.");
+      setFormError(t("auth.errors.demo"));
     }
   };
 
@@ -105,64 +107,64 @@ export function Auth() {
           <div className="overlay">
             <div className="badge">
               <span className="dot" />
-              FW 26 ✦ Inner Circle Members
+              {t("auth.side.badge")}
             </div>
             <h2>
-              <span>The </span>
-              <span className="gold">night</span>
-              <span> is</span>
+              <span>{t("auth.side.title.the")}</span>
+              <span className="gold">{t("auth.side.title.night")}</span>
+              <span>{t("auth.side.title.is")}</span>
               <br />
-              <span>only for </span>
-              <span className="gold">members</span>
-              <span>.</span>
+              <span>{t("auth.side.title.onlyFor")}</span>
+              <span className="gold">{t("auth.side.title.members")}</span>
+              <span>{t("auth.side.title.end")}</span>
             </h2>
             <div className="perks">
               <div className="perk">
                 <span className="num">12h</span>
-                Early access
+                {t("auth.side.perks.earlyAccess1")}
                 <br />
-                to every drop
+                {t("auth.side.perks.earlyAccess2")}
               </div>
               <div className="perk">
                 <span className="num">−15%</span>
-                Birthday
+                {t("auth.side.perks.birthday1")}
                 <br />
-                discount
+                {t("auth.side.perks.birthday2")}
               </div>
               <div className="perk">
                 <span className="num">∞</span>
-                Free
+                {t("auth.side.perks.returns1")}
                 <br />
-                returns
+                {t("auth.side.perks.returns2")}
               </div>
             </div>
           </div>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit}>
-          <div className="small">{tab === "signin" ? "✦ Welcome back" : "✦ Join Obsidian"}</div>
+          <div className="small">{tab === "signin" ? t("auth.eyebrow.signin") : t("auth.eyebrow.signup")}</div>
           <h1>
             {tab === "signin" ? (
               <>
-                Sign <span className="gold">in</span>
+                {t("auth.title.signin1")}<span className="gold">{t("auth.title.signin2")}</span>
               </>
             ) : (
               <>
-                Create <span className="gold">account</span>
+                {t("auth.title.signup1")}<span className="gold">{t("auth.title.signup2")}</span>
               </>
             )}
           </h1>
 
           {/* Shortcut for recruiters reviewing the project: no sign up needed. */}
           <div className="auth-demo">
-            <div className="auth-demo-title">✦ Reviewing this project?</div>
-            <p>Skip the sign up. Explore it with sample data in one click.</p>
+            <div className="auth-demo-title">{t("auth.demo.title")}</div>
+            <p>{t("auth.demo.text")}</p>
             <div className="auth-demo-actions">
               <button type="button" className="social-btn" onClick={startDemo} disabled={demoMutation.isPending}>
-                {demoMutation.isPending ? "Opening…" : "Demo customer"}
+                {demoMutation.isPending ? t("auth.demo.opening") : t("auth.demo.customer")}
               </button>
               <Link to="/admin/login" className="social-btn">
-                Admin panel ↗
+                {t("auth.demo.admin")}
               </Link>
             </div>
           </div>
@@ -177,41 +179,41 @@ export function Auth() {
               className={tab === "signin" ? "active" : ""}
               onClick={() => setTab("signin")}
             >
-              Sign in
+              {t("auth.tabs.signin")}
             </button>
             <button
               type="button"
               className={tab === "signup" ? "active" : ""}
               onClick={() => setTab("signup")}
             >
-              Create account
+              {t("auth.tabs.signup")}
             </button>
           </div>
 
           {tab === "signup" && (
             <div className="field-row">
               <div className="field">
-                <label htmlFor="firstName">First name</label>
-                <input id="firstName" name="firstName" type="text" placeholder="First name" />
+                <label htmlFor="firstName">{t("auth.fields.firstName")}</label>
+                <input id="firstName" name="firstName" type="text" placeholder={t("auth.fields.firstName")} />
               </div>
               <div className="field">
-                <label htmlFor="lastName">Last name</label>
-                <input id="lastName" name="lastName" type="text" placeholder="Last name" />
+                <label htmlFor="lastName">{t("auth.fields.lastName")}</label>
+                <input id="lastName" name="lastName" type="text" placeholder={t("auth.fields.lastName")} />
               </div>
             </div>
           )}
 
           <div className="field">
-            <label htmlFor="email">Email</label>
-            <input id="email" name="email" type="email" placeholder="you@email.com" required />
+            <label htmlFor="email">{t("auth.fields.email")}</label>
+            <input id="email" name="email" type="email" placeholder={t("auth.fields.emailPlaceholder")} required />
           </div>
 
           <div className="field">
             <label htmlFor="password">
-              Password
-              {tab === "signin" && <span className="hint">Forgot?</span>}
+              {t("auth.fields.password")}
+              {tab === "signin" && <span className="hint">{t("auth.fields.forgot")}</span>}
             </label>
-            <input id="password" name="password" type="password" placeholder="Min. 8 characters" required minLength={8} />
+            <input id="password" name="password" type="password" placeholder={t("auth.fields.passwordPlaceholder")} required minLength={8} />
           </div>
 
           {tab === "signup" && (
@@ -221,9 +223,11 @@ export function Auth() {
             >
               <span className="box">{agree && <span style={{ fontSize: 9 }}>✓</span>}</span>
               <span>
-                I agree to the <Link to="/terms">Terms</Link> and{" "}
-                <Link to="/privacy">Privacy Policy</Link>. Subscribe me to the Inner
-                Circle newsletter for early drops and exclusive pieces.
+                {t("auth.agree.start")}
+                <Link to="/terms">{t("auth.agree.terms")}</Link>
+                {t("auth.agree.and")}
+                <Link to="/privacy">{t("auth.agree.privacy")}</Link>
+                {t("auth.agree.end")}
               </span>
             </div>
           )}
@@ -235,10 +239,11 @@ export function Auth() {
           )}
 
           <button type="submit" className="btn-submit" disabled={isSubmitting}>
-            {isSubmitting ? "Working..." : tab === "signin" ? "Sign in" : "Create account"} <Icon.Arrow />
+            {isSubmitting ? t("auth.submit.working") : tab === "signin" ? t("auth.submit.signin") : t("auth.submit.signup")}{" "}
+            <Icon.Arrow />
           </button>
 
-          <div className="divider">Or continue with</div>
+          <div className="divider">{t("auth.divider")}</div>
 
           <div className="social-row">
             <button type="button" className="social-btn" onClick={() => startOAuth("google")}>
@@ -252,18 +257,18 @@ export function Auth() {
           <div className="foot-note">
             {tab === "signin" ? (
               <>
-                New here?{" "}
-                <a onClick={() => setTab("signup")}>Create an account ↗</a>
+                {t("auth.foot.newHere")}{" "}
+                <a onClick={() => setTab("signup")}>{t("auth.foot.createAccount")}</a>
               </>
             ) : (
               <>
-                Already a member? <a onClick={() => setTab("signin")}>Sign in ↗</a>
+                {t("auth.foot.alreadyMember")} <a onClick={() => setTab("signin")}>{t("auth.foot.signIn")}</a>
               </>
             )}
             <br />
             <br />
             <Link to="/" style={{ color: "var(--fg-mute)" }}>
-              ← Continue as guest
+              {t("auth.foot.guest")}
             </Link>
           </div>
         </form>

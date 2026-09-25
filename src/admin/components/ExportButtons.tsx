@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useToast } from "../../context/ToastContext";
 import { downloadExport, type ExportFormat, type ExportSection } from "../api";
 import { AdminIcon } from "./AdminIcon";
@@ -11,6 +12,7 @@ interface ExportButtonsProps {
 
 /** "Export: CSV · Excel" buttons used on every list page. */
 export function ExportButtons({ section, filters = {} }: ExportButtonsProps) {
+  const { t } = useTranslation("admin");
   const { push } = useToast();
   const [loading, setLoading] = useState<ExportFormat | null>(null);
 
@@ -19,16 +21,16 @@ export function ExportButtons({ section, filters = {} }: ExportButtonsProps) {
     try {
       await downloadExport(section, filters, format);
     } catch {
-      push("Could not export the list.", "warn");
+      push(t("export.failed"), "warn");
     } finally {
       setLoading(null);
     }
   }
 
   return (
-    <div className="adm-export" role="group" aria-label="Export">
+    <div className="adm-export" role="group" aria-label={t("export.label")}>
       <span className="adm-export-label">
-        <AdminIcon.Download /> Export
+        <AdminIcon.Download /> {t("export.label")}
       </span>
       <button type="button" onClick={() => handleExport("csv")} disabled={loading !== null}>
         {loading === "csv" ? "…" : "CSV"}

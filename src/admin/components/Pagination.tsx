@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 interface PaginationProps {
   page: number;
   lastPage: number;
@@ -6,18 +8,19 @@ interface PaginationProps {
 
 /** "Previous · Page 2 of 9 · Next" bar under the tables. */
 export function Pagination({ page, lastPage, onChange }: PaginationProps) {
+  const { t } = useTranslation("admin");
   if (lastPage <= 1) return null;
 
   return (
     <div className="adm-pagination">
       <button type="button" className="adm-btn" disabled={page <= 1} onClick={() => onChange(page - 1)}>
-        Previous
+        {t("pagination.previous")}
       </button>
       <span className="adm-muted">
-        Page {page} of {lastPage}
+        {t("pagination.page", { page, lastPage })}
       </span>
       <button type="button" className="adm-btn" disabled={page >= lastPage} onClick={() => onChange(page + 1)}>
-        Next
+        {t("pagination.next")}
       </button>
     </div>
   );
