@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useToast } from "../../context/ToastContext";
+import { catalogColour } from "../../i18n/catalog";
 import type { AdminProduct } from "../api";
 import { errorMessage } from "../errors";
 import { dateTime } from "../format";
@@ -78,7 +79,7 @@ export function StockTable({ product }: { product: AdminProduct }) {
               {colors.map((color) => (
                 <tr key={color.hex}>
                   <td>
-                    <span className="adm-swatch" style={{ background: color.hex }} /> {color.name ?? color.hex}
+                    <span className="adm-swatch" style={{ background: color.hex }} /> {color.name ? catalogColour(color.name) : color.hex}
                   </td>
                   {sizes.map((size) => {
                     const variant = findVariant(color.hex, size);
@@ -95,7 +96,7 @@ export function StockTable({ product }: { product: AdminProduct }) {
                           min="0"
                           value={stock[variant.id] ?? ""}
                           onChange={(e) => setStock({ ...stock, [variant.id]: e.target.value })}
-                          aria-label={t("stock.inputLabel", { colour: color.name ?? color.hex, size })}
+                          aria-label={t("stock.inputLabel", { colour: color.name ? catalogColour(color.name) : color.hex, size })}
                           title={variant.sku}
                         />
                       </td>

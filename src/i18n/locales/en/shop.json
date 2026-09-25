@@ -271,6 +271,14 @@
     },
     "sizes": {
       "ONE": "ONE"
+    },
+    "colours": {
+      "Onyx": "Onyx",
+      "Gold": "Gold",
+      "Charcoal": "Charcoal",
+      "Coal": "Coal",
+      "Olive": "Olive",
+      "Bone": "Bone"
     }
   }
 }

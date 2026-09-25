@@ -2,8 +2,8 @@ import i18n from "./index";
 
 /**
  * The catalogue API sends a few fixed words in English: product tags
- * ("NEW", "BESTSELLER"), garment types ("Hoodie · Urban Man") and the
- * "ONE" size. These helpers translate them with the list in
+ * ("NEW", "BESTSELLER"), garment types ("Hoodie · Urban Man"), colour
+ * names ("Gold") and the "ONE" size. These helpers translate them with the list in
  * shop.json → "catalog". A word that isn't in the list is shown as it comes.
  * Product names stay in English on purpose (they are like brand names).
  */
@@ -18,6 +18,11 @@ export function catalogType(label: string): string {
   const [type, ...rest] = label.split(" · ");
   const translated = i18n.t(`shop:catalog.types.${type}`, { defaultValue: type });
   return [translated, ...rest].join(" · ");
+}
+
+/** "Gold" → "Dorado" (a colour name saved with the product). */
+export function catalogColour(name: string): string {
+  return i18n.t(`shop:catalog.colours.${name}`, { defaultValue: name });
 }
 
 /** "men" → "Hombre" (the name of a shop category). */

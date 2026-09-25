@@ -271,6 +271,14 @@
     },
     "sizes": {
       "ONE": "ÚNICA"
+    },
+    "colours": {
+      "Onyx": "Ónice",
+      "Gold": "Dorado",
+      "Charcoal": "Carbón",
+      "Coal": "Negro carbón",
+      "Olive": "Oliva",
+      "Bone": "Hueso"
     }
   }
 }
