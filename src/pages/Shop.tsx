@@ -10,6 +10,7 @@ import { compareNewCollectionOrder } from "../constants/catalog";
 import { useCategories, useProducts } from "../hooks/queries";
 import type { Category } from "../types";
 import { formatPrice } from "../utils/format";
+import { NotFound } from "./NotFound";
 
 /** Sort modes the user can pick. */
 type SortMode = "featured" | "newest" | "priceAsc" | "priceDesc" | "best";
@@ -31,7 +32,8 @@ const SIZE_FILTERS = ["XS", "S", "M", "L", "XL", "XXL", "28", "30", "32", "34"];
 const SORT_OPTIONS: SortMode[] = ["featured", "newest", "priceAsc", "priceDesc", "best"];
 
 const PRICE_MIN = 0;
-const PRICE_MAX = 890;
+/** The price slider moves in steps of €5. */
+const PRICE_STEP = 5;
 
 /**
  * Product Listing Page.
@@ -55,17 +57,28 @@ export function Shop() {
 
   // The header texts of each category live in the translations
   // (listing.categories.<slug>), because the API only has them in English.
-  // Unknown slugs (e.g. /shop/archive) use the "new" texts.
-  const textKey = i18n.exists(`shop:listing.categories.${cat}`) ? cat : "new";
+  // A category from the API without texts yet uses the "new" texts.
+  const hasTexts = i18n.exists(`shop:listing.categories.${cat}`);
+  const textKey = hasTexts ? cat : "new";
   const heading = (part: string) => t(`listing.categories.${textKey}.${part}`);
+  // Unknown slugs (e.g. /shop/archive) show the 404 page. Until the
+  // categories load, we trust the translations list.
+  const isUnknownCategory = categoryMap ? !categoryMap[cat] : !hasTexts;
+
+  // The top of the price slider: the most expensive product, rounded up to €5.
+  const priceMax = useMemo(() => {
+    const highest = Math.max(0, ...(products ?? []).map((p) => p.price));
+    return Math.max(PRICE_STEP, Math.ceil(highest / PRICE_STEP) * PRICE_STEP);
+  }, [products]);
 
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [color, setColor] = useState<string | null>(null);
-  const [priceRange, setPriceRange] = useState<[number, number]>([PRICE_MIN, PRICE_MAX]);
+  // null = no price filter (the whole range).
+  const [priceRange, setPriceRange] = useState<[number, number] | null>(null);
   const [sort, setSort] = useState<SortMode>("featured");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const priceRangeRef = useRef<HTMLDivElement>(null);
-  const [minPrice, maxPrice] = priceRange;
+  const [minPrice, maxPrice] = priceRange ?? [PRICE_MIN, priceMax];
 
   // Reset filters whenever the category changes so active filters from
   // one section don't bleed into another (e.g. size "28" has no matches
@@ -73,7 +86,7 @@ export function Shop() {
   useEffect(() => {
     setSelectedSizes([]);
     setColor(null);
-    setPriceRange([PRICE_MIN, PRICE_MAX]);
+    setPriceRange(null);
   }, [cat]);
 
   /**
@@ -91,7 +104,7 @@ export function Shop() {
     if (selectedSizes.length > 0) {
       list = list.filter((p) => selectedSizes.some((selectedSize) => p.sizes.includes(selectedSize)));
     }
-    if (color) list = list.filter((p) => p.colors.includes(color));
+    if (color) list = list.filter((p) => p.colors.some((c) => c.hex === color));
     list = list.filter((p) => p.price >= minPrice && p.price <= maxPrice);
 
     switch (sort) {
@@ -128,32 +141,33 @@ export function Shop() {
   const clearFilters = () => {
     setSelectedSizes([]);
     setColor(null);
-    setPriceRange([PRICE_MIN, PRICE_MAX]);
+    setPriceRange(null);
   };
 
-  const priceStart = ((minPrice - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100;
-  const priceEnd = ((maxPrice - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100;
+  const priceStart = ((minPrice - PRICE_MIN) / (priceMax - PRICE_MIN)) * 100;
+  const priceEnd = ((maxPrice - PRICE_MIN) / (priceMax - PRICE_MIN)) * 100;
 
   const priceFromPointer = (clientX: number) => {
     const rect = priceRangeRef.current?.getBoundingClientRect();
     if (!rect) return null;
 
     const percent = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
-    const rawPrice = PRICE_MIN + percent * (PRICE_MAX - PRICE_MIN);
-    const steppedPrice = Math.round(rawPrice / 5) * 5;
+    const rawPrice = PRICE_MIN + percent * (priceMax - PRICE_MIN);
+    const steppedPrice = Math.round(rawPrice / PRICE_STEP) * PRICE_STEP;
 
-    return Math.min(PRICE_MAX, Math.max(PRICE_MIN, steppedPrice));
+    return Math.min(priceMax, Math.max(PRICE_MIN, steppedPrice));
   };
 
   const updatePriceFromPointer = (clientX: number, handle: PriceHandle) => {
     const nextPrice = priceFromPointer(clientX);
     if (nextPrice === null) return;
 
-    setPriceRange(([currentMin, currentMax]) =>
-      handle === "min"
+    setPriceRange((current) => {
+      const [currentMin, currentMax] = current ?? [PRICE_MIN, priceMax];
+      return handle === "min"
         ? [Math.min(nextPrice, currentMax), currentMax]
-        : [currentMin, Math.max(nextPrice, currentMin)],
-    );
+        : [currentMin, Math.max(nextPrice, currentMin)];
+    });
   };
 
   const startPriceDrag = (handle: PriceHandle, event: ReactPointerEvent<HTMLDivElement>) => {
@@ -186,6 +200,10 @@ export function Shop() {
   // has returned (useful before categories resolve, or for slugs the
   // categories endpoint doesn't know about).
   const headerCount = categoryMap?.[cat]?.count || products?.length || 0;
+
+  if (isUnknownCategory) {
+    return <NotFound />;
+  }
 
   return (
     <main className="fade-in">
@@ -295,7 +313,7 @@ export function Shop() {
                 role="slider"
                 aria-label={t("listing.maxPrice")}
                 aria-valuemin={minPrice}
-                aria-valuemax={PRICE_MAX}
+                aria-valuemax={priceMax}
                 aria-valuenow={maxPrice}
                 style={{ left: `${priceEnd}%` }}
                 onPointerDown={(event) => startPriceDrag("max", event)}
@@ -321,8 +339,8 @@ export function Shop() {
                   {t("listing.chipSize", { size: selectedSize })}
                 </button>
               ))}
-              {(minPrice !== PRICE_MIN || maxPrice !== PRICE_MAX) && (
-                <button type="button" className="chip" onClick={() => setPriceRange([PRICE_MIN, PRICE_MAX])}>
+              {priceRange && (
+                <button type="button" className="chip" onClick={() => setPriceRange(null)}>
                   {t("listing.chipPrice", { min: formatPrice(minPrice), max: formatPrice(maxPrice) })}
                 </button>
               )}

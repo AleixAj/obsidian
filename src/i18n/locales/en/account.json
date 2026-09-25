@@ -159,10 +159,10 @@
       "text": "Tap the heart on any piece to save it here. We'll let you know when items go on sale or come back in stock.",
       "cta": "Explore the drop"
     },
-    "share": "Share wishlist ↗",
     "removeFromWishlist": "Remove from wishlist",
     "addToBag": "Add to bag — {{price}}",
-    "remove": "Remove"
+    "remove": "Remove",
+    "soldOut": "Sold out"
   },
   "addresses": {
     "eyebrow": "✦ Shipping & billing",
@@ -195,7 +195,10 @@
     "edit": "Edit",
     "setDefault": "Set default",
     "remove": "Remove",
-    "addNew": "Add new address"
+    "addNew": "Add new address",
+    "confirmRemove": "Delete this address?",
+    "saveFailed": "We couldn't save the address. Try again.",
+    "removeFailed": "We couldn't delete the address. Try again."
   },
   "settings": {
     "eyebrow": "✦ Profile & preferences",
@@ -222,8 +225,7 @@
       "backInStock": "Back-in-stock alerts",
       "newsletter": "Newsletter ✦ Lookbook",
       "birthday": "Birthday gift reminder"
-    },
-    "deleteAccount": "Delete account"
+    }
   },
   "rewards": {
     "eyebrow": "✦ Members only · Gold tier",

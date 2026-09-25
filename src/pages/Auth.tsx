@@ -20,13 +20,23 @@ import { ApiError, oauthRedirectUrl } from "../lib/api";
  */
 type AuthMode = "signin" | "signup";
 
+/**
+ * Only accept paths inside this site ("/account/orders"). "//evil.com" or
+ * "/\evil.com" would take the user to another site, so we ignore them.
+ */
+function safeReturnTo(value: string | null): string {
+  if (!value || !value.startsWith("/")) return "/account";
+  if (value.startsWith("//") || value.startsWith("/\\")) return "/account";
+  return value;
+}
+
 export function Auth() {
   const { t } = useTranslation("account");
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const initial = (params.get("mode") as AuthMode) || "signin";
   const oauthError = params.get("error");
-  const returnTo = params.get("returnTo") || "/account";
+  const returnTo = safeReturnTo(params.get("returnTo"));
 
   const [tab, setTab] = useState<AuthMode>(initial);
   const [agree, setAgree] = useState(false);

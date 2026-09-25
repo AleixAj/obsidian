@@ -8,7 +8,7 @@ import { formatPrice } from "../../utils/format";
 import { Icon } from "../ui/Icon";
 import { LanguageSwitch } from "../ui/LanguageSwitch";
 import { Logo } from "../ui/Logo";
-import { catalogCategory, catalogType } from "../../i18n/catalog";
+import { catalogCategory, catalogColour, catalogType } from "../../i18n/catalog";
 
 /**
  * Top-level navigation.
@@ -43,6 +43,7 @@ export function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -63,7 +64,7 @@ export function Header() {
           product.tag ?? "",
           product.cats.join(" "),
           product.cats.map(catalogCategory).join(" "),
-          product.colors.join(" "),
+          product.colors.map((c) => `${c.name} ${catalogColour(c.name)}`).join(" "),
           product.sizes.join(" "),
         ]
           .join(" ")
@@ -91,6 +92,8 @@ export function Header() {
   useEffect(() => {
     if (!searchOpen) return;
 
+    // Remember the button that opened the search, to focus it again on close.
+    const opener = document.activeElement as HTMLElement | null;
     const id = window.setTimeout(() => searchInputRef.current?.focus(), 0);
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -102,8 +105,24 @@ export function Header() {
     return () => {
       window.clearTimeout(id);
       window.removeEventListener("keydown", handleKeyDown);
+      opener?.focus();
     };
   }, [searchOpen]);
+
+  // Close the mobile menu with `Escape` and give the focus back to the hamburger.
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileOpen(false);
+        hamburgerRef.current?.focus();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [mobileOpen]);
 
   const openSearch = () => {
     setMobileOpen(false);
@@ -122,9 +141,10 @@ export function Header() {
     scrollTop();
   };
 
-  const handleSignOut = async () => {
-    await logoutMutation.mutateAsync();
-    navigate("/");
+  // Even if the request fails (e.g. the session already expired), the
+  // local session is cleared (see useLogout), so we always go home.
+  const handleSignOut = () => {
+    logoutMutation.mutate(undefined, { onSettled: () => navigate("/") });
   };
 
   return (
@@ -147,6 +167,7 @@ export function Header() {
 
           <button
             type="button"
+            ref={hamburgerRef}
             className={`hamburger ${mobileOpen ? "open" : ""}`}
             aria-label={t("header.toggleMenu")}
             aria-expanded={mobileOpen}
@@ -212,7 +233,8 @@ export function Header() {
         </div>
       </header>
 
-      <div className={`mobile-nav ${mobileOpen ? "open" : ""}`} aria-hidden={!mobileOpen}>
+      {/* `inert` when closed: hidden menus can't get keyboard focus. */}
+      <div className={`mobile-nav ${mobileOpen ? "open" : ""}`} aria-hidden={!mobileOpen} inert={!mobileOpen}>
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.to}
@@ -240,7 +262,7 @@ export function Header() {
         </div>
       </div>
 
-      <div className={`search-overlay ${searchOpen ? "open" : ""}`} aria-hidden={!searchOpen}>
+      <div className={`search-overlay ${searchOpen ? "open" : ""}`} aria-hidden={!searchOpen} inert={!searchOpen}>
         <button type="button" className="search-backdrop" aria-label={t("search.close")} onClick={closeSearch} />
         <section className="search-panel" role="dialog" aria-modal="true" aria-label={t("search.dialog")}>
           <div className="search-panel-head">

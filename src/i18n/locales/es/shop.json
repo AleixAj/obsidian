@@ -176,12 +176,6 @@
       "back": "DETRÁS",
       "fullLook": "LOOK COMPLETO"
     },
-    "colors": {
-      "black": "Negro",
-      "grey": "Gris",
-      "red": "Rojo",
-      "white": "Blanco"
-    },
     "defaultTag": "FW26 ✦ Drop 04",
     "inStock": "En stock",
     "save": "Ahorra un {{percent}} %",
@@ -191,7 +185,7 @@
     "colorCount_other": "{{count}} colores",
     "size": "Talla",
     "sizeGuide": "Guía de tallas ↗",
-    "soldOut": "Agotado en {{sizes}} · Avísame ↗",
+    "soldOut": "Agotado en {{sizes}}",
     "addToBag": "Añadir a la cesta",
     "addToBagDefault": "Añadir a la cesta · talla por defecto",
     "wishlist": "Favoritos",
@@ -227,7 +221,8 @@
       "eyebrow": "Combínalo con ✦ Recomendado",
       "title": "Completa",
       "titleGold": "el look"
-    }
+    },
+    "allSoldOut": "Agotado"
   },
   "lookbook": {
     "eyebrow": "Lookbook 04 ✦ FW26 ✦ Aurum",

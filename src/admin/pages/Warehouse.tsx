@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
+import { ErrorBoundary } from "../../components/ErrorBoundary";
 import type { WarehouseLocation } from "../api";
 import { AdminIcon } from "../components/AdminIcon";
 import { PageHeader } from "../components/PageHeader";
@@ -27,21 +28,33 @@ const FILTERS: { value: StateFilter; label: string }[] = [
   { value: "empty", label: STATE_LABELS.empty },
 ];
 
-/** Some old computers or browsers can't draw 3D (WebGL). Then we start on the plan. */
+// Saved answer of canUse3D(), so the test only runs once.
+let has3DCache: boolean | null = null;
+
+/** Some old computers or browsers can't draw 3D (WebGL). Then we show the plan. */
 function canUse3D(): boolean {
+  if (has3DCache !== null) return has3DCache;
   try {
     const canvas = document.createElement("canvas");
-    return Boolean(canvas.getContext("webgl2") ?? canvas.getContext("webgl"));
+    const gl = canvas.getContext("webgl2") ?? canvas.getContext("webgl");
+    has3DCache = Boolean(gl);
+    // We only wanted to know if it works. Free the test context now,
+    // because browsers only allow a few WebGL contexts at the same time.
+    gl?.getExtension("WEBGL_lose_context")?.loseContext();
   } catch {
-    return false;
+    has3DCache = false;
   }
+  return has3DCache;
 }
 
-const HAS_3D = canUse3D();
-
-// On phones the 3D view is small and hard to move, so the plan opens first.
-// The 3D button is still there for anyone who wants it.
-const DEFAULT_VIEW: View = HAS_3D && window.innerWidth >= 640 ? "3d" : "plan";
+/** The view to show: the one in the URL if it's valid, and never 3D without WebGL. */
+function viewFromUrl(value: string | null, has3D: boolean): View {
+  const view = VIEWS.find((option) => option === value);
+  // On phones the 3D view is small and hard to move, so the plan opens first.
+  // The 3D button is still there for anyone who wants it.
+  const wanted = view ?? (window.innerWidth >= 640 ? "3d" : "plan");
+  return wanted === "3d" && !has3D ? "plan" : wanted;
+}
 
 /**
  * Warehouse page: the same data in three views (3D, plan, list),
@@ -55,7 +68,8 @@ export function Warehouse() {
   const { data: warehouse, isPending, isError } = useWarehouse();
   const [params, setParams] = useSearchParams();
 
-  const view = (params.get("view") as View | null) ?? DEFAULT_VIEW;
+  const has3D = canUse3D();
+  const view = viewFromUrl(params.get("view"), has3D);
   const filter = (params.get("filter") as StateFilter | null) ?? "all";
   const search = params.get("q") ?? "";
   const selectedCode = params.get("location");
@@ -93,8 +107,8 @@ export function Warehouse() {
                 type="button"
                 className={view === option ? "is-active" : ""}
                 onClick={() => setParam("view", option)}
-                disabled={option === "3d" && !HAS_3D}
-                title={option === "3d" && !HAS_3D ? t("warehouse.no3d") : undefined}
+                disabled={option === "3d" && !has3D}
+                title={option === "3d" && !has3D ? t("warehouse.no3d") : undefined}
               >
                 {t(`warehouse.views.${option}`)}
               </button>
@@ -107,7 +121,7 @@ export function Warehouse() {
         <div className="adm-card adm-kpi">
           <span className="adm-kpi-label">{t("warehouse.summary.occupancy")}</span>
           <strong className="adm-kpi-value">{summary.occupancy}%</strong>
-          <span className="adm-kpi-change">{t("warehouse.summary.unitsStored", { units: count(summary.units) })}</span>
+          <span className="adm-kpi-change">{t("warehouse.summary.unitsStored", { count: summary.units, units: count(summary.units) })}</span>
         </div>
         <button type="button" className="adm-card adm-kpi wh-kpi-button" onClick={() => setParam("filter", "low")}>
           <span className="adm-kpi-label">{t("warehouse.summary.lowStock")}</span>
@@ -157,16 +171,30 @@ export function Warehouse() {
         <div className="adm-card wh-view">
           {view === "3d" && (
             <>
-              <Suspense fallback={<div className="adm-loading">{t("warehouse.loading3d")}</div>}>
-                <div className="wh-canvas">
-                  <WarehouseScene
-                    warehouse={warehouse}
-                    selectedId={selected?.id ?? null}
-                    onSelect={select}
-                    isMatch={isMatch}
-                  />
-                </div>
-              </Suspense>
+              {/* If the 3D view breaks (WebGL error, or its code can't download),
+                  show a message instead of a blank page. */}
+              <ErrorBoundary
+                fallback={
+                  <div className="adm-empty">
+                    <strong>{t("warehouse.error3d")}</strong>
+                    <button type="button" className="adm-btn" onClick={() => setParam("view", "plan")}>
+                      {t("warehouse.showPlan")}
+                    </button>
+                  </div>
+                }
+              >
+                <Suspense fallback={<div className="adm-loading">{t("warehouse.loading3d")}</div>}>
+                  <div className="wh-canvas">
+                    <WarehouseScene
+                      warehouse={warehouse}
+                      selectedId={selected?.id ?? null}
+                      onSelect={select}
+                      isMatch={isMatch}
+                      filtering={filter !== "all" || search !== ""}
+                    />
+                  </div>
+                </Suspense>
+              </ErrorBoundary>
               <p className="wh-hint adm-muted adm-small">{t("warehouse.hint3d")}</p>
             </>
           )}

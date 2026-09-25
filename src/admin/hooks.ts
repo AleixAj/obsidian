@@ -35,6 +35,7 @@ import {
   type Range,
   type ReturnFilters,
   type Role,
+  type StockChange,
 } from "./api";
 
 export const adminKeys = {
@@ -85,9 +86,15 @@ export function useUpdateOrderStatus(id: number) {
       updateOrderStatus(id, status, note),
     onSuccess: (order) => {
       queryClient.setQueryData(adminKeys.order(id), order);
-      // Lists and dashboard numbers may have changed too.
+      // Lists and dashboard numbers (and the menu badges) may have changed too.
       queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
+      // The customer page shows their orders.
+      queryClient.invalidateQueries({ queryKey: ["admin", "customer"] });
+      // Cancelling an order puts its units back in stock.
+      queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "product"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "warehouse"] });
     },
   });
 }
@@ -118,6 +125,8 @@ function useRefreshProducts() {
   return () => {
     queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
     queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
+    // The warehouse shows the same stock numbers.
+    queryClient.invalidateQueries({ queryKey: ["admin", "warehouse"] });
     // The shop pages too, so "sold out" sizes update there.
     queryClient.invalidateQueries({ queryKey: ["products"] });
     queryClient.invalidateQueries({ queryKey: ["product"] });
@@ -142,8 +151,7 @@ export function useUpdateStock(slug: string) {
   const refresh = useRefreshProducts();
 
   return useMutation({
-    mutationFn: ({ variants, note }: { variants: { id: number; stock: number; low_stock_at: number }[]; note?: string }) =>
-      updateStock(slug, variants, note),
+    mutationFn: ({ variants, note }: { variants: StockChange[]; note?: string }) => updateStock(slug, variants, note),
     onSuccess: (product) => {
       queryClient.setQueryData(adminKeys.product(slug), product);
       refresh();
@@ -200,6 +208,9 @@ export function useReturnAction(id: number) {
       queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "order"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "product"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "warehouse"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "customer"] });
     },
   });
 }
@@ -253,6 +264,9 @@ function useRefreshWarehouse() {
     queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
     queryClient.invalidateQueries({ queryKey: ["admin", "product"] });
     queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
+    // The shop pages too, so "sold out" sizes update there.
+    queryClient.invalidateQueries({ queryKey: ["products"] });
+    queryClient.invalidateQueries({ queryKey: ["product"] });
   };
 }
 

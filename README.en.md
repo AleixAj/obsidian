@@ -108,12 +108,13 @@ page opens, and phones or browsers without WebGL open the Plan view.
 **Decisions:**
 
 - Permissions live in one place (`App\Enums\Role` in the API), with Laravel Gates on the routes.
-- Demo accounts are shared: they can't upload files or change the team (otherwise anyone
-  could give themselves admin access), and the catalogue is restored every day.
+- Demo accounts are shared: they only see demo data and can't upload files, change the
+  public catalogue or the team (otherwise anyone could give themselves admin access). Demo
+  data is restored every day.
 - Photos are resized and saved as WebP with GD, on a Railway volume.
 - Charts with Recharts; Excel with OpenSpout.
 
-**Tests:** 76 API tests (mostly permissions per role) and an end-to-end Playwright test
+**Tests:** 125 API tests (role permissions, demo accounts, stock, returns, checkout and security) and an end-to-end Playwright test
 (`e2e/main-flow.e2e.ts`): a customer asks for a return, support approves and refunds it,
 the customer sees the refund, the warehouse prepares an order, restocks a location and can't open customers,
 and the admin checks the overview and the team. It runs in the API CI on every push and
@@ -126,8 +127,8 @@ every night.
 The whole site (shop, account, legal pages and panel) is in Spanish and English.
 
 - **Default language:** the one chosen last time (saved in the browser) or, if none, the
-  browser's: Spanish if it's set to Spanish, English otherwise. Switch it with the **EN · ES**
-  selector in the header and in the panel.
+  browser's: Spanish if it's set to Spanish, English otherwise. Switch it with the flags in
+  the header and in the panel.
 - **Site texts:** with i18next. They live in `src/i18n/locales/{en,es}/`, split by area
   (`common`, `shop`, `account`, `legal`, `admin`). A test (`locales.test.ts`) checks that both
   languages have the same keys.
@@ -141,6 +142,31 @@ The whole site (shop, account, legal pages and panel) is in Spanish and English.
   notes, return comments, order history…). Anything a real person types is shown as it is.
 
 ![The panel in Spanish](./docs/screenshots/admin-overview-es.png)
+
+## Security and protection
+
+The site is open to the public (with shared demo accounts), so both the API and the UI are
+protected against abuse and mistakes:
+
+- **Rate limits** per real visitor: login (by email and IP), sign-up, demo access, checkout,
+  returns, photo uploads and exports have their own limit, and the rest of the API a general one.
+- **Only through Cloudflare:** the Worker adds a shared secret and the visitor's real IP.
+  Laravel rejects requests that reach Railway directly without that secret.
+- **Security headers** on the site and the API (HSTS, `nosniff`, `X-Frame-Options`,
+  `Referrer-Policy`, `Permissions-Policy`) and a report-only Content-Security-Policy.
+- **Isolated demo accounts:** they only see and change demo data (made-up customers and
+  orders) and can't change the public catalogue, upload files or manage the team.
+- **Accounts:** signing in with Google to an account created earlier with a password
+  cancels that password (stops someone registering your email before you). Only accounts
+  that have signed in with Google/GitHub can join the team, and the owner's account becomes
+  admin through the `OWNER_EMAIL` variable, only when signing in with Google.
+- **Orders and stock:** prices are always calculated by the server, you can't sell or
+  return more than there is, cancelling an order puts the stock back, important actions lock
+  the record so a double click can't repeat them, and the panel warns you if the stock
+  changed while you were editing it.
+- **Exports** to CSV/Excel without dangerous formulas in customer texts.
+- **Errors:** if part of a page fails, a message is shown instead of a blank screen, and
+  after a deploy the site reloads itself to get the new version.
 
 ## Tech Stack
 
@@ -156,7 +182,7 @@ The whole site (shop, account, legal pages and panel) is in Spanish and English.
 | Styling | Plain CSS + tokens | Shows CSS fundamentals without relying on a framework. |
 | Backend | Laravel 11 API | Separate repository, REST endpoints, Sanctum auth and MySQL in production. |
 | 3D | react-three-fiber + drei | Three.js as React components, for the panel's warehouse. |
-| Languages | i18next + react-i18next | Shop and panel in Spanish and English. Picked from the browser, switchable with EN · ES. The API answers in the same language. |
+| Languages | i18next + react-i18next | Shop and panel in Spanish and English. Picked from the browser, switchable with the flags. The API answers in the same language. |
 | Deploy | Cloudflare Workers + Assets + Railway | SPA on the Cloudflare edge, Laravel API with managed MySQL. |
 
 ## Architecture
@@ -392,6 +418,7 @@ The Stripe/Cashier dependencies and env placeholders exist in the backend, but r
 - [x] Stage 10 - Admin panel: roles, orders, stock, customers, returns, team and exports.
 - [x] Stage 11 - 3D warehouse: locations per variant, restocking and 3D, plan and list views.
 - [x] Stage 12 - Spanish and English for the site, the panel, the API and the demo.
+- [x] Stage 13 - Security and bug review: rate limits, secret-protected proxy, isolated demo accounts and order/stock integrity.
 - [ ] Next - Real Stripe payments.
 
 ## Why This Project Matters

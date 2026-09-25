@@ -159,10 +159,10 @@
       "text": "Toca el corazón de cualquier pieza para guardarla aquí. Te avisaremos cuando baje de precio o vuelva a estar en stock.",
       "cta": "Explorar el drop"
     },
-    "share": "Compartir favoritos ↗",
     "removeFromWishlist": "Quitar de favoritos",
     "addToBag": "Añadir a la cesta — {{price}}",
-    "remove": "Quitar"
+    "remove": "Quitar",
+    "soldOut": "Agotado"
   },
   "addresses": {
     "eyebrow": "✦ Envío y facturación",
@@ -195,7 +195,10 @@
     "edit": "Editar",
     "setDefault": "Hacer principal",
     "remove": "Eliminar",
-    "addNew": "Añadir dirección"
+    "addNew": "Añadir dirección",
+    "confirmRemove": "¿Eliminar esta dirección?",
+    "saveFailed": "No hemos podido guardar la dirección. Inténtalo de nuevo.",
+    "removeFailed": "No hemos podido eliminar la dirección. Inténtalo de nuevo."
   },
   "settings": {
     "eyebrow": "✦ Perfil y preferencias",
@@ -222,8 +225,7 @@
       "backInStock": "Avisos de reposición",
       "newsletter": "Newsletter ✦ Lookbook",
       "birthday": "Recordatorio del regalo de cumpleaños"
-    },
-    "deleteAccount": "Eliminar cuenta"
+    }
   },
   "rewards": {
     "eyebrow": "✦ Solo miembros · Nivel Gold",

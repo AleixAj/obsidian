@@ -7,7 +7,7 @@
  * full page reload.
  */
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import {
   deleteAvatar,
   demoLogin,
@@ -24,12 +24,23 @@ import {
   type UpdateUserPayload,
 } from "../../lib/api";
 import { accountKeys } from "./useAccount";
-import { cartKeys } from "./useCartSync";
-import { wishlistKeys } from "./useWishlistSync";
 
 export const authKeys = {
   user: ["user"] as const,
 };
+
+/** Catalogue data is the same for every visitor, so it can stay cached. */
+const PUBLIC_QUERY_KEYS = ["user", "products", "product", "categories"];
+
+/**
+ * Forget everything that belongs to the previous user (account, orders,
+ * cart, wishlist, admin pages...), so it's never shown to the next one.
+ */
+function forgetPrivateData(queryClient: QueryClient) {
+  queryClient.removeQueries({
+    predicate: (query) => !PUBLIC_QUERY_KEYS.includes(String(query.queryKey[0])),
+  });
+}
 
 export function useUser() {
   return useQuery({
@@ -45,6 +56,7 @@ export function useLogin() {
   return useMutation({
     mutationFn: (payload: AuthCredentials) => login(payload),
     onSuccess: (user: ApiUserDTO) => {
+      forgetPrivateData(queryClient);
       queryClient.setQueryData(authKeys.user, user);
     },
   });
@@ -56,7 +68,10 @@ export function useDemoLogin() {
   return useMutation({
     mutationFn: (role: DemoRole) => demoLogin(role),
     // Load the new user (and its role) from /api/user.
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: authKeys.user }),
+    onSuccess: () => {
+      forgetPrivateData(queryClient);
+      return queryClient.invalidateQueries({ queryKey: authKeys.user });
+    },
   });
 }
 
@@ -66,6 +81,7 @@ export function useRegister() {
   return useMutation({
     mutationFn: (payload: RegisterPayload) => register(payload),
     onSuccess: (user: ApiUserDTO) => {
+      forgetPrivateData(queryClient);
       queryClient.setQueryData(authKeys.user, user);
     },
   });
@@ -76,11 +92,11 @@ export function useLogout() {
 
   return useMutation({
     mutationFn: logout,
-    onSuccess: () => {
+    // onSettled runs on success AND on error: if the session had already
+    // expired (419), we still clear the local session and the user's data.
+    onSettled: () => {
       queryClient.setQueryData(authKeys.user, null);
-      queryClient.removeQueries({ queryKey: cartKeys.cart });
-      queryClient.removeQueries({ queryKey: wishlistKeys.wishlist });
-      queryClient.invalidateQueries({ queryKey: authKeys.user });
+      forgetPrivateData(queryClient);
     },
   });
 }

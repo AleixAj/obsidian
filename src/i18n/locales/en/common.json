@@ -8,6 +8,11 @@
     "title": "Loading Obsidian…",
     "sub": "Preparing the next view."
   },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "text": "This part of the page couldn't load.",
+    "reload": "Reload"
+  },
   "session": {
     "checking": "✦ Checking session…",
     "sub": "Looking for your Obsidian member cookie."
@@ -112,14 +117,17 @@
     "noteGold": "Stripe later",
     "signInToCheckout": "Sign in to finish checkout",
     "orderPlaced": "Order {{number}} placed",
-    "failed": "Checkout failed. Try again."
+    "failed": "Checkout failed. Try again.",
+    "soldOut": "This product is sold out",
+    "updateFailed": "We couldn't update your bag. Try again."
   },
   "productCard": {
     "addWishlist": "Add to wishlist",
     "removeWishlist": "Remove from wishlist",
     "front": "Front",
     "back": "Back",
-    "quickAdd": "Quick add ✦ {{price}}"
+    "quickAdd": "Quick add ✦ {{price}}",
+    "soldOut": "Sold out"
   },
   "toast": {
     "addedWishlist": "Added to wishlist",

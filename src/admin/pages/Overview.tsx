@@ -147,7 +147,7 @@ export function Overview() {
                     </small>
                   </span>
                   <strong className={item.stock === 0 ? "adm-stock-out" : "adm-stock-low"}>
-                    {item.stock === 0 ? t("overview.out") : t("overview.left", { units: item.stock })}
+                    {item.stock === 0 ? t("overview.out") : t("overview.left", { count: item.stock })}
                   </strong>
                 </Link>
               </li>

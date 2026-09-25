@@ -42,7 +42,7 @@ export function LocationPanel({ location, onClose }: PanelProps) {
 
   function handleRestock() {
     restock.mutate(location.id, {
-      onSuccess: () => push(t("warehouse.panel.restocked", { code: location.code, units: missing })),
+      onSuccess: () => push(t("warehouse.panel.restocked", { code: location.code, count: missing })),
       onError: (error) => push(errorMessage(error, t("warehouse.panel.restockError")), "warn"),
     });
   }
@@ -102,11 +102,11 @@ export function LocationPanel({ location, onClose }: PanelProps) {
           <span className="wh-bar wh-bar--big">
             <span className={`is-${location.state}`} style={{ width: `${fillRatio(location) * 100}%` }} />
           </span>
-          <p className="adm-muted adm-small">{t("warehouse.panel.alertAt", { units: location.variant.low_stock_at })}</p>
+          <p className="adm-muted adm-small">{t("warehouse.panel.alertAt", { count: location.variant.low_stock_at })}</p>
 
           <div className="adm-actions">
             <button type="button" className="adm-btn adm-btn--gold" onClick={handleRestock} disabled={busy || missing <= 0}>
-              {missing > 0 ? t("warehouse.panel.restock", { units: missing }) : t("warehouse.panel.full")}
+              {missing > 0 ? t("warehouse.panel.restock", { count: missing }) : t("warehouse.panel.full")}
             </button>
             <button type="button" className="adm-btn" onClick={() => handleAssign(null)} disabled={busy}>
               {t("warehouse.panel.free")}

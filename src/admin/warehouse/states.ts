@@ -8,7 +8,7 @@ export const STATE_COLORS: Record<LocationState, string> = {
   ok: "#6fb38b", // green: enough units
   low: "#e0a44a", // amber: at or below the alert level
   out: "#d96446", // red: no units left
-  empty: "#3a3630", // grey: nothing stored here
+  empty: "#7f9cc9", // blue-grey: nothing stored here (free to use)
 };
 
 /** Translation keys (admin.json), shown with t(STATE_LABELS[state]). */

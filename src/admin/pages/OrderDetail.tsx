@@ -3,10 +3,10 @@ import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
 import { useUser } from "../../hooks/queries";
-import { ApiError } from "../../lib/api";
 import type { OrderStatus } from "../api";
 import { AdminIcon } from "../components/AdminIcon";
 import { StatusBadge } from "../components/StatusBadge";
+import { errorMessage } from "../errors";
 import { dateTime, money, STATUS_LABELS } from "../format";
 import { useAdminOrder, useUpdateOrderStatus } from "../hooks";
 
@@ -40,6 +40,9 @@ export function OrderDetail() {
   );
 
   function changeStatus(status: OrderStatus) {
+    // Cancelling can't be undone, so we ask first.
+    if (status === "cancelled" && !window.confirm(t("orderDetail.confirmCancel", { number: order!.number }))) return;
+
     updateStatus.mutate(
       { status, note: note.trim() || undefined },
       {
@@ -47,12 +50,8 @@ export function OrderDetail() {
           setNote("");
           push(t("orderDetail.changed", { number: order!.number, status: t(STATUS_LABELS[status]).toLowerCase() }));
         },
-        onError: (error) => {
-          const message = error instanceof ApiError && error.status === 403
-            ? t("orderDetail.forbidden")
-            : t("orderDetail.updateError");
-          push(message, "warn");
-        },
+        // Shows the API's reason when there is one (e.g. a 422 or 409).
+        onError: (error) => push(errorMessage(error, t("orderDetail.updateError")), "warn"),
       },
     );
   }

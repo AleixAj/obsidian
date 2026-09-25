@@ -8,7 +8,7 @@
  * Design notes:
  *   - Prices are stored as integer **cents** in the backend so currency
  *     math never goes through a float. The `toProduct` adapter divides
- *     by 100 to match the existing `Product.price` (integer euros).
+ *     by 100 to get euros, keeping the cents (129.99, not 130).
  *   - The wire shape (`ApiProductDTO`) is purposely *different* from
  *     the UI shape (`Product`). Mixing both would couple every render
  *     to the backend schema; the adapter keeps the boundary explicit.
@@ -294,6 +294,20 @@ export const csrfCookie = (): Promise<void> =>
     }
   });
 
+/**
+ * The message the API sent with an error (already in the user's language),
+ * or undefined so the caller can show its own text.
+ * For validation errors (422) we show the first field error.
+ */
+export function apiErrorMessage(error: unknown): string | undefined {
+  if (!(error instanceof ApiError)) return undefined;
+  if (typeof error.payload !== "object" || error.payload === null) return undefined;
+
+  const payload = error.payload as { message?: string; errors?: Record<string, string[]> };
+  const firstError = Object.values(payload.errors ?? {})[0]?.[0];
+  return firstError ?? payload.message;
+}
+
 const jsonRequest = <T>(path: string, payload: unknown): Promise<T> =>
   request<T>(path, {
     method: "POST",
@@ -563,10 +577,11 @@ export function toProduct(dto: ApiProductDTO): Product {
     id: dto.slug,
     name: dto.name,
     cat: dto.sub_label ?? "",
-    price: Math.round(dto.price_cents / 100),
-    old: dto.old_price_cents !== null ? Math.round(dto.old_price_cents / 100) : null,
+    price: dto.price_cents / 100,
+    old: dto.old_price_cents !== null ? dto.old_price_cents / 100 : null,
     tag: dto.tag,
-    colors: dto.colors.map((c) => c.hex),
+    // Some colours have no name in the database: we show the hex then.
+    colors: dto.colors.map((c) => ({ hex: c.hex, name: c.name ?? c.hex })),
     sizes: dto.sizes.map((s) => s.label),
     sold_out: dto.sizes.filter((s) => s.is_sold_out).map((s) => s.label),
     palette: dto.palette === "gold" ? "gold" : "warm",

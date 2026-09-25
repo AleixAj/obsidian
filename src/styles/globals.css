@@ -1419,6 +1419,7 @@ ul {
 }
 
 .product-info .name {
+  display: block;
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.02em;
@@ -1466,30 +1467,35 @@ ul {
 .lang-switch {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
+  gap: 8px;
 }
 
 .lang-switch button {
-  padding: 4px 6px;
-  color: var(--fg-mute);
-  transition: color 0.2s var(--ease);
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 3px;
+  opacity: 0.45;
+  filter: saturate(0.6);
+  transition: opacity 0.2s var(--ease), filter 0.2s var(--ease);
 }
 
 .lang-switch button:hover {
-  color: var(--fg);
+  opacity: 0.85;
+  filter: none;
 }
 
+/* The language in use: full colour with a thin gold frame. */
 .lang-switch button.is-active {
-  color: var(--gold);
+  opacity: 1;
+  filter: none;
+  box-shadow: 0 0 0 1px var(--gold);
 }
 
-.lang-switch button + button::before {
-  content: "·";
-  margin-right: 6px;
-  color: var(--fg-mute);
+.lang-switch .flag {
+  display: block;
+  width: 21px;
+  height: 14px;
+  border-radius: 2px;
 }
 
 /* In the header the tool labels hide on small screens; the switch lives in the menu there. */

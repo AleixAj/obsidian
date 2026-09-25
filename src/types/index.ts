@@ -13,14 +13,14 @@ export interface Product {
   name: string;
   /** Short categorical line shown under the title (eg. "Hoodie · FW26"). */
   cat: string;
-  /** Price in euros (integer for simplicity, no cents). */
+  /** Price in euros. It can have cents (e.g. 49.99). */
   price: number;
   /** Original price when on sale, otherwise null. */
   old: number | null;
   /** Marketing tag rendered on the card ("NEW DROP", "−20%", ...). */
   tag: string | null;
-  /** Available colour hex values (used as swatches). */
-  colors: string[];
+  /** Available colours: hex for the swatch and the English name from the API. */
+  colors: ProductColor[];
   /** Available sizes. */
   sizes: string[];
   /** Sizes currently out of stock (still rendered, but disabled). */
@@ -39,12 +39,19 @@ export interface Product {
   cats: string[];
 }
 
+/** One colour of a product. */
+export interface ProductColor {
+  hex: string;
+  /** English name (e.g. "Gold"). Translate it with catalogColour(). */
+  name: string;
+}
+
 /** A line item inside the cart. */
 export interface CartItem extends Product {
   /** Picked size for this line. */
   size: string;
-  /** Human readable colour name, derived from PDP selection. */
-  colorName?: string;
+  /** Picked colour (hex), or null when the product has no colours. */
+  colorHex: string | null;
   /** Quantity ordered. */
   qty: number;
 }

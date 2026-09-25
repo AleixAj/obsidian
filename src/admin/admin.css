@@ -1432,7 +1432,7 @@
 .wh-cell.is-ok { background: #6fb38b; }
 .wh-cell.is-low { background: #e0a44a; }
 .wh-cell.is-out { background: #d96446; }
-.wh-cell.is-empty { background: transparent; border-color: #3a3630; }
+.wh-cell.is-empty { background: rgba(127, 156, 201, 0.35); border: 1px dashed #7f9cc9; }
 .wh-cell.is-faded { opacity: 0.15; }
 
 .wh-cell.is-selected {
@@ -1477,7 +1477,7 @@
 .wh-state.is-ok { color: #6fb38b; }
 .wh-state.is-low { color: #e0a44a; }
 .wh-state.is-out { color: #d96446; }
-.wh-state.is-empty { color: var(--fg-dim); }
+.wh-state.is-empty { color: #7f9cc9; }
 
 .adm-table tr.is-selected {
   background: #15130e;

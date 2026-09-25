@@ -108,12 +108,13 @@ guarda una variante y su stock, y al reponer se crea un movimiento de stock norm
 **Decisiones:**
 
 - Permisos en un solo sitio (`App\Enums\Role` en la API) y Gates de Laravel en las rutas.
-- Las cuentas demo son compartidas: no pueden subir archivos ni cambiar el equipo (si no,
-  cualquiera podría darse acceso de administrador), y el catálogo se restaura cada día.
+- Las cuentas demo son compartidas: solo ven datos de demo y no pueden subir archivos,
+  cambiar el catálogo público ni el equipo (si no, cualquiera podría darse acceso de
+  administrador). Los datos de demo se restauran cada día.
 - Las fotos se reducen y se guardan en WebP con GD, en un volumen de Railway.
 - Gráficas con Recharts; Excel con OpenSpout.
 
-**Tests:** 76 tests de la API (sobre todo permisos por rol) y un test de extremo a extremo
+**Tests:** 125 tests de la API (permisos por rol, cuentas demo, stock, devoluciones, checkout y seguridad) y un test de extremo a extremo
 con Playwright (`e2e/main-flow.e2e.ts`): un cliente pide una devolución, atención al cliente
 la aprueba y la reembolsa, el cliente ve el reembolso, almacén prepara un pedido, repone una ubicación y no puede
 ver clientes, y administración revisa el resumen y el equipo. Se ejecuta en la CI de la API
@@ -126,8 +127,8 @@ en cada push y cada noche.
 Toda la web (tienda, cuenta, páginas legales y panel) está en español e inglés.
 
 - **Idioma por defecto:** el que se eligió la última vez (se guarda en el navegador) o, si
-  no, el del navegador: español si está en español, inglés en el resto. Se cambia con el
-  selector **EN · ES** de la cabecera y del panel.
+  no, el del navegador: español si está en español, inglés en el resto. Se cambia con las
+  banderas de la cabecera y del panel.
 - **Textos de la web:** con i18next. Están en `src/i18n/locales/{en,es}/` separados por
   zonas (`common`, `shop`, `account`, `legal`, `admin`). Un test (`locales.test.ts`) comprueba
   que los dos idiomas tienen las mismas claves.
@@ -144,6 +145,32 @@ Toda la web (tienda, cuenta, páginas legales y panel) está en español e ingl�
 
 ![El panel en español](./docs/screenshots/admin-overview-es.png)
 
+## Seguridad y protección
+
+La web está pensada para estar abierta al público (con cuentas demo compartidas), así que
+se protege contra abusos y errores tanto en la API como en la interfaz:
+
+- **Límites de peticiones** por visitante real: login (por email e IP), registro, acceso
+  demo, checkout, devoluciones, subidas de fotos y exportaciones tienen su propio límite, y
+  el resto de la API uno general.
+- **Solo a través de Cloudflare:** el Worker añade una clave secreta y la IP real del
+  visitante. Laravel rechaza las peticiones que llegan directas a Railway sin esa clave.
+- **Cabeceras de seguridad** en la web y en la API (HSTS, `nosniff`, `X-Frame-Options`,
+  `Referrer-Policy`, `Permissions-Policy`) y una Content-Security-Policy en modo informe.
+- **Cuentas demo aisladas:** solo ven y modifican datos de demo (clientes y pedidos
+  inventados), no pueden cambiar el catálogo público, subir archivos ni tocar el equipo.
+- **Cuentas:** si alguien entra con Google en una cuenta creada antes con contraseña, esa
+  contraseña se anula (evita que otro registre tu email antes que tú). Al equipo solo se
+  añaden cuentas que ya han entrado con Google/GitHub, y la cuenta del dueño es
+  administradora mediante la variable `OWNER_EMAIL`, solo al entrar con Google.
+- **Pedidos y stock:** el precio siempre lo calcula el servidor, no se puede vender ni
+  devolver más de lo que hay, cancelar un pedido devuelve el stock, las operaciones
+  importantes bloquean el registro para que un doble clic no las repita, y el panel avisa
+  si el stock cambió mientras lo editabas.
+- **Exportaciones** a CSV/Excel sin fórmulas peligrosas en los textos de los clientes.
+- **Errores:** si una parte de la página falla se muestra un aviso en vez de una pantalla en
+  blanco, y tras un despliegue la web se recarga sola para coger la versión nueva.
+
 ## Stack Técnico
 
 | Capa | Elección | Motivo |
@@ -158,7 +185,7 @@ Toda la web (tienda, cuenta, páginas legales y panel) está en español e ingl�
 | Estilos | CSS plano + tokens | Demuestra fundamentos de CSS sin depender de un framework. |
 | Backend | Laravel 11 API | Repositorio separado, endpoints REST, Sanctum auth y MySQL en producción. |
 | 3D | react-three-fiber + drei | Three.js como componentes de React, para el almacén del panel. |
-| Idiomas | i18next + react-i18next | Tienda y panel en español e inglés. Se elige según el navegador y se puede cambiar con EN · ES. La API responde en el mismo idioma. |
+| Idiomas | i18next + react-i18next | Tienda y panel en español e inglés. Se elige según el navegador y se puede cambiar con las banderas. La API responde en el mismo idioma. |
 | Deploy | Cloudflare Workers + Assets + Railway | SPA en Cloudflare edge, API Laravel con MySQL gestionado. |
 
 ## Arquitectura
@@ -394,6 +421,7 @@ Las dependencias/env placeholders de Stripe/Cashier existen en el backend, pero 
 - [x] Etapa 10 - Panel de administración: roles, pedidos, stock, clientes, devoluciones, equipo y exportación.
 - [x] Etapa 11 - Almacén en 3D: ubicaciones por variante, reposición y vistas 3D, plano y lista.
 - [x] Etapa 12 - Traducción al español e inglés de la web, el panel, la API y la demo.
+- [x] Etapa 13 - Revisión de seguridad y fallos: límites de peticiones, proxy con clave secreta, cuentas demo aisladas e integridad de pedidos y stock.
 - [ ] Siguiente - Pagos reales con Stripe.
 
 ## Por Qué Importa Este Proyecto

@@ -159,7 +159,8 @@
     "lowStock_other": "Low stock · {{count}} variants",
     "sizeLine": "{{sku}} · size {{size}}",
     "out": "Out",
-    "left": "{{units}} left"
+    "left_one": "{{count}} left",
+    "left_other": "{{count}} left"
   },
   "orders": {
     "title": "Orders",
@@ -192,8 +193,8 @@
     "notePlaceholder": "e.g. tracking number",
     "shippingAddress": "Shipping address",
     "changed": "Order {{number}} is now {{status}}.",
-    "forbidden": "Your role can't make this change.",
     "updateError": "Could not update the order.",
+    "confirmCancel": "Cancel order {{number}}? Its units go back to stock. This can't be undone.",
     "actions": {
       "pending": "Mark as pending",
       "paid": "Mark as paid",
@@ -271,23 +272,31 @@
     "upload": "Upload from computer",
     "uploadRules": "JPG, PNG or WebP, at least 400 px, up to {{mb}} MB.",
     "uploadsOff": "Photo uploads are turned off for the demo accounts. You can paste a link.",
+    "demoReadOnly": "Product changes are turned off for the demo accounts. You can still change the stock below.",
     "wrongType": "Use a JPG, PNG or WebP image.",
     "tooBig": "The image is too big. The limit is {{mb}} MB.",
     "uploadError": "Could not upload the image.",
     "saved": "Product saved.",
     "created": "Product created. Now add its stock.",
     "saveError": "Could not save the product.",
+    "confirmLoseStock_one": "Removing or changing these colours or sizes deletes variants that still have stock: {{count}} unit will be lost. Save anyway?",
+    "confirmLoseStock_other": "Removing or changing these colours or sizes deletes variants that still have stock: {{count}} units will be lost. Save anyway?",
+    "invalidPrice": "Write the price as a number, e.g. 129.90",
     "saveChanges": "Save changes",
     "create": "Create product"
   },
   "stock": {
-    "title": "Stock · {{units}} units",
+    "title_one": "Stock · {{count}} unit",
+    "title_other": "Stock · {{count}} units",
     "inputLabel": "Stock {{colour}} {{size}}",
     "alertAt": "Alert when stock ≤",
+    "alertMixed": "each one",
     "notePlaceholder": "e.g. supplier delivery",
     "save": "Save stock",
     "saved": "Stock saved.",
     "saveError": "Could not save the stock.",
+    "invalid": "Stock and alert must be whole numbers from 0.",
+    "conflict": "Someone changed this stock while you were editing. The new numbers are loaded: check them and save again.",
     "legendLow": "low stock",
     "legendOut": "out of stock",
     "history": "Stock history",
@@ -296,7 +305,8 @@
       "sale": "Sale",
       "adjustment": "Adjustment",
       "restock": "Restock",
-      "return": "Return"
+      "return": "Return",
+      "cancel": "Order cancelled"
     }
   },
   "customers": {
@@ -445,6 +455,8 @@
       "list": "List"
     },
     "no3d": "Your browser can't show 3D",
+    "error3d": "The 3D view could not load on this device.",
+    "showPlan": "Show the plan",
     "states": {
       "ok": "In stock",
       "low": "Low stock",
@@ -453,7 +465,8 @@
     },
     "summary": {
       "occupancy": "Occupancy",
-      "unitsStored": "{{units}} units stored",
+      "unitsStored_one": "{{units}} unit stored",
+      "unitsStored_other": "{{units}} units stored",
       "lowStock": "Low stock",
       "toRestock": "locations to restock",
       "outOfStock": "Out of stock",
@@ -480,8 +493,10 @@
       "close": "Close details",
       "position": "Aisle {{aisle}} · bay {{bay}} · level {{level}}",
       "size": "size {{size}}",
-      "alertAt": "Alert when {{units}} units or fewer.",
-      "restock": "Restock +{{units}} units",
+      "alertAt_one": "Alert when {{count}} unit or fewer.",
+      "alertAt_other": "Alert when {{count}} units or fewer.",
+      "restock_one": "Restock +{{count}} unit",
+      "restock_other": "Restock +{{count}} units",
       "full": "Location is full",
       "free": "Free this location",
       "isFree": "This location is free. Place a product that has no location yet:",
@@ -489,7 +504,8 @@
       "productToPlace": "Product to place",
       "choose": "Choose a product…",
       "placeHere": "Place here",
-      "restocked": "{{code}} restocked with {{units}} units.",
+      "restocked_one": "{{code}} restocked with {{count}} unit.",
+      "restocked_other": "{{code}} restocked with {{count}} units.",
       "restockError": "Could not restock.",
       "placed": "Product placed in {{code}}.",
       "freed": "{{code}} is free now.",

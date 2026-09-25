@@ -108,12 +108,13 @@ es descarrega en obrir aquesta pàgina, i al mòbil o sense WebGL s'obre la vist
 **Decisions:**
 
 - Permisos en un sol lloc (`App\Enums\Role` a l'API) i Gates de Laravel a les rutes.
-- Els comptes de demostració són compartits: no poden pujar fitxers ni canviar l'equip
-  (si no, qualsevol es podria donar accés d'administrador), i el catàleg es restaura cada dia.
+- Els comptes de demostració són compartits: només veuen dades de demostració i no poden
+  pujar fitxers, canviar el catàleg públic ni l'equip (si no, qualsevol es podria donar
+  accés d'administrador). Les dades de demostració es restauren cada dia.
 - Les fotos es redueixen i es desen en WebP amb GD, en un volum de Railway.
 - Gràfiques amb Recharts; Excel amb OpenSpout.
 
-**Tests:** 76 tests de l'API (sobretot permisos per rol) i un test d'extrem a extrem amb
+**Tests:** 125 tests de l'API (permisos per rol, comptes de demostració, estoc, devolucions, checkout i seguretat) i un test d'extrem a extrem amb
 Playwright (`e2e/main-flow.e2e.ts`): un client demana una devolució, atenció al client
 l'aprova i la reemborsa, el client veu el reemborsament, magatzem prepara una comanda, reposa una ubicació i
 no pot veure clients, i administració revisa el resum i l'equip. S'executa a la CI de
@@ -127,7 +128,7 @@ Tot el web (botiga, compte, pàgines legals i panell) està en castellà i angl�
 
 - **Idioma per defecte:** el que es va triar l'última vegada (es desa al navegador) o, si no,
   el del navegador: castellà si està en castellà, anglès en la resta de casos. Es canvia amb
-  el selector **EN · ES** de la capçalera i del panell.
+  les banderes de la capçalera i del panell.
 - **Textos del web:** amb i18next. Són a `src/i18n/locales/{en,es}/`, separats per zones
   (`common`, `shop`, `account`, `legal`, `admin`). Un test (`locales.test.ts`) comprova que
   els dos idiomes tenen les mateixes claus.
@@ -143,6 +144,32 @@ Tot el web (botiga, compte, pàgines legals i panell) està en castellà i angl�
 
 ![El panell en castellà](./docs/screenshots/admin-overview-es.png)
 
+## Seguretat i protecció
+
+El web està pensat per estar obert al públic (amb comptes de demostració compartits), així
+que es protegeix contra abusos i errors tant a l'API com a la interfície:
+
+- **Límits de peticions** per visitant real: inici de sessió (per email i IP), registre,
+  accés de demostració, checkout, devolucions, pujades de fotos i exportacions tenen el seu
+  propi límit, i la resta de l'API un de general.
+- **Només a través de Cloudflare:** el Worker afegeix una clau secreta i la IP real del
+  visitant. Laravel rebutja les peticions que arriben directes a Railway sense aquesta clau.
+- **Capçaleres de seguretat** al web i a l'API (HSTS, `nosniff`, `X-Frame-Options`,
+  `Referrer-Policy`, `Permissions-Policy`) i una Content-Security-Policy en mode informe.
+- **Comptes de demostració aïllats:** només veuen i modifiquen dades de demostració (clients
+  i comandes inventats) i no poden canviar el catàleg públic, pujar fitxers ni tocar l'equip.
+- **Comptes:** si algú entra amb Google en un compte creat abans amb contrasenya, aquesta
+  contrasenya s'anul·la (evita que un altre registri el teu email abans que tu). A l'equip
+  només s'hi afegeixen comptes que ja han entrat amb Google/GitHub, i el compte del
+  propietari és administrador mitjançant la variable `OWNER_EMAIL`, només en entrar amb Google.
+- **Comandes i estoc:** el preu sempre el calcula el servidor, no es pot vendre ni retornar
+  més del que hi ha, cancel·lar una comanda retorna l'estoc, les operacions importants
+  bloquegen el registre perquè un doble clic no les repeteixi, i el panell avisa si l'estoc
+  ha canviat mentre l'editaves.
+- **Exportacions** a CSV/Excel sense fórmules perilloses als textos dels clients.
+- **Errors:** si una part de la pàgina falla es mostra un avís en lloc d'una pantalla en
+  blanc, i després d'un desplegament el web es recarrega sol per agafar la versió nova.
+
 ## Stack tècnic
 
 | Capa | Elecció | Motiu |
@@ -157,7 +184,7 @@ Tot el web (botiga, compte, pàgines legals i panell) està en castellà i angl�
 | Estils | CSS pla + tokens | Demostra els fonaments de CSS sense dependre d'un framework. |
 | Backend | API Laravel 11 | Repositori separat, endpoints REST, autenticació Sanctum i MySQL a producció. |
 | 3D | react-three-fiber + drei | Three.js com a components de React, per al magatzem del panell. |
-| Idiomes | i18next + react-i18next | Botiga i panell en castellà i anglès. Es tria segons el navegador i es pot canviar amb EN · ES. L'API respon en el mateix idioma. |
+| Idiomes | i18next + react-i18next | Botiga i panell en castellà i anglès. Es tria segons el navegador i es pot canviar amb les banderes. L'API respon en el mateix idioma. |
 | Desplegament | Cloudflare Workers + Assets + Railway | SPA a l'edge de Cloudflare, API Laravel amb MySQL gestionat. |
 
 ## Arquitectura
@@ -393,6 +420,7 @@ Les dependències i els placeholders d'entorn de Stripe/Cashier existeixen al ba
 - [x] Etapa 10 - Panell d'administració: rols, comandes, estoc, clients, devolucions, equip i exportació.
 - [x] Etapa 11 - Magatzem en 3D: ubicacions per variant, reposició i vistes 3D, pla i llista.
 - [x] Etapa 12 - Traducció al castellà i l'anglès del web, el panell, l'API i la demostració.
+- [x] Etapa 13 - Revisió de seguretat i errors: límits de peticions, proxy amb clau secreta, comptes de demostració aïllats i integritat de comandes i estoc.
 - [ ] Següent - Pagaments reals amb Stripe.
 
 ## Per què és important aquest projecte

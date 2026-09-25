@@ -14,7 +14,8 @@ import { useProduct, useProducts } from "../hooks/queries";
 import { ApiError } from "../lib/api";
 import { formatPrice } from "../utils/format";
 import { NotFound } from "./NotFound";
-import { catalogSize, catalogTag, catalogType } from "../i18n/catalog";
+import { catalogColour, catalogSize, catalogTag, catalogType } from "../i18n/catalog";
+import { firstAvailableSize } from "../utils/product";
 
 /**
  * Shared product gallery used temporarily across every PDP.
@@ -22,13 +23,18 @@ import { catalogSize, catalogTag, catalogType } from "../i18n/catalog";
  */
 const VIEW_LABELS = ["front", "back", "fullLook"] as const;
 
-/** `key` is also the translation key for the name (product.colors.*). */
-const MODEL_COLORS = [
-  { key: "black", hex: "#0a0a0a" },
-  { key: "grey", hex: "#7b7b78" },
-  { key: "red", hex: "#8f1f22" },
-  { key: "white", hex: "#f5efe2" },
-] as const;
+/**
+ * The gallery uses the same model photos for every product, in 4 tones
+ * (/model1-black.webp...). This picks the closest tone for each colour.
+ */
+const MODEL_PHOTO_TONE: Record<string, string> = {
+  "#0a0a0a": "black",
+  "#1a1818": "black",
+  "#3a3a3a": "grey",
+  "#3a342a": "grey",
+  "#d4af37": "red",
+  "#f5efe2": "white",
+};
 
 /**
  * Static accordion sections — would come from a CMS in a real app.
@@ -110,15 +116,20 @@ export function Product() {
     );
   }
 
-  const selectedColor = MODEL_COLORS[colorIdx] ?? MODEL_COLORS[0];
-  const colorName = t(`product.colors.${selectedColor.key}`);
-  const pdpImages = VIEW_LABELS.map((_, i) => `/model${i + 1}-${selectedColor.key}.webp`);
+  // The colours come from the API. Some products may have none.
+  const selectedColor = product.colors[colorIdx] ?? product.colors[0];
+  const colorName = selectedColor ? catalogColour(selectedColor.name) : "";
+  const photoTone = (selectedColor && MODEL_PHOTO_TONE[selectedColor.hex]) || "black";
+  const pdpImages = VIEW_LABELS.map((_, i) => `/model${i + 1}-${photoTone}.webp`);
+
+  // Without a picked size we add the first one that isn't sold out.
+  const defaultSize = firstAvailableSize(product);
+  const isSoldOut = defaultSize === null;
 
   const handleAdd = () => {
-    add({
-      ...product,
-      size: size ?? product.sizes[0],
-      colorName,
+    add(product, {
+      size: size ?? defaultSize ?? undefined,
+      colorHex: selectedColor?.hex ?? null,
     });
   };
 
@@ -193,27 +204,32 @@ export function Product() {
 
           {/* `pdp-section-color` lets the stacked layout pull the swatches up
               under the gallery — tapping one has to show the photo change. */}
-          <div className="pdp-section pdp-section-color">
-            <h4>
-              <span>
-                {t("product.color")} · <span style={{ color: "var(--gold)" }}>{colorName}</span>
-              </span>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--fg-dim)" }}>
-                {t("product.colorCount", { count: MODEL_COLORS.length })}
-              </span>
-            </h4>
-            <div className="color-row">
-              {MODEL_COLORS.map((color, i) => (
-                <span
-                  key={color.key}
-                  className={`chip ${colorIdx === i ? "active" : ""}`}
-                  style={{ background: color.hex }}
-                  onClick={() => setColorIdx(i)}
-                  title={t(`product.colors.${color.key}`)}
-                />
-              ))}
+          {product.colors.length > 0 && (
+            <div className="pdp-section pdp-section-color">
+              <h4>
+                <span>
+                  {t("product.color")} · <span style={{ color: "var(--gold)" }}>{colorName}</span>
+                </span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--fg-dim)" }}>
+                  {t("product.colorCount", { count: product.colors.length })}
+                </span>
+              </h4>
+              <div className="color-row">
+                {product.colors.map((color, i) => (
+                  <button
+                    type="button"
+                    key={color.hex}
+                    className={`chip ${colorIdx === i ? "active" : ""}`}
+                    style={{ background: color.hex }}
+                    onClick={() => setColorIdx(i)}
+                    title={catalogColour(color.name)}
+                    aria-label={catalogColour(color.name)}
+                    aria-pressed={colorIdx === i}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="pdp-section">
             <h4>
@@ -243,8 +259,13 @@ export function Product() {
           </div>
 
           <div className="pdp-cta-row">
-            <button type="button" className="btn btn-primary" onClick={handleAdd}>
-              {size ? t("product.addToBag") : t("product.addToBagDefault")} <Icon.Arrow />
+            <button type="button" className="btn btn-primary" onClick={handleAdd} disabled={isSoldOut}>
+              {isSoldOut
+                ? t("product.allSoldOut")
+                : size
+                  ? t("product.addToBag")
+                  : t("product.addToBagDefault")}{" "}
+              <Icon.Arrow />
             </button>
             <button
               type="button"

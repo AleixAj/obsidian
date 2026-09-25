@@ -8,6 +8,7 @@ import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../components/Pagination";
 import { initials, money, monthYear, shortDate } from "../format";
 import { useAdminCustomers } from "../hooks";
+import { openRow, pageFromUrl } from "../tables";
 
 type Sort = NonNullable<CustomerFilters["sort"]>;
 
@@ -22,7 +23,7 @@ export function Customers() {
 
   const search = params.get("search") ?? "";
   const sort = (params.get("sort") ?? "recent") as Sort;
-  const page = Number(params.get("page") ?? 1);
+  const page = pageFromUrl(params);
 
   const { data, isPending, isError, isFetching } = useAdminCustomers({ search, sort, page });
 
@@ -103,7 +104,7 @@ export function Customers() {
               </thead>
               <tbody>
                 {data.data.map((customer) => (
-                  <tr key={customer.id} onClick={() => navigate(`/admin/customers/${customer.id}`)}>
+                  <tr key={customer.id} onClick={openRow(() => navigate(`/admin/customers/${customer.id}`))}>
                     <td data-label={t("common.customer")}>
                       <div className="adm-product-cell">
                         <span className="adm-avatar adm-avatar--sm">{initials(customer.name)}</span>

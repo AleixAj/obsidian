@@ -19,7 +19,7 @@ export function Logo({ markOnly = false, className = "", onClick }: LogoProps) {
   const { t } = useTranslation();
   return (
     <Link to="/" className={`logo ${className}`} aria-label={t("logo.home")} onClick={onClick}>
-      <img src="/obsidian-logo.png" alt="" aria-hidden="true" />
+      <img src="/obsidian-logo.png" alt="" aria-hidden="true" width={31} height={31} />
       {!markOnly && <span>OBSIDIAN</span>}
     </Link>
   );

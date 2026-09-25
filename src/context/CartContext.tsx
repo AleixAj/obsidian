@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { useUser } from "../hooks/queries";
 import {
   useAddCartItem,
@@ -18,15 +19,20 @@ import {
   useUpdateCartItem,
 } from "../hooks/queries/useCartSync";
 import { useLocalStorage } from "../hooks/useLocalStorage";
-import { toProduct, type ApiCartDTO, type CartLinePayload } from "../lib/api";
+import { ApiError, apiErrorMessage, toProduct, type ApiCartDTO, type CartLinePayload } from "../lib/api";
 import type { CartItem, Product } from "../types";
+import { firstAvailableSize } from "../utils/product";
+import { useToast } from "./ToastContext";
+
+/** Most units of one line (the API has the same limit). */
+export const MAX_QTY = 99;
 
 /**
  * Shape exposed by `useCart()` to the rest of the app.
  *
  * The cart is intentionally kept simple (no SKUs, no taxes): every
- * unique combination of (productId + size) becomes a line item, and
- * line items are merged when the user adds the same combo twice.
+ * unique combination of (productId + size + colour) becomes a line item,
+ * and line items are merged when the user adds the same combo twice.
  */
 interface CartContextValue {
   /** Current line items. */
@@ -35,10 +41,13 @@ interface CartContextValue {
   isOpen: boolean;
   /** Total count, summing the `qty` of every line. */
   totalCount: number;
-  /** Sum of `price * qty` across every line. */
-  subtotal: number;
-  /** Add a product (optionally pre-sized). Opens the drawer. */
-  add: (product: Product & { size?: string; colorName?: string }) => void;
+  /** Sum of `price * qty` across every line, in cents (same as the API). */
+  subtotalCents: number;
+  /**
+   * Add a product. Without a size we use the first one that isn't sold out,
+   * and without a colour the first colour. Opens the drawer when it worked.
+   */
+  add: (product: Product, choice?: { size?: string; colorHex?: string | null }) => void;
   /** Increment / decrement qty for a given line index. */
   updateQty: (index: number, delta: number) => void;
   /** Remove a line entirely. */
@@ -69,6 +78,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const clearCart = useClearCart();
   const mergeCart = useMergeCart();
   const mergedGuestCartForUser = useRef<number | null>(null);
+  const { push } = useToast();
+  const { t } = useTranslation();
 
   const serverItems = useMemo(
     () => (cartQuery.data ? toCartItems(cartQuery.data) : []),
@@ -85,43 +96,57 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (guestItems.length === 0 || mergeCart.isPending) return;
     if (mergedGuestCartForUser.current === user.id) return;
 
+    // We only try once per login. If it fails we don't try again (that
+    // would loop forever); if the server says the data is wrong, we drop it.
     mergedGuestCartForUser.current = user.id;
     mergeCart.mutate(toCartPayload(guestItems), {
       onSuccess: () => setGuestItems([]),
-      onError: () => {
-        mergedGuestCartForUser.current = null;
+      onError: (error) => {
+        if (error instanceof ApiError && error.status === 422) setGuestItems([]);
       },
     });
   }, [guestItems, mergeCart, setGuestItems, user]);
 
   const add = useCallback<CartContextValue["add"]>(
-    (product) => {
-      const size = product.size || product.sizes?.[0] || "M";
+    (product, choice = {}) => {
+      const size = choice.size ?? firstAvailableSize(product);
+      if (!size) {
+        push(t("cart.soldOut"), "warn");
+        return;
+      }
+      const colorHex = choice.colorHex ?? product.colors[0]?.hex ?? null;
+
       if (isAuthenticated) {
-        addCartItem.mutate({
-          product_slug: product.id,
-          size_label: size,
-          color_hex: product.colors?.[0] ?? null,
-          quantity: 1,
-        });
-        setIsOpen(true);
+        addCartItem.mutate(
+          {
+            product_slug: product.id,
+            size_label: size,
+            color_hex: colorHex,
+            quantity: 1,
+          },
+          {
+            // Only open the bag when the server really added it.
+            onSuccess: () => setIsOpen(true),
+            onError: (error) => push(apiErrorMessage(error) ?? t("cart.updateFailed"), "warn"),
+          },
+        );
         return;
       }
 
       setGuestItems((prev) => {
         const existing = prev.findIndex(
-          (line) => line.id === product.id && line.size === size,
+          (line) => line.id === product.id && line.size === size && line.colorHex === colorHex,
         );
         if (existing > -1) {
           const copy = [...prev];
-          copy[existing] = { ...copy[existing], qty: copy[existing].qty + 1 };
+          copy[existing] = { ...copy[existing], qty: Math.min(MAX_QTY, copy[existing].qty + 1) };
           return copy;
         }
-        return [...prev, { ...product, size, qty: 1 }];
+        return [...prev, { ...product, size, colorHex, qty: 1 }];
       });
       setIsOpen(true);
     },
-    [addCartItem, isAuthenticated, setGuestItems],
+    [addCartItem, isAuthenticated, push, setGuestItems, t],
   );
 
   const updateQty = useCallback<CartContextValue["updateQty"]>(
@@ -130,10 +155,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const line = serverItems[index];
         const serverLine = cartQuery.data?.items[index];
         if (!line || !serverLine) return;
-        updateCartItem.mutate({
-          id: serverLine.id,
-          quantity: Math.max(1, line.qty + delta),
-        });
+        updateCartItem.mutate(
+          { id: serverLine.id, quantity: clampQty(line.qty + delta) },
+          { onError: (error) => push(apiErrorMessage(error) ?? t("cart.updateFailed"), "warn") },
+        );
         return;
       }
 
@@ -142,12 +167,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
         if (!copy[index]) return prev;
         copy[index] = {
           ...copy[index],
-          qty: Math.max(1, copy[index].qty + delta),
+          qty: clampQty(copy[index].qty + delta),
         };
         return copy;
       });
     },
-    [cartQuery.data?.items, isAuthenticated, serverItems, setGuestItems, updateCartItem],
+    [cartQuery.data?.items, isAuthenticated, push, serverItems, setGuestItems, t, updateCartItem],
   );
 
   const remove = useCallback<CartContextValue["remove"]>(
@@ -180,16 +205,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
     () => items.reduce((sum, line) => sum + line.qty, 0),
     [items],
   );
-  const subtotal = useMemo(
-    () => items.reduce((sum, line) => sum + line.price * line.qty, 0),
-    [items],
+  // Signed in: the server's total. Guest: we add it up in cents.
+  const guestSubtotalCents = useMemo(
+    () => guestItems.reduce((sum, line) => sum + Math.round(line.price * 100) * line.qty, 0),
+    [guestItems],
   );
+  const subtotalCents = isAuthenticated ? (cartQuery.data?.subtotal_cents ?? 0) : guestSubtotalCents;
 
   const value: CartContextValue = {
     items,
     isOpen,
     totalCount,
-    subtotal,
+    subtotalCents,
     add,
     updateQty,
     remove,
@@ -201,11 +228,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
+/** Keeps a quantity between 1 and MAX_QTY. */
+function clampQty(qty: number): number {
+  return Math.min(MAX_QTY, Math.max(1, qty));
+}
+
 function toCartItems(cart: ApiCartDTO): CartItem[] {
   return cart.items.map((line) => ({
     ...toProduct(line.product),
-    size: line.size_label || line.product.sizes?.[0]?.label || "M",
-    colorName: line.color_hex || undefined,
+    // The price the server will charge for this line.
+    price: line.unit_price_cents / 100,
+    size: line.size_label ?? "",
+    colorHex: line.color_hex,
     qty: line.quantity,
   }));
 }
@@ -214,8 +248,8 @@ function toCartPayload(items: CartItem[]): CartLinePayload[] {
   return items.map((line) => ({
     product_slug: line.id,
     size_label: line.size,
-    color_hex: line.colors?.[0] ?? null,
-    quantity: line.qty,
+    color_hex: line.colorHex ?? null,
+    quantity: clampQty(line.qty),
   }));
 }
 

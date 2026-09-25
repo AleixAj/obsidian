@@ -1,7 +1,7 @@
 import monoFont from "@fontsource/jetbrains-mono/files/jetbrains-mono-latin-700-normal.woff?url";
 import { Edges, OrbitControls, Text } from "@react-three/drei";
 import { Canvas, type ThreeEvent } from "@react-three/fiber";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Warehouse, WarehouseLocation } from "../api";
 import { fillRatio, STATE_COLORS } from "./states";
 
@@ -31,6 +31,8 @@ interface SceneProps {
   onSelect: (location: WarehouseLocation | null) => void;
   /** Locations that don't match the search are drawn faded. */
   isMatch: (location: WarehouseLocation) => boolean;
+  /** True when a filter chip or a search is active. */
+  filtering: boolean;
 }
 
 /** Where a location sits in 3D space (the centre of its cell). */
@@ -41,8 +43,16 @@ function positionOf(location: WarehouseLocation, aisles: string[]): [number, num
   return [x, y, z];
 }
 
-export default function WarehouseScene({ warehouse, selectedId, onSelect, isMatch }: SceneProps) {
+export default function WarehouseScene({ warehouse, selectedId, onSelect, isMatch, filtering }: SceneProps) {
   const { aisles, bays, levels } = warehouse.layout;
+
+  // The boxes change the mouse to a hand. If the view closes while the
+  // mouse is over one, put the normal cursor back.
+  useEffect(() => {
+    return () => {
+      document.body.style.cursor = "";
+    };
+  }, []);
 
   // The middle of the warehouse, so the camera looks at the centre.
   const width = (aisles.length - 1) * (CELL + AISLE_GAP);
@@ -85,7 +95,7 @@ export default function WarehouseScene({ warehouse, selectedId, onSelect, isMatc
 
       {/* The metal shelves: one rack per aisle */}
       {aisles.map((aisle, index) => (
-        <Rack key={aisle} x={index * (CELL + AISLE_GAP)} depth={depth} levels={levels} />
+        <Rack key={aisle} x={index * (CELL + AISLE_GAP)} depth={depth} levels={levels} seeThrough={filtering} />
       ))}
 
       {warehouse.locations.map((location) => (
@@ -95,6 +105,7 @@ export default function WarehouseScene({ warehouse, selectedId, onSelect, isMatc
           position={positionOf(location, aisles)}
           selected={location.id === selectedId}
           faded={!isMatch(location)}
+          highlighted={filtering && isMatch(location)}
           onSelect={onSelect}
         />
       ))}
@@ -110,11 +121,19 @@ export default function WarehouseScene({ warehouse, selectedId, onSelect, isMatc
   );
 }
 
+interface RackProps {
+  x: number;
+  depth: number;
+  levels: number;
+  /** While filtering, the boards are see-through so they don't hide the boxes below them. */
+  seeThrough: boolean;
+}
+
 /**
  * One rack: a thin board under each level and four posts at the corners.
  * It's only decoration, so it can't be clicked.
  */
-function Rack({ x, depth, levels }: { x: number; depth: number; levels: number }) {
+function Rack({ x, depth, levels, seeThrough }: RackProps) {
   const length = depth + CELL;
   const height = levels * LEVEL_HEIGHT;
   const halfCell = CELL / 2;
@@ -124,7 +143,12 @@ function Rack({ x, depth, levels }: { x: number; depth: number; levels: number }
       {Array.from({ length: levels }, (_, level) => (
         <mesh key={level} position={[0, level * LEVEL_HEIGHT - LEVEL_HEIGHT / 2 + 0.02, 0]}>
           <boxGeometry args={[CELL, 0.04, length]} />
-          <meshStandardMaterial color="#2a2620" />
+          <meshStandardMaterial
+            color="#2a2620"
+            transparent={seeThrough}
+            opacity={seeThrough ? 0.15 : 1}
+            depthWrite={!seeThrough}
+          />
         </mesh>
       ))}
       {[
@@ -147,11 +171,13 @@ interface BoxProps {
   position: [number, number, number];
   selected: boolean;
   faded: boolean;
+  /** It matches the active filter or search: make it easy to spot. */
+  highlighted: boolean;
   onSelect: (location: WarehouseLocation) => void;
 }
 
 /** One shelf position: an outline, plus a coloured box as full as the stock. */
-function LocationBox({ location, position, selected, faded, onSelect }: BoxProps) {
+function LocationBox({ location, position, selected, faded, highlighted, onSelect }: BoxProps) {
   const [hovered, setHovered] = useState(false);
   const size = LEVEL_HEIGHT * 0.85;
   // Empty or out of stock locations still show a thin slice, so you can click them.
@@ -184,11 +210,20 @@ function LocationBox({ location, position, selected, faded, onSelect }: BoxProps
         {/* Invisible, but still clickable. Only its outline (Edges) is drawn. */}
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
         <Edges
-          color={selected ? "#d4af37" : hovered ? "#e8c87a" : "#4a4439"}
+          color={selected ? "#d4af37" : hovered ? "#e8c87a" : highlighted ? STATE_COLORS.empty : "#4a4439"}
           transparent
           opacity={faded && !selected ? 0.2 : 1}
         />
       </mesh>
+
+      {/* A free location has no box. When it's what you're looking for
+          (e.g. the "Free" filter), show a solid box in the "free" colour. */}
+      {location.state === "empty" && highlighted && (
+        <mesh>
+          <boxGeometry args={[CELL * 0.8, size, CELL * 0.8]} />
+          <meshStandardMaterial color={STATE_COLORS.empty} emissive={STATE_COLORS.empty} emissiveIntensity={0.35} />
+        </mesh>
+      )}
 
       {/* The stock: a box that grows from the bottom of the shelf. */}
       {location.state !== "empty" && (
@@ -198,6 +233,8 @@ function LocationBox({ location, position, selected, faded, onSelect }: BoxProps
             color={color}
             transparent
             opacity={opacity}
+            // A faded box must not hide the highlighted boxes behind it.
+            depthWrite={!faded}
             emissive={selected || hovered ? color : "#000000"}
             emissiveIntensity={selected ? 0.5 : 0.25}
           />

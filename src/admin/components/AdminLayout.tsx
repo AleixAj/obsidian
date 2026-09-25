@@ -1,10 +1,10 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useLogout, useUser } from "../../hooks/queries";
 import { authKeys } from "../../hooks/queries/useAuth";
-import { ApiError, mediaUrl } from "../../lib/api";
+import { mediaUrl } from "../../lib/api";
 import { useDashboard } from "../hooks";
 import { initials, ROLE_LABELS } from "../format";
 import { canSee, LOGISTICS_NAV, MAIN_NAV, type NavItem } from "../navigation";
@@ -34,19 +34,15 @@ export function AdminLayout() {
 
   // The dashboard query is cached, so this doesn't cost an extra request
   // when the Overview page is open. We only use it for the badges.
-  const { data: dashboard, error } = useDashboard("30d");
+  const { data: dashboard } = useDashboard("30d");
   const badges: Record<string, number> = {
     "/admin/orders": dashboard?.badges.orders_to_prepare ?? 0,
     "/admin/products": dashboard?.badges.low_stock ?? 0,
     "/admin/returns": dashboard?.badges.returns_to_review ?? 0,
   };
 
-  // 401 = the session expired. Forget the user so RequireStaff sends
-  // them back to the login page.
-  const sessionExpired = error instanceof ApiError && error.status === 401;
-  useEffect(() => {
-    if (sessionExpired) queryClient.setQueryData(authKeys.user, null);
-  }, [sessionExpired, queryClient]);
+  // If the session expires, src/lib/queryClient.ts forgets the user on any
+  // 401, and RequireStaff sends them back to the login page.
 
   if (!user?.role) return null;
 

@@ -16,6 +16,7 @@ import {
   useWishlistQuery,
 } from "../hooks/queries/useWishlistSync";
 import { useLocalStorage } from "../hooks/useLocalStorage";
+import { ApiError } from "../lib/api";
 
 /**
  * The wishlist is intentionally a `string[]` of product ids — every
@@ -34,13 +35,8 @@ interface WishlistContextValue {
 const WishlistContext = createContext<WishlistContextValue | undefined>(undefined);
 
 export function WishlistProvider({ children }: { children: ReactNode }) {
-  const [guestIds, setGuestIds] = useLocalStorage<string[]>("obsidian:wishlist", [
-    "p2",
-    "p4",
-    "p5",
-    "p7",
-    "p9",
-  ]);
+  // A new visitor starts with an empty wishlist.
+  const [guestIds, setGuestIds] = useLocalStorage<string[]>("obsidian:wishlist", []);
   const { data: user } = useUser();
   const isAuthenticated = Boolean(user);
   const wishlistQuery = useWishlistQuery(isAuthenticated);
@@ -62,11 +58,13 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     if (guestIds.length === 0 || mergeWishlist.isPending) return;
     if (mergedGuestWishlistForUser.current === user.id) return;
 
+    // We only try once per login. If it fails we don't try again (that
+    // would loop forever); if the server says the data is wrong, we drop it.
     mergedGuestWishlistForUser.current = user.id;
     mergeWishlist.mutate(guestIds, {
       onSuccess: () => setGuestIds([]),
-      onError: () => {
-        mergedGuestWishlistForUser.current = null;
+      onError: (error) => {
+        if (error instanceof ApiError && error.status === 422) setGuestIds([]);
       },
     });
   }, [guestIds, mergeWishlist, setGuestIds, user]);

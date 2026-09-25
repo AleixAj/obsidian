@@ -9,6 +9,7 @@ import { Pagination } from "../components/Pagination";
 import { StatusBadge } from "../components/StatusBadge";
 import { count, dateTime, money, STATUS_LABELS } from "../format";
 import { useAdminOrders } from "../hooks";
+import { openRow, pageFromUrl } from "../tables";
 
 const STATUS_TABS: (OrderStatus | "")[] = ["", "paid", "preparing", "shipped", "delivered", "returned", "cancelled", "pending"];
 
@@ -25,7 +26,7 @@ export function Orders() {
 
   const status = (params.get("status") ?? "") as OrderStatus | "";
   const search = params.get("search") ?? "";
-  const page = Number(params.get("page") ?? 1);
+  const page = pageFromUrl(params);
 
   const { data, isPending, isError, isFetching } = useAdminOrders({ status, search, page });
 
@@ -117,7 +118,7 @@ export function Orders() {
               <tbody>
                 {data.data.map((order) => (
                   // The whole row opens the order. The link inside is for keyboard users.
-                  <tr key={order.id} onClick={() => navigate(`/admin/orders/${order.id}`)}>
+                  <tr key={order.id} onClick={openRow(() => navigate(`/admin/orders/${order.id}`))}>
                     <td data-label={t("common.order")}>
                       <Link to={`/admin/orders/${order.id}`} className="adm-mono adm-order-link">
                         {order.number}

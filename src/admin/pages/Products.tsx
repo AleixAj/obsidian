@@ -11,6 +11,7 @@ import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../components/Pagination";
 import { money } from "../format";
 import { useAdminProducts } from "../hooks";
+import { openRow, pageFromUrl } from "../tables";
 
 type StockTab = NonNullable<ProductFilters["stock"]>;
 
@@ -33,7 +34,7 @@ export function Products() {
 
   const stock = (params.get("stock") ?? "") as StockTab;
   const search = params.get("search") ?? "";
-  const page = Number(params.get("page") ?? 1);
+  const page = pageFromUrl(params);
   const canEdit = user?.permissions.includes("products") ?? false;
 
   const { data, isPending, isError, isFetching } = useAdminProducts({ stock, search, page });
@@ -133,7 +134,7 @@ export function Products() {
               </thead>
               <tbody>
                 {data.data.map((product) => (
-                  <tr key={product.id} onClick={() => navigate(`/admin/products/${product.slug}`)}>
+                  <tr key={product.id} onClick={openRow(() => navigate(`/admin/products/${product.slug}`))}>
                     <td data-label={t("common.product")}>
                       <div className="adm-product-cell">
                         <img src={mediaUrl(product.img)} alt="" loading="lazy" />

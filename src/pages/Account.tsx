@@ -19,10 +19,11 @@ import {
   useUser,
 } from "../hooks/queries";
 import i18n, { currentLocale } from "../i18n";
-import { mediaUrl, type AddressPayload, type ApiAddressDTO, type ApiOrderDTO } from "../lib/api";
+import { apiErrorMessage, mediaUrl, type AddressPayload, type ApiAddressDTO, type ApiOrderDTO } from "../lib/api";
 import type { Product } from "../types";
 import { formatPrice } from "../utils/format";
 import { catalogType } from "../i18n/catalog";
+import { firstAvailableSize } from "../utils/product";
 
 type Order = ApiOrderDTO;
 type ProductMap = Map<string, Product>;
@@ -30,8 +31,9 @@ type ProductMap = Map<string, Product>;
 type Section = "overview" | "orders" | "wishlist" | "addresses" | "settings" | "rewards";
 const SECTIONS: Section[] = ["overview", "orders", "wishlist", "addresses", "settings", "rewards"];
 
+/** 4999 → 49.99 (we keep the cents). */
 function euroFromCents(cents: number): number {
-  return Math.round(cents / 100);
+  return cents / 100;
 }
 
 // These helpers live outside components, so they use i18n.t() directly
@@ -122,7 +124,8 @@ function toAddressPayload(address: ApiAddressDTO): AddressPayload {
    Section components
    =========================================== */
 
-function OrderRow({ order, productMap }: { order: Order; productMap: ProductMap }) {
+/** `onOpen` shows the arrow button (used on the overview to open the orders section). */
+function OrderRow({ order, productMap, onOpen }: { order: Order; productMap: ProductMap; onOpen?: () => void }) {
   const { t } = useTranslation("account");
   return (
     <div className="order-card">
@@ -154,9 +157,16 @@ function OrderRow({ order, productMap }: { order: Order; productMap: ProductMap 
         {statusLabel(order.status)}
       </div>
       <div className="total">{formatPrice(euroFromCents(order.total_cents))}</div>
-      <button type="button" className="arrow-btn" aria-label={t("orderRow.view", { number: order.number })}>
-        <Icon.Arrow />
-      </button>
+      {onOpen && (
+        <button
+          type="button"
+          className="arrow-btn"
+          aria-label={t("orderRow.view", { number: order.number })}
+          onClick={onOpen}
+        >
+          <Icon.Arrow />
+        </button>
+      )}
     </div>
   );
 }
@@ -257,7 +267,7 @@ function Overview({
       </div>
       <div className="orders-list">
         {orders.slice(0, 3).map((o) => (
-          <OrderRow key={o.id} order={o} productMap={productMap} />
+          <OrderRow key={o.id} order={o} productMap={productMap} onOpen={() => goTo("orders")} />
         ))}
       </div>
     </>
@@ -380,9 +390,6 @@ function WishlistView({ productMap }: { productMap: ProductMap }) {
             <span className="gold">{t("wishlist.title2")}</span>
           </h1>
         </div>
-        <button type="button" className="btn">
-          {t("wishlist.share")}
-        </button>
       </div>
 
       <div className="wishlist-grid">
@@ -421,9 +428,15 @@ function WishlistView({ productMap }: { productMap: ProductMap }) {
                   </div>
                 </div>
                 <div className="actions">
-                  <button type="button" className="btn-add" onClick={() => add(product)}>
-                    {t("wishlist.addToBag", { price: formatPrice(product.price) })}
-                  </button>
+                  {firstAvailableSize(product) ? (
+                    <button type="button" className="btn-add" onClick={() => add(product)}>
+                      {t("wishlist.addToBag", { price: formatPrice(product.price) })}
+                    </button>
+                  ) : (
+                    <button type="button" className="btn-add" disabled>
+                      {t("wishlist.soldOut")}
+                    </button>
+                  )}
                   <button
                     type="button"
                     className="remove"
@@ -451,6 +464,8 @@ function Addresses() {
 
   const accountAddresses = account?.addresses ?? [];
   const [editing, setEditing] = useState<{ id: number | null; values: AddressPayload } | null>(null);
+  // Error from the API (e.g. a validation message).
+  const [error, setError] = useState<string | null>(null);
 
   const isSaving = createAddress.isPending || updateAddress.isPending;
 
@@ -479,14 +494,35 @@ function Addresses() {
   const saveEditing = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editing) return;
+    setError(null);
 
-    if (editing.id === null) {
-      await createAddress.mutateAsync(editing.values);
-    } else {
-      await updateAddress.mutateAsync({ id: editing.id, payload: editing.values });
+    try {
+      if (editing.id === null) {
+        await createAddress.mutateAsync(editing.values);
+      } else {
+        await updateAddress.mutateAsync({ id: editing.id, payload: editing.values });
+      }
+      setEditing(null);
+    } catch (err) {
+      // Keep the form open so the user can fix what the server complained about.
+      setError(apiErrorMessage(err) ?? t("addresses.saveFailed"));
     }
+  };
 
-    setEditing(null);
+  const makeDefault = (address: ApiAddressDTO) => {
+    setError(null);
+    updateAddress.mutate(
+      { id: address.id, payload: { is_default: true } },
+      { onError: (err) => setError(apiErrorMessage(err) ?? t("addresses.saveFailed")) },
+    );
+  };
+
+  const removeAddress = (address: ApiAddressDTO) => {
+    if (!window.confirm(t("addresses.confirmRemove"))) return;
+    setError(null);
+    deleteAddress.mutate(address.id, {
+      onError: (err) => setError(apiErrorMessage(err) ?? t("addresses.removeFailed")),
+    });
   };
 
   return (
@@ -606,17 +642,28 @@ function Addresses() {
               />
               <span>{t("addresses.form.default")}</span>
             </label>
+            {error && <div className="auth-error">{error}</div>}
             <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
               <button type="submit" className="btn btn-primary" disabled={isSaving}>
                 {isSaving ? t("addresses.form.saving") : t("addresses.form.save")} <Icon.Arrow />
               </button>
-              <button type="button" className="btn" onClick={() => setEditing(null)}>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => {
+                  setEditing(null);
+                  setError(null);
+                }}
+              >
                 {t("addresses.form.cancel")}
               </button>
             </div>
           </div>
         </form>
       )}
+
+      {/* Errors from the card buttons (the form shows its own). */}
+      {error && !editing && <div className="auth-error">{error}</div>}
 
       <div className="addr-grid">
         {isPending && <div className="data-error">{t("addresses.loading")}</div>}
@@ -634,11 +681,11 @@ function Addresses() {
             <div className="actions">
               <a onClick={() => startEdit(a)}>{t("addresses.edit")}</a>
               {!a.is_default && (
-                <a onClick={() => updateAddress.mutate({ id: a.id, payload: { is_default: true } })}>
+                <a onClick={() => makeDefault(a)}>
                   {t("addresses.setDefault")}
                 </a>
               )}
-              <a style={{ color: "var(--accent-warn)" }} onClick={() => deleteAddress.mutate(a.id)}>
+              <a style={{ color: "var(--accent-warn)" }} onClick={() => removeAddress(a)}>
                 {t("addresses.remove")}
               </a>
             </div>
@@ -676,13 +723,6 @@ function Settings() {
     { key: "newsletter", channels: "Email" },
     { key: "birthday", channels: "Email" },
   ];
-
-  useEffect(() => {
-    if (user) {
-      setName(user.name);
-      setEmail(user.email);
-    }
-  }, [user]);
 
   const [firstName, ...lastNameParts] = name.split(" ");
   const lastName = lastNameParts.join(" ");
@@ -799,16 +839,6 @@ function Settings() {
             </div>
           ))}
         </div>
-      </div>
-
-      <div style={{ display: "flex", gap: 12, marginTop: 32 }}>
-        <button
-          type="button"
-          className="btn"
-          style={{ color: "var(--accent-warn)", borderColor: "rgba(217,100,70,0.3)" }}
-        >
-          {t("settings.deleteAccount")}
-        </button>
       </div>
     </>
   );
@@ -980,9 +1010,10 @@ export function Account() {
     .map((part) => part[0]?.toUpperCase())
     .join("") || "AA";
 
-  const handleSignOut = async () => {
-    await logoutMutation.mutateAsync();
-    navigate("/");
+  // Even if the request fails (e.g. the session already expired), the
+  // local session is cleared (see useLogout), so we always go home.
+  const handleSignOut = () => {
+    logoutMutation.mutate(undefined, { onSettled: () => navigate("/") });
   };
 
   const orders = account?.orders ?? [];
@@ -1057,7 +1088,9 @@ export function Account() {
         {current === "orders" && <Orders productMap={productMap} />}
         {current === "wishlist" && <WishlistView productMap={productMap} />}
         {current === "addresses" && <Addresses />}
-        {current === "settings" && <Settings />}
+        {/* key: a different user gets a fresh form. We don't copy the user
+            into the form on every refresh, or it would wipe what is being typed. */}
+        {current === "settings" && <Settings key={user.id} />}
         {current === "rewards" && <Rewards />}
       </div>
     </main>

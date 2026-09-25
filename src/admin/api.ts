@@ -5,6 +5,7 @@
  * CSRF and errors work the same way. All money is in cents.
  */
 
+import { currentLanguage } from "../i18n";
 import { API_URL, ApiError, csrfCookie, request } from "../lib/api";
 
 export type Role = "admin" | "warehouse" | "support";
@@ -167,10 +168,11 @@ export interface ProductVariant {
 
 export interface StockMovement {
   id: number;
+  /** null when the variant was deleted later. */
   sku: string | null;
   change: number;
   stock_after: number;
-  reason: "sale" | "adjustment" | "restock" | "return" | string;
+  reason: "sale" | "adjustment" | "restock" | "return" | "cancel" | string;
   note: string | null;
   by: string;
   at: string;
@@ -255,11 +257,20 @@ export const uploadProductImage = async (file: File): Promise<string> => {
   return data.url;
 };
 
-export const updateStock = async (
-  slug: string,
-  variants: { id: number; stock: number; low_stock_at: number }[],
-  note?: string,
-): Promise<AdminProduct> => {
+/**
+ * One changed variant for the stock form.
+ * expected_stock is the stock we loaded: if someone changed it in the
+ * meantime, the API answers 409 instead of overwriting their change.
+ * low_stock_at is left out when the alert level didn't change.
+ */
+export interface StockChange {
+  id: number;
+  stock: number;
+  expected_stock: number;
+  low_stock_at?: number;
+}
+
+export const updateStock = async (slug: string, variants: StockChange[], note?: string): Promise<AdminProduct> => {
   await csrfCookie();
   const { data } = await request<{ data: AdminProduct }>(`/api/admin/products/${encodeURIComponent(slug)}/stock`, {
     method: "PATCH",
@@ -449,17 +460,34 @@ export async function downloadExport(
   format: ExportFormat,
 ): Promise<void> {
   const url = `${API_URL}/api/admin/${section}/export${toQueryString({ ...filters, format })}`;
-  const res = await fetch(url, { credentials: "include" });
+  const res = await fetch(url, {
+    credentials: "include",
+    // The column titles of the file come in the panel's language.
+    headers: { "Accept-Language": currentLanguage() },
+  });
   if (!res.ok) throw new ApiError(res.status, url);
 
   const blob = await res.blob();
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
+  link.download = fileNameFrom(res.headers.get("Content-Disposition")) ?? defaultFileName(section, format);
+  link.click();
+  // Give the browser a moment to start the download before freeing the file.
+  const href = link.href;
+  setTimeout(() => URL.revokeObjectURL(href), 10_000);
+}
+
+/** 'attachment; filename="orders-2026-09-25.csv"' → "orders-2026-09-25.csv" */
+function fileNameFrom(header: string | null): string | null {
+  const match = header?.match(/filename="?([^";]+)"?/i);
+  return match ? match[1].trim() : null;
+}
+
+/** Name used when the server doesn't send one, e.g. "orders-2026-09-25.csv". */
+function defaultFileName(section: ExportSection, format: ExportFormat): string {
   // The products export is a stock list (one row per SKU).
   const name = section === "products" ? "stock" : section;
-  link.download = `${name}-${new Date().toISOString().slice(0, 10)}.${format}`;
-  link.click();
-  URL.revokeObjectURL(link.href);
+  return `${name}-${new Date().toISOString().slice(0, 10)}.${format}`;
 }
 
 // ──────────────────────────────────────────────────────────────────────

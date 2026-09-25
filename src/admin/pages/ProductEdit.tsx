@@ -72,10 +72,32 @@ function toFormValues(product?: AdminProduct): FormValues {
   };
 }
 
-/** "129.90" → 12990. Empty text → null. */
+/**
+ * "129.90" or "129,90" → 12990. Empty text → null. Not a price ("abc", "1.005") → NaN.
+ * We read the euros and the cents as two whole numbers, so there are no
+ * float rounding errors (1.005 * 100 is 100.49999... in JavaScript).
+ */
 function toCents(value: string): number | null {
-  if (value.trim() === "") return null;
-  return Math.round(Number(value.replace(",", ".")) * 100);
+  const text = value.trim().replace(",", ".");
+  if (text === "") return null;
+
+  const match = /^(\d+)(?:\.(\d{1,2}))?$/.exec(text);
+  if (!match) return NaN;
+
+  const euros = Number(match[1]);
+  const cents = Number((match[2] ?? "").padEnd(2, "0")); // "5" → 50, "05" → 5
+  return euros * 100 + cents;
+}
+
+/**
+ * Units that would be lost when saving: variants that have stock but whose
+ * colour or size is not in the form anymore (the API deletes them).
+ */
+function unitsToLose(product: AdminProduct | undefined, values: FormValues): number {
+  const kept = new Set(values.colors.flatMap((color) => values.sizes.map((size) => `${color.hex}|${size}`)));
+  return (product?.variants ?? [])
+    .filter((variant) => variant.stock > 0 && !kept.has(`${variant.color_hex}|${variant.size_label}`))
+    .reduce((sum, variant) => sum + variant.stock, 0);
 }
 
 function ProductForm({ product }: { product?: AdminProduct }) {
@@ -90,8 +112,10 @@ function ProductForm({ product }: { product?: AdminProduct }) {
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState<"img" | "img_alt" | null>(null);
   const save = useSaveProduct(product?.slug);
-  // Demo accounts are shared by everyone, so they can't upload files.
-  const canUpload = canEdit && !user?.is_demo;
+  // Demo accounts are shared by everyone, so they can't upload files
+  // or change the catalogue (the API answers 403). They can still change the stock.
+  const isDemo = user?.is_demo ?? false;
+  const canUpload = canEdit && !isDemo;
   const { data: categories = [] } = useQuery({ queryKey: ["categories", "list"], queryFn: fetchCategories });
 
   /** Updates one field of the form. */
@@ -159,11 +183,23 @@ function ProductForm({ product }: { product?: AdminProduct }) {
     event.preventDefault();
     setError(null);
 
+    const priceCents = toCents(values.price);
+    const oldPriceCents = toCents(values.old_price);
+    if (priceCents === null || Number.isNaN(priceCents) || Number.isNaN(oldPriceCents)) {
+      setError(t("productEdit.invalidPrice"));
+      return;
+    }
+
+    // Removing a colour or size (or changing a colour's code) deletes its variants.
+    // If they still have units, ask first.
+    const lost = unitsToLose(product, values);
+    if (lost > 0 && !window.confirm(t("productEdit.confirmLoseStock", { count: lost }))) return;
+
     const payload: ProductPayload = {
       name: values.name.trim(),
       sub_label: values.sub_label.trim() || null,
-      price_cents: toCents(values.price) ?? 0,
-      old_price_cents: toCents(values.old_price),
+      price_cents: priceCents,
+      old_price_cents: oldPriceCents,
       tag: values.tag.trim() || null,
       img: values.img.trim(),
       img_alt: values.img_alt.trim() || null,
@@ -230,11 +266,10 @@ function ProductForm({ product }: { product?: AdminProduct }) {
             <div className="adm-form-row">
               <label>
                 {t("productEdit.price")}
+                {/* Text (not number) so "580,50" and "580.50" both work. */}
                 <input
                   className="adm-input"
-                  type="number"
-                  min="0"
-                  step="0.01"
+                  inputMode="decimal"
                   value={values.price}
                   onChange={(e) => set("price", e.target.value)}
                   required
@@ -246,9 +281,7 @@ function ProductForm({ product }: { product?: AdminProduct }) {
                 </span>
                 <input
                   className="adm-input"
-                  type="number"
-                  min="0"
-                  step="0.01"
+                  inputMode="decimal"
                   value={values.old_price}
                   onChange={(e) => set("old_price", e.target.value)}
                 />
@@ -412,7 +445,8 @@ function ProductForm({ product }: { product?: AdminProduct }) {
           {canEdit && (
             <section className="adm-card">
               {error && <div className="adm-alert">{error}</div>}
-              <button type="submit" className="adm-btn adm-btn--gold adm-btn--full" disabled={save.isPending}>
+              {isDemo && <p className="adm-muted adm-small">{t("productEdit.demoReadOnly")}</p>}
+              <button type="submit" className="adm-btn adm-btn--gold adm-btn--full" disabled={save.isPending || isDemo}>
                 {save.isPending ? t("common.saving") : product ? t("productEdit.saveChanges") : t("productEdit.create")}
               </button>
             </section>

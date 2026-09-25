@@ -9,6 +9,7 @@ import { Pagination } from "../components/Pagination";
 import { ReturnBadge } from "../components/ReturnBadge";
 import { dateTime, money, RETURN_STATUS_LABELS } from "../format";
 import { useAdminReturns } from "../hooks";
+import { openRow, pageFromUrl } from "../tables";
 
 const TABS: (ReturnStatus | "")[] = ["requested", "approved", "refunded", "rejected", ""];
 
@@ -25,7 +26,7 @@ export function Returns() {
   const statusParam = params.get("status");
   const status = (statusParam === null ? "requested" : statusParam === "all" ? "" : statusParam) as ReturnStatus | "";
   const search = params.get("search") ?? "";
-  const page = Number(params.get("page") ?? 1);
+  const page = pageFromUrl(params);
 
   const { data, isPending, isError, isFetching } = useAdminReturns({ status, search, page });
 
@@ -108,7 +109,7 @@ export function Returns() {
               </thead>
               <tbody>
                 {data.data.map((item) => (
-                  <tr key={item.id} onClick={() => navigate(`/admin/returns/${item.id}`)}>
+                  <tr key={item.id} onClick={openRow(() => navigate(`/admin/returns/${item.id}`))}>
                     <td data-label={t("returns.columns.return")}>
                       <Link to={`/admin/returns/${item.id}`} className="adm-mono adm-order-link">
                         {item.number}

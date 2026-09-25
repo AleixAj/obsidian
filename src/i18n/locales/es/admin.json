@@ -159,7 +159,8 @@
     "lowStock_other": "Stock bajo · {{count}} variantes",
     "sizeLine": "{{sku}} · talla {{size}}",
     "out": "Agotado",
-    "left": "Quedan {{units}}"
+    "left_one": "Queda {{count}}",
+    "left_other": "Quedan {{count}}"
   },
   "orders": {
     "title": "Pedidos",
@@ -192,8 +193,8 @@
     "notePlaceholder": "p. ej. número de seguimiento",
     "shippingAddress": "Dirección de envío",
     "changed": "El pedido {{number}} ha pasado a: {{status}}.",
-    "forbidden": "Tu rol no puede hacer este cambio.",
     "updateError": "No se ha podido actualizar el pedido.",
+    "confirmCancel": "¿Cancelar el pedido {{number}}? Sus unidades vuelven al stock. No se puede deshacer.",
     "actions": {
       "pending": "Marcar como pendiente",
       "paid": "Marcar como pagado",
@@ -271,23 +272,31 @@
     "upload": "Subir desde el ordenador",
     "uploadRules": "JPG, PNG o WebP, de al menos 400 px y hasta {{mb}} MB.",
     "uploadsOff": "Las cuentas de demo no pueden subir fotos. Puedes pegar un enlace.",
+    "demoReadOnly": "Las cuentas de demo no pueden cambiar los productos. Sí puedes cambiar el stock más abajo.",
     "wrongType": "Usa una imagen JPG, PNG o WebP.",
     "tooBig": "La imagen es demasiado grande. El límite es de {{mb}} MB.",
     "uploadError": "No se ha podido subir la imagen.",
     "saved": "Producto guardado.",
     "created": "Producto creado. Ahora añade su stock.",
     "saveError": "No se ha podido guardar el producto.",
+    "confirmLoseStock_one": "Al quitar o cambiar estos colores o tallas se borran variantes que aún tienen stock: se perderá {{count}} unidad. ¿Guardar igualmente?",
+    "confirmLoseStock_other": "Al quitar o cambiar estos colores o tallas se borran variantes que aún tienen stock: se perderán {{count}} unidades. ¿Guardar igualmente?",
+    "invalidPrice": "Escribe el precio como un número, p. ej. 129,90",
     "saveChanges": "Guardar cambios",
     "create": "Crear producto"
   },
   "stock": {
-    "title": "Stock · {{units}} unidades",
+    "title_one": "Stock · {{count}} unidad",
+    "title_other": "Stock · {{count}} unidades",
     "inputLabel": "Stock {{colour}} {{size}}",
     "alertAt": "Avisar cuando el stock sea ≤",
+    "alertMixed": "cada una",
     "notePlaceholder": "p. ej. entrega del proveedor",
     "save": "Guardar stock",
     "saved": "Stock guardado.",
     "saveError": "No se ha podido guardar el stock.",
+    "invalid": "El stock y el aviso deben ser números enteros desde 0.",
+    "conflict": "Alguien ha cambiado este stock mientras lo editabas. Ya se han cargado los números nuevos: revísalos y vuelve a guardar.",
     "legendLow": "stock bajo",
     "legendOut": "agotado",
     "history": "Historial de stock",
@@ -296,7 +305,8 @@
       "sale": "Venta",
       "adjustment": "Ajuste",
       "restock": "Reposición",
-      "return": "Devolución"
+      "return": "Devolución",
+      "cancel": "Pedido cancelado"
     }
   },
   "customers": {
@@ -445,6 +455,8 @@
       "list": "Lista"
     },
     "no3d": "Tu navegador no puede mostrar 3D",
+    "error3d": "La vista 3D no ha podido cargarse en este dispositivo.",
+    "showPlan": "Ver el plano",
     "states": {
       "ok": "Con stock",
       "low": "Stock bajo",
@@ -453,7 +465,8 @@
     },
     "summary": {
       "occupancy": "Ocupación",
-      "unitsStored": "{{units}} unidades guardadas",
+      "unitsStored_one": "{{units}} unidad guardada",
+      "unitsStored_other": "{{units}} unidades guardadas",
       "lowStock": "Stock bajo",
       "toRestock": "ubicaciones por reponer",
       "outOfStock": "Agotado",
@@ -480,8 +493,10 @@
       "close": "Cerrar detalles",
       "position": "Pasillo {{aisle}} · módulo {{bay}} · nivel {{level}}",
       "size": "talla {{size}}",
-      "alertAt": "Aviso con {{units}} unidades o menos.",
-      "restock": "Reponer +{{units}} unidades",
+      "alertAt_one": "Aviso con {{count}} unidad o menos.",
+      "alertAt_other": "Aviso con {{count}} unidades o menos.",
+      "restock_one": "Reponer +{{count}} unidad",
+      "restock_other": "Reponer +{{count}} unidades",
       "full": "La ubicación está llena",
       "free": "Liberar esta ubicación",
       "isFree": "Esta ubicación está libre. Coloca un producto que aún no tenga ubicación:",
@@ -489,7 +504,8 @@
       "productToPlace": "Producto para colocar",
       "choose": "Elige un producto…",
       "placeHere": "Colocar aquí",
-      "restocked": "{{code}} repuesta con {{units}} unidades.",
+      "restocked_one": "{{code}} repuesta con {{count}} unidad.",
+      "restocked_other": "{{code}} repuesta con {{count}} unidades.",
       "restockError": "No se ha podido reponer.",
       "placed": "Producto colocado en {{code}}.",
       "freed": "{{code}} ya está libre.",

@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
 import { useUser } from "../../hooks/queries";
@@ -7,15 +7,17 @@ import type { Product } from "../../types";
 import { formatPrice } from "../../utils/format";
 import { Icon } from "../ui/Icon";
 import { Placeholder } from "../ui/Placeholder";
-import { catalogTag, catalogType } from "../../i18n/catalog";
+import { catalogColour, catalogTag, catalogType } from "../../i18n/catalog";
+import { firstAvailableSize } from "../../utils/product";
 
 /**
  * Compact card used across home, PLP, "complete the look" and wishlist.
  *
- * - Clicking the card opens the PDP.
+ * - Clicking the card opens the PDP. The name is also a real link, so
+ *   keyboard users can open the product too.
  * - "Quick add" appears on hover and pushes the product into the cart
- *   with its default size (so the user keeps browsing without leaving
- *   the listing).
+ *   with the first size that isn't sold out (so the user keeps browsing
+ *   without leaving the listing).
  * - Two images swap on hover for a subtle look-shot effect.
  */
 interface ProductCardProps {
@@ -29,6 +31,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const { data: user } = useUser();
   const { has, toggle } = useWishlist();
   const isSaved = has(product.id);
+  const isSoldOut = firstAvailableSize(product) === null;
 
   const goToProduct = () => navigate(`/product/${product.id}`);
 
@@ -77,17 +80,22 @@ export function ProductCard({ product }: ProductCardProps) {
           className="alt"
           img={product.imgAlt}
         />
-        <button type="button" className="quick-add" onClick={quickAdd}>
-          {t("productCard.quickAdd", { price: formatPrice(product.price) })}
+        <button type="button" className="quick-add" onClick={quickAdd} disabled={isSoldOut}>
+          {isSoldOut
+            ? t("productCard.soldOut")
+            : t("productCard.quickAdd", { price: formatPrice(product.price) })}
         </button>
       </div>
       <div className="product-info">
         <div>
-          <div className="name">{product.name}</div>
+          {/* stopPropagation: the card's own click would navigate a second time. */}
+          <Link to={`/product/${product.id}`} className="name" onClick={(e) => e.stopPropagation()}>
+            {product.name}
+          </Link>
           <div className="cat">{catalogType(product.cat)}</div>
           <div className="swatches">
-            {product.colors.map((c, i) => (
-              <span key={i} className="swatch" style={{ background: c }} />
+            {product.colors.map((c) => (
+              <span key={c.hex} className="swatch" style={{ background: c.hex }} title={catalogColour(c.name)} />
             ))}
           </div>
         </div>

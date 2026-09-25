@@ -8,6 +8,11 @@
     "title": "Cargando Obsidian…",
     "sub": "Preparando la siguiente vista."
   },
+  "errorBoundary": {
+    "title": "Algo ha fallado",
+    "text": "Esta parte de la página no se ha podido cargar.",
+    "reload": "Recargar"
+  },
   "session": {
     "checking": "✦ Comprobando sesión…",
     "sub": "Buscando tu cookie de miembro de Obsidian."
@@ -112,14 +117,17 @@
     "noteGold": "Stripe próximamente",
     "signInToCheckout": "Inicia sesión para terminar la compra",
     "orderPlaced": "Pedido {{number}} realizado",
-    "failed": "No se pudo completar la compra. Inténtalo de nuevo."
+    "failed": "No se pudo completar la compra. Inténtalo de nuevo.",
+    "soldOut": "Este producto está agotado",
+    "updateFailed": "No hemos podido actualizar tu cesta. Inténtalo de nuevo."
   },
   "productCard": {
     "addWishlist": "Añadir a favoritos",
     "removeWishlist": "Quitar de favoritos",
     "front": "Delante",
     "back": "Detrás",
-    "quickAdd": "Añadir ✦ {{price}}"
+    "quickAdd": "Añadir ✦ {{price}}",
+    "soldOut": "Agotado"
   },
   "toast": {
     "addedWishlist": "Añadido a favoritos",
