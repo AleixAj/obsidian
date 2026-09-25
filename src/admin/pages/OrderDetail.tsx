@@ -157,15 +157,19 @@ export function OrderDetail() {
             ) : actions.length === 0 ? (
               <p className="adm-muted">{t("orderDetail.onlySupport")}</p>
             ) : (
-              <>
-                <input
-                  className="adm-input"
-                  value={note}
-                  onChange={(event) => setNote(event.target.value)}
-                  placeholder={t("orderDetail.notePlaceholder")}
-                  maxLength={255}
-                  aria-label={t("common.note")}
-                />
+              <div className="adm-form">
+                <label>
+                  <span className="adm-label-row">
+                    {t("common.note")} <small>{t("common.optional")}</small>
+                  </span>
+                  <input
+                    className="adm-input"
+                    value={note}
+                    onChange={(event) => setNote(event.target.value)}
+                    placeholder={t("orderDetail.notePlaceholder")}
+                    maxLength={255}
+                  />
+                </label>
                 <div className="adm-actions">
                   {actions.map((status) => (
                     <button
@@ -179,7 +183,7 @@ export function OrderDetail() {
                     </button>
                   ))}
                 </div>
-              </>
+              </div>
             )}
           </section>
 

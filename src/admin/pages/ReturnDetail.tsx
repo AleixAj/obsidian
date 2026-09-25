@@ -142,14 +142,18 @@ export function ReturnDetail() {
                   <input type="checkbox" checked={restock} onChange={(e) => setRestock(e.target.checked)} />
                   {t("returnDetail.restock")}
                 </label>
-                <textarea
-                  className="adm-input adm-textarea"
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder={t("returnDetail.notePlaceholder")}
-                  maxLength={500}
-                  aria-label={t("common.note")}
-                />
+                <label>
+                  <span className="adm-label-row">
+                    {t("returnDetail.noteLabel")} <small>{t("returnDetail.noteRequired")}</small>
+                  </span>
+                  <textarea
+                    className="adm-input adm-textarea"
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    placeholder={t("returnDetail.notePlaceholder")}
+                    maxLength={500}
+                  />
+                </label>
                 <div className="adm-actions">
                   <button type="button" className="adm-btn adm-btn--gold" onClick={() => run("approve")} disabled={action.isPending}>
                     {t("returnDetail.approve")}

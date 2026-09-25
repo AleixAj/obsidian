@@ -149,7 +149,7 @@ export function Users() {
                     <tr>
                       <th>{t("users.permission")}</th>
                       {data.roles.map((role) => (
-                        <th key={role.value} className="num">
+                        <th key={role.value} className="adm-center">
                           {t(ROLE_LABELS[role.value])}
                         </th>
                       ))}
@@ -160,7 +160,7 @@ export function Users() {
                       <tr key={permission}>
                         <td>{t(label)}</td>
                         {data.roles.map((role) => (
-                          <td key={role.value} className="num">
+                          <td key={role.value} className="adm-center">
                             {role.permissions.includes(permission) ? (
                               <span className="adm-yes" aria-label={t("common.yes")}>✓</span>
                             ) : (

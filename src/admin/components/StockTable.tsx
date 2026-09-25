@@ -68,7 +68,7 @@ export function StockTable({ product }: { product: AdminProduct }) {
               <tr>
                 <th>{t("common.colour")}</th>
                 {sizes.map((size) => (
-                  <th key={size} className="num">
+                  <th key={size} className="adm-center">
                     {size}
                   </th>
                 ))}
@@ -82,13 +82,13 @@ export function StockTable({ product }: { product: AdminProduct }) {
                   </td>
                   {sizes.map((size) => {
                     const variant = findVariant(color.hex, size);
-                    if (!variant) return <td key={size} className="num adm-muted">—</td>;
+                    if (!variant) return <td key={size} className="adm-center adm-muted">—</td>;
 
                     const units = Number(stock[variant.id]) || 0;
                     const tone = units === 0 ? "is-out" : units <= Number(lowAt) ? "is-low" : "";
 
                     return (
-                      <td key={size} className="num">
+                      <td key={size} className="adm-center">
                         <input
                           className={`adm-input adm-stock-input ${tone}`}
                           type="number"
@@ -112,14 +112,18 @@ export function StockTable({ product }: { product: AdminProduct }) {
             {t("stock.alertAt")}
             <input className="adm-input adm-stock-input" type="number" min="0" value={lowAt} onChange={(e) => setLowAt(e.target.value)} />
           </label>
-          <input
-            className="adm-input"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder={t("stock.notePlaceholder")}
-            maxLength={255}
-            aria-label={t("common.note")}
-          />
+          <label>
+            <span className="adm-label-row">
+              {t("common.note")} <small>{t("common.optional")}</small>
+            </span>
+            <input
+              className="adm-input"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder={t("stock.notePlaceholder")}
+              maxLength={255}
+            />
+          </label>
           <button type="button" className="adm-btn adm-btn--gold" onClick={handleSave} disabled={!hasChanges || updateStock.isPending}>
             {updateStock.isPending ? t("common.saving") : t("stock.save")}
           </button>
