@@ -56,6 +56,7 @@ Funcionalitats implementades:
 - Panell d'administració a `/admin` amb rols, comandes, estoc, clients, devolucions, equip i magatzem en 3D ([vegeu la secció](#panell-dadministració-admin)).
 - Accés de demostració amb un clic (botiga i panell) per revisar el projecte sense registrar-se.
 - Test d'extrem a extrem amb Playwright del flux principal.
+- Botiga i panell en castellà i anglès, també les dades de la demostració ([vegeu la secció](#idiomes-es--en)).
 
 ## Panell d'administració (`/admin`)
 
@@ -63,9 +64,11 @@ Una eina interna com la d'una botiga real, dins la mateixa SPA però carregada a
 (els visitants de la botiga no en descarreguen el codi).
 
 **Proveu-lo sense registrar-vos:** entreu a [`/admin/login`](https://obsidian.aleixaj.com/admin/login)
-i trieu un rol amb els botons de demostració. A l'inici de sessió de la botiga també hi ha
-un accés de "client de demostració". Les dades d'exemple (unes 900 comandes de 90 dies,
-60 clients, estoc i devolucions) es reinicien soles cada 24 hores.
+i trieu un rol amb els botons de demostració: Aleix Auqué (administració), Javier Molina
+(magatzem) o Lucía Fernández (atenció al client). A l'inici de sessió de la botiga també hi
+ha un accés de "client de demostració". Les dades d'exemple (unes 900 comandes de 90 dies,
+60 clients, estoc i devolucions) es reinicien soles cada 24 hores i són coherents: cada
+comentari de devolució encaixa amb el seu motiu i cada adreça és de la seva ciutat.
 
 ![Fitxa de producte amb la taula d'estoc](./docs/screenshots/admin-product-stock.png)
 
@@ -105,13 +108,33 @@ es descarrega en obrir aquesta pàgina, i al mòbil o sense WebGL s'obre la vist
 - Les fotos es redueixen i es desen en WebP amb GD, en un volum de Railway.
 - Gràfiques amb Recharts; Excel amb OpenSpout.
 
-**Tests:** 71 tests de l'API (sobretot permisos per rol) i un test d'extrem a extrem amb
+**Tests:** 76 tests de l'API (sobretot permisos per rol) i un test d'extrem a extrem amb
 Playwright (`e2e/main-flow.e2e.ts`): un client demana una devolució, atenció al client
 l'aprova i la reemborsa, el client veu el reemborsament, magatzem prepara una comanda, reposa una ubicació i
 no pot veure clients, i administració revisa el resum i l'equip. S'executa a la CI de
 l'API a cada push i cada nit.
 
 ![El panell al mòbil](./docs/screenshots/admin-mobile.png)
+
+## Idiomes (ES / EN)
+
+Tot el web (botiga, compte, pàgines legals i panell) està en castellà i anglès.
+
+- **Idioma per defecte:** el que es va triar l'última vegada (es desa al navegador) o, si no,
+  el del navegador: castellà si està en castellà, anglès en la resta de casos. Es canvia amb
+  el selector **EN · ES** de la capçalera i del panell.
+- **Textos del web:** amb i18next. Són a `src/i18n/locales/{en,es}/`, separats per zones
+  (`common`, `shop`, `account`, `legal`, `admin`). Un test (`locales.test.ts`) comprova que
+  els dos idiomes tenen les mateixes claus.
+- **Preus, dates i percentatges** fan servir el format de cada idioma ("1.485,00 €" / "€1,485.00").
+- **Paraules del catàleg** que l'API desa en anglès (etiquetes com "NEW", tipus de peça,
+  colors, la talla "ONE"…) es tradueixen a `src/i18n/catalog.ts`. Els noms dels productes es
+  queden en anglès, com a noms de marca. El cercador entén les dues versions ("hoodie" i "sudadera").
+- **API:** el web envia `Accept-Language` a cada petició i Laravel respon en aquest idioma
+  (errors de validació, missatges, estats, rols i capçaleres de les exportacions).
+- **Dades de la demostració:** es desen un sol cop, en anglès, i l'API les tradueix en
+  enviar-les (notes d'estoc, comentaris de devolucions, historial de comandes…). El que escriu
+  una persona de debò es mostra tal com és.
 
 ## Stack tècnic
 
@@ -188,6 +211,7 @@ src/
 │   ├── queries/       # Hooks de React Query
 │   ├── useLocalStorage.ts
 │   └── useReveal.ts
+├── i18n/              # Traduccions ES/EN (i18next) i paraules del catàleg
 ├── lib/               # Client de l'API + QueryClient
 ├── pages/             # Home, Shop, Product, Lookbook, Auth, Account, Legal, NotFound
 ├── styles/            # Tokens CSS, estils globals i estils per pàgina
@@ -263,7 +287,7 @@ Verificat:
 - Frontend: [`https://obsidian.aleixaj.com`](https://obsidian.aleixaj.com)
 - API del backend: [`https://obsidian-api-production-8b5e.up.railway.app`](https://obsidian-api-production-8b5e.up.railway.app)
 - Health check: [`/api/health`](https://obsidian-api-production-8b5e.up.railway.app/api/health)
-- Demostració sense contrasenya: botó "Reviewing this project?" a `/auth` i botons de rol a `/admin/login`
+- Demostració sense contrasenya: botó "¿Estás revisando este proyecto?" ("Reviewing this project?" en anglès) a `/auth` i botons de rol a `/admin/login`
 
 Notes de desplegament:
 
@@ -361,6 +385,7 @@ Les dependències i els placeholders d'entorn de Stripe/Cashier existeixen al ba
 - [x] Etapa 9 - Pàgines legals (`/privacy`, `/terms`) requerides per la pantalla de consentiment de Google.
 - [x] Etapa 10 - Panell d'administració: rols, comandes, estoc, clients, devolucions, equip i exportació.
 - [x] Etapa 11 - Magatzem en 3D: ubicacions per variant, reposició i vistes 3D, pla i llista.
+- [x] Etapa 12 - Traducció al castellà i l'anglès del web, el panell, l'API i la demostració.
 - [ ] Següent - Pagaments reals amb Stripe.
 
 ## Per què és important aquest projecte

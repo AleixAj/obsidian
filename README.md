@@ -56,6 +56,7 @@ Funcionalidades implementadas:
 - Panel de administración en `/admin` con roles, pedidos, stock, clientes, devoluciones, equipo y almacén en 3D ([ver sección](#panel-de-administración-admin)).
 - Acceso demo con un clic (tienda y panel) para revisar el proyecto sin registrarse.
 - Test de extremo a extremo con Playwright del flujo principal.
+- Tienda y panel en español e inglés, también los datos de la demo ([ver sección](#idiomas-es--en)).
 
 ## Panel de administración (`/admin`)
 
@@ -63,9 +64,11 @@ Una herramienta interna como la de una tienda real, en el mismo SPA pero cargada
 (los visitantes de la tienda no descargan su código).
 
 **Pruébalo sin registrarte:** entra en [`/admin/login`](https://obsidian.aleixaj.com/admin/login)
-y elige un rol con los botones de demo. En el login de la tienda también hay un acceso de
-"cliente demo". Los datos de ejemplo (unos 900 pedidos de 90 días, 60 clientes, stock y
-devoluciones) se reinician solos cada 24 horas.
+y elige un rol con los botones de demo: Aleix Auqué (administración), Javier Molina
+(almacén) o Lucía Fernández (atención al cliente). En el login de la tienda también hay un
+acceso de "cliente demo". Los datos de ejemplo (unos 900 pedidos de 90 días, 60 clientes,
+stock y devoluciones) se reinician solos cada 24 horas y son coherentes: cada comentario de
+devolución encaja con su motivo y cada dirección es de su ciudad.
 
 ![Ficha de producto con la tabla de stock](./docs/screenshots/admin-product-stock.png)
 
@@ -105,13 +108,34 @@ guarda una variante y su stock, y al reponer se crea un movimiento de stock norm
 - Las fotos se reducen y se guardan en WebP con GD, en un volumen de Railway.
 - Gráficas con Recharts; Excel con OpenSpout.
 
-**Tests:** 71 tests de la API (sobre todo permisos por rol) y un test de extremo a extremo
+**Tests:** 76 tests de la API (sobre todo permisos por rol) y un test de extremo a extremo
 con Playwright (`e2e/main-flow.e2e.ts`): un cliente pide una devolución, atención al cliente
 la aprueba y la reembolsa, el cliente ve el reembolso, almacén prepara un pedido, repone una ubicación y no puede
 ver clientes, y administración revisa el resumen y el equipo. Se ejecuta en la CI de la API
 en cada push y cada noche.
 
 ![El panel en móvil](./docs/screenshots/admin-mobile.png)
+
+## Idiomas (ES / EN)
+
+Toda la web (tienda, cuenta, páginas legales y panel) está en español e inglés.
+
+- **Idioma por defecto:** el que se eligió la última vez (se guarda en el navegador) o, si
+  no, el del navegador: español si está en español, inglés en el resto. Se cambia con el
+  selector **EN · ES** de la cabecera y del panel.
+- **Textos de la web:** con i18next. Están en `src/i18n/locales/{en,es}/` separados por
+  zonas (`common`, `shop`, `account`, `legal`, `admin`). Un test (`locales.test.ts`) comprueba
+  que los dos idiomas tienen las mismas claves.
+- **Precios, fechas y porcentajes** usan el formato de cada idioma ("1.485,00 €" / "€1,485.00").
+- **Palabras del catálogo** que la API guarda en inglés (etiquetas como "NEW", tipos de
+  prenda, colores, la talla "ONE"…) se traducen en `src/i18n/catalog.ts`. Los nombres de los
+  productos se quedan en inglés, como nombres de marca. El buscador entiende las dos versiones
+  ("hoodie" y "sudadera").
+- **API:** la web envía `Accept-Language` en cada petición y Laravel responde en ese idioma
+  (errores de validación, mensajes, estados, roles y cabeceras de las exportaciones).
+- **Datos de la demo:** se guardan una sola vez, en inglés, y la API los traduce al enviarlos
+  (notas de stock, comentarios de devoluciones, historial de pedidos…). Lo que escribe una
+  persona de verdad se muestra tal cual.
 
 ## Stack Técnico
 
@@ -188,6 +212,7 @@ src/
 │   ├── queries/       # Hooks React Query
 │   ├── useLocalStorage.ts
 │   └── useReveal.ts
+├── i18n/              # Traducciones ES/EN (i18next) y palabras del catálogo
 ├── lib/               # Cliente API + QueryClient
 ├── pages/             # Home, Shop, Product, Lookbook, Auth, Account, Legal, NotFound
 ├── styles/            # Tokens CSS, globales y estilos por página
@@ -263,7 +288,7 @@ Verificado:
 - Frontend: [`https://obsidian.aleixaj.com`](https://obsidian.aleixaj.com)
 - Backend API: [`https://obsidian-api-production-8b5e.up.railway.app`](https://obsidian-api-production-8b5e.up.railway.app)
 - Health check: [`/api/health`](https://obsidian-api-production-8b5e.up.railway.app/api/health)
-- Demo sin contraseña: botón "Reviewing this project?" en `/auth` y botones de rol en `/admin/login`
+- Demo sin contraseña: botón "¿Estás revisando este proyecto?" ("Reviewing this project?" en inglés) en `/auth` y botones de rol en `/admin/login`
 
 Notas de despliegue:
 
@@ -361,6 +386,7 @@ Las dependencias/env placeholders de Stripe/Cashier existen en el backend, pero 
 - [x] Etapa 9 - Páginas legales (`/privacy`, `/terms`) requeridas por el consentimiento de Google.
 - [x] Etapa 10 - Panel de administración: roles, pedidos, stock, clientes, devoluciones, equipo y exportación.
 - [x] Etapa 11 - Almacén en 3D: ubicaciones por variante, reposición y vistas 3D, plano y lista.
+- [x] Etapa 12 - Traducción al español e inglés de la web, el panel, la API y la demo.
 - [ ] Siguiente - Pagos reales con Stripe.
 
 ## Por Qué Importa Este Proyecto

@@ -56,6 +56,7 @@ Implemented features:
 - Admin panel at `/admin` with roles, orders, stock, customers, returns, team and a 3D warehouse ([see section](#admin-panel-admin)).
 - One-click demo access (shop and panel) to review the project without signing up.
 - End-to-end Playwright test of the main flow.
+- Shop and panel in Spanish and English, demo data included ([see section](#languages-es--en)).
 
 ## Admin panel (`/admin`)
 
@@ -63,9 +64,11 @@ An internal tool like a real shop would have, in the same SPA but loaded separat
 (shop visitors never download its code).
 
 **Try it without signing up:** open [`/admin/login`](https://obsidian.aleixaj.com/admin/login)
-and pick a role with the demo buttons. The shop login also has a "demo customer" shortcut.
+and pick a role with the demo buttons: Aleix Auqué (admin), Javier Molina (warehouse) or
+Lucía Fernández (customer support). The shop login also has a "demo customer" shortcut.
 The sample data (about 900 orders over 90 days, 60 customers, stock and returns) resets
-itself every 24 hours.
+itself every 24 hours and is consistent: every return comment matches its reason and every
+address belongs to its city.
 
 ![Product page with the stock grid](./docs/screenshots/admin-product-stock.png)
 
@@ -105,13 +108,32 @@ page opens, and phones or browsers without WebGL open the Plan view.
 - Photos are resized and saved as WebP with GD, on a Railway volume.
 - Charts with Recharts; Excel with OpenSpout.
 
-**Tests:** 71 API tests (mostly permissions per role) and an end-to-end Playwright test
+**Tests:** 76 API tests (mostly permissions per role) and an end-to-end Playwright test
 (`e2e/main-flow.e2e.ts`): a customer asks for a return, support approves and refunds it,
 the customer sees the refund, the warehouse prepares an order, restocks a location and can't open customers,
 and the admin checks the overview and the team. It runs in the API CI on every push and
 every night.
 
 ![The panel on a phone](./docs/screenshots/admin-mobile.png)
+
+## Languages (ES / EN)
+
+The whole site (shop, account, legal pages and panel) is in Spanish and English.
+
+- **Default language:** the one chosen last time (saved in the browser) or, if none, the
+  browser's: Spanish if it's set to Spanish, English otherwise. Switch it with the **EN · ES**
+  selector in the header and in the panel.
+- **Site texts:** with i18next. They live in `src/i18n/locales/{en,es}/`, split by area
+  (`common`, `shop`, `account`, `legal`, `admin`). A test (`locales.test.ts`) checks that both
+  languages have the same keys.
+- **Prices, dates and percentages** use each language's format ("€1,485.00" / "1.485,00 €").
+- **Catalogue words** the API stores in English (tags like "NEW", garment types, colours, the
+  "ONE" size…) are translated in `src/i18n/catalog.ts`. Product names stay in English, like
+  brand names. Search understands both versions ("hoodie" and "sudadera").
+- **API:** the site sends `Accept-Language` with every request and Laravel answers in that
+  language (validation errors, messages, statuses, roles and export headers).
+- **Demo data:** saved once, in English, and translated by the API when it's sent (stock
+  notes, return comments, order history…). Anything a real person types is shown as it is.
 
 ## Tech Stack
 
@@ -188,6 +210,7 @@ src/
 │   ├── queries/       # React Query hooks
 │   ├── useLocalStorage.ts
 │   └── useReveal.ts
+├── i18n/              # ES/EN translations (i18next) and catalogue words
 ├── lib/               # API client + QueryClient
 ├── pages/             # Home, Shop, Product, Lookbook, Auth, Account, Legal, NotFound
 ├── styles/            # CSS tokens, globals and per-page styles
@@ -361,6 +384,7 @@ The Stripe/Cashier dependencies and env placeholders exist in the backend, but r
 - [x] Stage 9 - Legal pages (`/privacy`, `/terms`) required by the Google consent screen.
 - [x] Stage 10 - Admin panel: roles, orders, stock, customers, returns, team and exports.
 - [x] Stage 11 - 3D warehouse: locations per variant, restocking and 3D, plan and list views.
+- [x] Stage 12 - Spanish and English for the site, the panel, the API and the demo.
 - [ ] Next - Real Stripe payments.
 
 ## Why This Project Matters
