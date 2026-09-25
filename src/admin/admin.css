@@ -954,6 +954,22 @@
   color: var(--fg-mute);
 }
 
+/* Field name on the left and a small note ("optional") on the right,
+   on the same line, so every input in a row starts at the same height. */
+.adm-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.adm-label-row small {
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .adm-field {
   display: flex;
   flex-direction: column;

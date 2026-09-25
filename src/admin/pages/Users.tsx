@@ -187,7 +187,9 @@ export function Users() {
                     <input className="adm-input" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required maxLength={120} />
                   </label>
                   <label>
-                    {t("users.email")} <small>{t("users.emailHint")}</small>
+                    <span className="adm-label-row">
+                      {t("users.email")} <small>{t("users.emailHint")}</small>
+                    </span>
                     <input
                       className="adm-input"
                       type="email"

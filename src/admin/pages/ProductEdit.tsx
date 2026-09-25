@@ -218,8 +218,14 @@ function ProductForm({ product }: { product?: AdminProduct }) {
               <input className="adm-input" value={values.name} onChange={(e) => set("name", e.target.value)} required maxLength={120} />
             </label>
             <label>
-              {t("productEdit.subtitle")} <small>{t("productEdit.subtitleHint")}</small>
-              <input className="adm-input" value={values.sub_label} onChange={(e) => set("sub_label", e.target.value)} maxLength={120} />
+              {t("productEdit.subtitle")}
+              <input
+                className="adm-input"
+                value={values.sub_label}
+                onChange={(e) => set("sub_label", e.target.value)}
+                placeholder={t("productEdit.subtitlePlaceholder")}
+                maxLength={120}
+              />
             </label>
             <div className="adm-form-row">
               <label>
@@ -235,7 +241,9 @@ function ProductForm({ product }: { product?: AdminProduct }) {
                 />
               </label>
               <label>
-                {t("productEdit.oldPrice")} <small>{t("productEdit.optional")}</small>
+                <span className="adm-label-row">
+                  {t("productEdit.oldPrice")} <small>{t("productEdit.optional")}</small>
+                </span>
                 <input
                   className="adm-input"
                   type="number"
@@ -246,8 +254,16 @@ function ProductForm({ product }: { product?: AdminProduct }) {
                 />
               </label>
               <label>
-                {t("productEdit.tag")} <small>{t("productEdit.tagHint")}</small>
-                <input className="adm-input" value={values.tag} onChange={(e) => set("tag", e.target.value)} maxLength={30} />
+                <span className="adm-label-row">
+                  {t("productEdit.tag")} <small>{t("productEdit.optional")}</small>
+                </span>
+                <input
+                  className="adm-input"
+                  value={values.tag}
+                  onChange={(e) => set("tag", e.target.value)}
+                  placeholder={t("productEdit.tagPlaceholder")}
+                  maxLength={30}
+                />
               </label>
             </div>
 
@@ -357,8 +373,10 @@ function ProductForm({ product }: { product?: AdminProduct }) {
               {(["img", "img_alt"] as const).map((field) => (
                 <div key={field} className="adm-field">
                   <label>
-                    {field === "img" ? t("productEdit.mainImage") : t("productEdit.hoverImage")}{" "}
-                    <small>{field === "img" ? t("productEdit.mainImageHint") : t("productEdit.optional")}</small>
+                    <span className="adm-label-row">
+                      {field === "img" ? t("productEdit.mainImage") : t("productEdit.hoverImage")}{" "}
+                      <small>{field === "img" ? t("productEdit.mainImageHint") : t("productEdit.optional")}</small>
+                    </span>
                     <input
                       className="adm-input"
                       value={values[field]}
