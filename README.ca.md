@@ -70,7 +70,7 @@ ha un accés de "client de demostració". Les dades d'exemple (unes 900 comandes
 60 clients, estoc i devolucions) es reinicien soles cada 24 hores i són coherents: cada
 comentari de devolució encaixa amb el seu motiu i cada adreça és de la seva ciutat.
 
-Els comptes de l'equip (també els de demostració) veuen un botó **Admin** / **Panel** a la
+Els comptes de l'equip (també els de demostració) veuen un botó **Admin** / **Administración** a la
 capçalera de la botiga per entrar-hi directament; els clients no el veuen.
 
 ![Capçalera de la botiga amb el botó del panell](./docs/screenshots/shop-header-admin.png)

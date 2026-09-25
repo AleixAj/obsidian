@@ -70,7 +70,7 @@ acceso de "cliente demo". Los datos de ejemplo (unos 900 pedidos de 90 días, 60
 stock y devoluciones) se reinician solos cada 24 horas y son coherentes: cada comentario de
 devolución encaja con su motivo y cada dirección es de su ciudad.
 
-Las cuentas del equipo (también las demo) ven un botón **Panel** en la cabecera de la tienda
+Las cuentas del equipo (también las demo) ven un botón **Administración** en la cabecera de la tienda
 para entrar directamente; los clientes no lo ven.
 
 ![Cabecera de la tienda con el botón del panel](./docs/screenshots/shop-header-admin.png)

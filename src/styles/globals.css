@@ -243,9 +243,16 @@ ul {
   color: var(--gold);
 }
 
-/* Team accounts have one more button (the admin panel). On medium screens
-   the buttons show only their icon, so everything fits next to the logo. */
-@media (max-width: 1320px) {
+/* Team accounts have one more button (the admin panel). On big screens
+   the buttons get a bit closer, so the logo stays in the centre... */
+@media (max-width: 1600px) {
+  .header-tools.has-admin {
+    gap: 12px;
+  }
+}
+
+/* ...and on medium screens they show only their icon. */
+@media (max-width: 1420px) {
   .header-tools.has-admin .tool-label {
     display: none;
   }
