@@ -461,3 +461,76 @@ export async function downloadExport(
   link.click();
   URL.revokeObjectURL(link.href);
 }
+
+// ──────────────────────────────────────────────────────────────────────
+// Warehouse
+// ──────────────────────────────────────────────────────────────────────
+
+/** ok = enough units, low = at or below the alert, out = 0 units, empty = nothing stored. */
+export type LocationState = "ok" | "low" | "out" | "empty";
+
+export interface WarehouseLocation {
+  id: number;
+  code: string; // e.g. "B-04-2" → aisle B, bay 4, level 2
+  aisle: string;
+  bay: number;
+  level: number;
+  capacity: number;
+  state: LocationState;
+  stock: number;
+  variant: {
+    id: number;
+    sku: string;
+    color_hex: string;
+    size_label: string;
+    low_stock_at: number;
+    product_name: string;
+    product_slug: string;
+    img: string;
+  } | null;
+}
+
+export interface Warehouse {
+  layout: { aisles: string[]; bays: number; levels: number };
+  locations: WarehouseLocation[];
+  summary: { occupancy: number; units: number; low: number; out: number; empty: number; orders_to_pick: number };
+}
+
+export interface UnplacedVariant {
+  id: number;
+  sku: string;
+  product_name: string;
+  color_hex: string;
+  size_label: string;
+  stock: number;
+}
+
+export const fetchWarehouse = async (): Promise<Warehouse> => {
+  const { data } = await request<{ data: Warehouse }>("/api/admin/warehouse");
+  return data;
+};
+
+export const fetchUnplaced = async (): Promise<UnplacedVariant[]> => {
+  const { data } = await request<{ data: UnplacedVariant[] }>("/api/admin/warehouse/unplaced");
+  return data;
+};
+
+/** Fills a location up to its capacity. */
+export const restockLocation = async (id: number): Promise<WarehouseLocation> => {
+  await csrfCookie();
+  const { data } = await request<{ data: WarehouseLocation }>(`/api/admin/warehouse/locations/${id}/restock`, {
+    method: "POST",
+  });
+  return data;
+};
+
+/** Puts a variant in a location, or frees it with null. */
+export const assignLocation = async (id: number, variantId: number | null): Promise<WarehouseLocation> => {
+  await csrfCookie();
+  const { data } = await request<{ data: WarehouseLocation }>(`/api/admin/warehouse/locations/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ product_variant_id: variantId }),
+  });
+  return data;
+};

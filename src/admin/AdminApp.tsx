@@ -14,6 +14,7 @@ import { Products } from "./pages/Products";
 import { ReturnDetail } from "./pages/ReturnDetail";
 import { Returns } from "./pages/Returns";
 import { Users } from "./pages/Users";
+import { Warehouse } from "./pages/Warehouse";
 import "./admin.css";
 
 /** Shortcut so each route below fits in one line. */
@@ -56,7 +57,8 @@ export default function AdminApp() {
 
         <Route path="users" element={only("users", <Users />)} />
 
-        {/* The 3D warehouse comes in a later version. */}
+        <Route path="warehouse" element={only("stock", <Warehouse />)} />
+
         <Route path="*" element={<ComingSoon />} />
       </Route>
     </Routes>

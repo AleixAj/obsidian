@@ -7,7 +7,8 @@ import { expect, test, type Page } from "@playwright/test";
  *   2. Customer support approves it and gives the money back.
  *   3. The customer sees the refund.
  *   4. The warehouse prepares a paid order, and can't open customers.
- *   5. The admin sees the overview and the team.
+ *   5. The warehouse restocks a location from the warehouse page.
+ *   6. The admin sees the overview and the team.
  *
  * Every test starts with a new, empty browser (no cookies), and they run
  * in this order because each one uses what the previous one did.
@@ -82,6 +83,21 @@ test("the warehouse prepares a paid order but can't open customers", async ({ pa
   // Typing the URL by hand doesn't help: the page (and the API) say no.
   await page.goto("/admin/customers");
   await expect(page.getByText("No access")).toBeVisible();
+});
+
+test("the warehouse restocks a location with low stock", async ({ page }) => {
+  await enterAdminAs(page, "Omar Haddad");
+
+  // The plan view (2D) is used here because 3D is not reliable in CI browsers.
+  await page.goto("/admin/warehouse?view=plan&filter=low");
+  await page.getByRole("button", { name: /Low stock$/ }).first().click();
+
+  const panel = page.getByRole("region", { name: /^Location / });
+  await expect(panel).toContainText("Low stock");
+  await panel.getByRole("button", { name: /^Restock \+/ }).click();
+
+  await expect(panel).toContainText("In stock");
+  await expect(panel.getByRole("button", { name: "Location is full" })).toBeDisabled();
 });
 
 test("the admin sees the overview and the team", async ({ page }) => {

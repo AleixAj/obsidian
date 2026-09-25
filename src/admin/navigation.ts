@@ -25,9 +25,9 @@ export const MAIN_NAV: NavItem[] = [
   { path: "/admin/users", label: "Users & roles", icon: "Users", permission: "users" },
 ];
 
-// Logistics tools. The 3D warehouse view will live here.
+// Logistics tools.
 export const LOGISTICS_NAV: NavItem[] = [
-  { path: "/admin/warehouse", label: "Warehouse 3D", icon: "Warehouse", permission: "stock", soon: true },
+  { path: "/admin/warehouse", label: "Warehouse 3D", icon: "Warehouse", permission: "stock" },
 ];
 
 export function canSee(permissions: string[], item: NavItem): boolean {

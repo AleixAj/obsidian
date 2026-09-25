@@ -7,6 +7,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addStaff,
+  assignLocation,
   changeRole,
   fetchCustomer,
   fetchCustomers,
@@ -18,7 +19,10 @@ import {
   fetchReturn,
   fetchReturns,
   fetchTeam,
+  fetchUnplaced,
+  fetchWarehouse,
   removeStaff,
+  restockLocation,
   returnAction,
   saveProduct,
   updateOrderStatus,
@@ -227,5 +231,40 @@ export function useRemoveStaff() {
   return useMutation({
     mutationFn: (id: number) => removeStaff(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.team }),
+  });
+}
+
+// ── Warehouse ────────────────────────────────────────────────────────
+
+export function useWarehouse() {
+  return useQuery({ queryKey: ["admin", "warehouse"], queryFn: fetchWarehouse });
+}
+
+/** Variants without a location. Only loaded when an empty location is open. */
+export function useUnplaced(enabled: boolean) {
+  return useQuery({ queryKey: ["admin", "warehouse", "unplaced"], queryFn: fetchUnplaced, enabled });
+}
+
+/** After a change in the warehouse, stock numbers change in other pages too. */
+function useRefreshWarehouse() {
+  const queryClient = useQueryClient();
+  return () => {
+    queryClient.invalidateQueries({ queryKey: ["admin", "warehouse"] });
+    queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
+    queryClient.invalidateQueries({ queryKey: ["admin", "product"] });
+    queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
+  };
+}
+
+export function useRestockLocation() {
+  const refresh = useRefreshWarehouse();
+  return useMutation({ mutationFn: (id: number) => restockLocation(id), onSuccess: refresh });
+}
+
+export function useAssignLocation() {
+  const refresh = useRefreshWarehouse();
+  return useMutation({
+    mutationFn: ({ id, variantId }: { id: number; variantId: number | null }) => assignLocation(id, variantId),
+    onSuccess: refresh,
   });
 }

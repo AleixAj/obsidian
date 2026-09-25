@@ -1255,6 +1255,224 @@
   color: var(--fg-mute);
 }
 
+/* ------------ Warehouse ------------ */
+
+.wh-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* KPI cards that are also buttons or links (they filter the view) */
+.wh-kpi-button {
+  text-align: left;
+  color: inherit;
+  transition: border-color 0.2s var(--ease);
+}
+
+.wh-kpi-button:hover {
+  border-color: var(--gold-soft);
+}
+
+.wh-text-low { color: #e0a44a; }
+.wh-text-out { color: var(--accent-warn); }
+
+.wh-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.wh-layout.has-panel {
+  grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+.wh-view {
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.wh-canvas {
+  height: 560px;
+  /* Dark "floor" glow behind the 3D scene, like the rest of the brand. */
+  background: radial-gradient(ellipse at 50% 30%, #1b1812 0%, #0c0b09 70%);
+  touch-action: none;
+}
+
+.wh-hint {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  pointer-events: none;
+}
+
+.wh-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--fg-dim);
+}
+
+.wh-legend i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+
+/* Plan view */
+.wh-plan {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(110px, 1fr));
+  gap: 16px;
+  padding: 20px;
+  overflow-x: auto;
+}
+
+.wh-plan-aisle h3 {
+  margin-bottom: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.wh-plan-bay {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.wh-plan-bay-number {
+  width: 22px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--fg-mute);
+}
+
+.wh-cell {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  transition: transform 0.15s var(--ease);
+}
+
+.wh-cell:hover {
+  transform: scale(1.2);
+}
+
+.wh-cell.is-ok { background: #6fb38b; }
+.wh-cell.is-low { background: #e0a44a; }
+.wh-cell.is-out { background: #d96446; }
+.wh-cell.is-empty { background: transparent; border-color: #3a3630; }
+.wh-cell.is-faded { opacity: 0.15; }
+
+.wh-cell.is-selected {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+  opacity: 1;
+}
+
+/* Bars and state pills (list and panel) */
+.wh-bar {
+  display: block;
+  width: 100%;
+  max-width: 140px;
+  height: 4px;
+  margin-top: 6px;
+  background: var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.wh-bar--big {
+  max-width: none;
+  height: 6px;
+}
+
+.wh-bar span {
+  display: block;
+  height: 100%;
+}
+
+.wh-bar .is-ok { background: #6fb38b; }
+.wh-bar .is-low { background: #e0a44a; }
+.wh-bar .is-out { background: #d96446; }
+
+.wh-state {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.wh-state.is-ok { color: #6fb38b; }
+.wh-state.is-low { color: #e0a44a; }
+.wh-state.is-out { color: #d96446; }
+.wh-state.is-empty { color: var(--fg-dim); }
+
+.adm-table tr.is-selected {
+  background: #15130e;
+}
+
+/* Location panel */
+.wh-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.wh-panel .adm-card-head {
+  margin-bottom: 0;
+}
+
+.wh-panel-code {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wh-panel-code strong {
+  font-size: 22px;
+}
+
+.wh-panel-product {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.wh-panel-product img {
+  width: 56px;
+  height: 68px;
+  object-fit: cover;
+  border-radius: var(--radius);
+}
+
+.wh-panel-units {
+  display: flex;
+  justify-content: space-between;
+  color: var(--fg-dim);
+  font-size: 13px;
+}
+
+.wh-panel-units strong {
+  color: var(--fg);
+}
+
 /* ------------ Customers ------------ */
 
 .adm-avatar--sm {
@@ -1440,6 +1658,15 @@
   .adm-low-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .wh-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* The panel goes under the view instead of next to it. */
+  .wh-layout.has-panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* Tablet and phone: the sidebar becomes a drawer. */
@@ -1580,6 +1807,10 @@
   .adm-timeline li {
     grid-template-columns: 1fr;
     gap: 4px;
+  }
+
+  .wh-canvas {
+    height: 400px;
   }
 
   .adm-form-row,
