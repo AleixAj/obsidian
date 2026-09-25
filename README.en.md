@@ -28,6 +28,10 @@ The goal is to show how a commerce app is planned, built and deployed with a rea
 
 ![Product page](./docs/screenshots/product-detail.png)
 
+![Admin panel: overview](./docs/screenshots/admin-overview.png)
+
+![Admin panel: returns](./docs/screenshots/admin-returns.png)
+
 ## Project Scope
 
 This repository contains the frontend. The backend lives in
@@ -49,6 +53,57 @@ Implemented features:
 - Responsive layout down to mobile.
 - Loading skeletons and retryable error states.
 - React Query Devtools in development.
+- Admin panel at `/admin` with roles, orders, stock, customers, returns and team ([see section](#admin-panel-admin)).
+- One-click demo access (shop and panel) to review the project without signing up.
+- End-to-end Playwright test of the main flow.
+
+## Admin panel (`/admin`)
+
+An internal tool like a real shop would have, in the same SPA but loaded separately
+(shop visitors never download its code).
+
+**Try it without signing up:** open [`/admin/login`](https://obsidian.aleixaj.com/admin/login)
+and pick a role with the demo buttons. The shop login also has a "demo customer" shortcut.
+The sample data (about 900 orders over 90 days, 60 customers, stock and returns) resets
+itself every 24 hours.
+
+![Product page with the stock grid](./docs/screenshots/admin-product-stock.png)
+
+| Section | What it does |
+|---|---|
+| Overview | Sales, orders, average ticket and return rate (today / 7 / 30 days) compared with the previous period, chart, best sellers, latest orders and low stock alerts. |
+| Orders | Filters, search, detail and step-by-step status changes (paid → preparing → shipped → delivered) with a history of who did what. |
+| Products & stock | Create and edit products, colours, sizes and photos (uploaded from the computer). Stock per colour and size with a movement history. Checkout takes units out of stock. |
+| Customers | List with total spent, and a profile with addresses and order history. |
+| Returns | The customer asks from their account (30 days); support approves or rejects it and refunds (simulated, no Stripe yet). Stock comes back automatically. |
+| Users & roles | Team, permissions table, adding people and changing their role. |
+| Export | Every list downloads as CSV or Excel. |
+
+**Roles** (checked by the API on every request, not only in the UI):
+
+| | Admin | Warehouse | Customer support |
+|---|:---:|:---:|:---:|
+| Overview and orders | ✓ | ✓ | ✓ |
+| Stock | ✓ | ✓ | |
+| Edit products | ✓ | | |
+| Customers and returns | ✓ | | ✓ |
+| Users and roles | ✓ | | |
+
+**Decisions:**
+
+- Permissions live in one place (`App\Enums\Role` in the API), with Laravel Gates on the routes.
+- Demo accounts are shared: they can't upload files or change the team (otherwise anyone
+  could give themselves admin access), and the catalogue is restored every day.
+- Photos are resized and saved as WebP with GD, on a Railway volume.
+- Charts with Recharts; Excel with OpenSpout.
+
+**Tests:** 65 API tests (mostly permissions per role) and an end-to-end Playwright test
+(`e2e/main-flow.e2e.ts`): a customer asks for a return, support approves and refunds it,
+the customer sees the refund, the warehouse prepares an order and can't open customers,
+and the admin checks the overview and the team. It runs in the API CI on every push and
+every night.
+
+![The panel on a phone](./docs/screenshots/admin-mobile.png)
 
 ## Tech Stack
 
@@ -111,6 +166,7 @@ Guests use `localStorage`, authenticated users use the Laravel API, and both sta
 
 ```txt
 src/
+├── admin/             # /admin panel: its own pages, components, API and hooks
 ├── components/
 │   ├── cart/          # CartDrawer
 │   ├── layout/        # Header, Footer, AnnounceBar, Layout
@@ -179,6 +235,7 @@ npm run test:ci    # runs unit tests with Vitest
 npm run build      # production build
 npm run preview    # previews dist locally
 npm run lint       # ESLint
+npm run e2e        # end-to-end test (starts the API and the shop)
 ```
 
 Verified:
@@ -196,7 +253,7 @@ Verified:
 - Frontend: [`https://obsidian.aleixaj.com`](https://obsidian.aleixaj.com)
 - Backend API: [`https://obsidian-api-production-8b5e.up.railway.app`](https://obsidian-api-production-8b5e.up.railway.app)
 - Health check: [`/api/health`](https://obsidian-api-production-8b5e.up.railway.app/api/health)
-- Demo user: `demo@obsidian.test`
+- Passwordless demo: "Reviewing this project?" button on `/auth` and role buttons on `/admin/login`
 
 Deployment notes:
 
@@ -247,8 +304,8 @@ Money is stored in the API as integer cents (`price_cents`). The adapter convert
 ## OAuth Setup
 
 The Google/GitHub OAuth routes are implemented in Laravel
-(`SocialiteController`). Only the credentials are missing, and they are added as
-variables in Railway:
+(`SocialiteController`). Google is already configured in production; the credentials
+are Railway variables:
 
 ```env
 GOOGLE_CLIENT_ID=
@@ -292,7 +349,8 @@ The Stripe/Cashier dependencies and env placeholders exist in the backend, but r
 - [x] Stage 7 - Wishlist synced across devices.
 - [x] Stage 8 - Deploy: Cloudflare Workers + Assets, Railway and demo user.
 - [x] Stage 9 - Legal pages (`/privacy`, `/terms`) required by the Google consent screen.
-- [ ] Final polish - Enable Stripe payments and OAuth credentials.
+- [x] Stage 10 - Admin panel: roles, orders, stock, customers, returns, team and exports.
+- [ ] Next - 3D warehouse (locations per variant) and real Stripe payments.
 
 ## Why This Project Matters
 

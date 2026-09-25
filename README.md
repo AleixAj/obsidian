@@ -28,6 +28,10 @@ El objetivo es demostrar cómo se planifica, implementa y despliega una app de c
 
 ![Página de producto](./docs/screenshots/product-detail.png)
 
+![Panel de administración: resumen](./docs/screenshots/admin-overview.png)
+
+![Panel: devoluciones](./docs/screenshots/admin-returns.png)
+
 ## Alcance del Proyecto
 
 Este repositorio contiene el frontend. El backend vive en
@@ -49,6 +53,57 @@ Funcionalidades implementadas:
 - Layout responsive hasta móvil.
 - Skeletons de carga y estados de error reintentables.
 - React Query Devtools en desarrollo.
+- Panel de administración en `/admin` con roles, pedidos, stock, clientes, devoluciones y equipo ([ver sección](#panel-de-administración-admin)).
+- Acceso demo con un clic (tienda y panel) para revisar el proyecto sin registrarse.
+- Test de extremo a extremo con Playwright del flujo principal.
+
+## Panel de administración (`/admin`)
+
+Una herramienta interna como la de una tienda real, en el mismo SPA pero cargada aparte
+(los visitantes de la tienda no descargan su código).
+
+**Pruébalo sin registrarte:** entra en [`/admin/login`](https://obsidian.aleixaj.com/admin/login)
+y elige un rol con los botones de demo. En el login de la tienda también hay un acceso de
+"cliente demo". Los datos de ejemplo (unos 900 pedidos de 90 días, 60 clientes, stock y
+devoluciones) se reinician solos cada 24 horas.
+
+![Ficha de producto con la tabla de stock](./docs/screenshots/admin-product-stock.png)
+
+| Sección | Qué hace |
+|---|---|
+| Resumen | Ventas, pedidos, ticket medio y tasa de devoluciones (hoy / 7 / 30 días) comparados con el periodo anterior, gráfica, más vendidos, últimos pedidos y avisos de stock bajo. |
+| Pedidos | Filtros, búsqueda, detalle y cambio de estado paso a paso (pagado → preparando → enviado → entregado) con historial de quién lo hizo. |
+| Productos y stock | Crear y editar productos, colores, tallas y fotos (subida desde el ordenador). Stock por color y talla con historial de movimientos. La compra descuenta stock. |
+| Clientes | Listado con total gastado y ficha con direcciones e historial de pedidos. |
+| Devoluciones | El cliente la pide desde su cuenta (30 días); atención al cliente la aprueba o rechaza y hace el reembolso (simulado, sin Stripe todavía). El stock vuelve solo. |
+| Usuarios y roles | Equipo, tabla de permisos, añadir personas y cambiar su rol. |
+| Exportar | Cada listado se descarga en CSV o Excel. |
+
+**Roles** (se comprueban en la API en cada petición, no solo en la interfaz):
+
+| | Administración | Almacén | Atención al cliente |
+|---|:---:|:---:|:---:|
+| Resumen y pedidos | ✓ | ✓ | ✓ |
+| Stock | ✓ | ✓ | |
+| Editar productos | ✓ | | |
+| Clientes y devoluciones | ✓ | | ✓ |
+| Usuarios y roles | ✓ | | |
+
+**Decisiones:**
+
+- Permisos en un solo sitio (`App\Enums\Role` en la API) y Gates de Laravel en las rutas.
+- Las cuentas demo son compartidas: no pueden subir archivos ni cambiar el equipo (si no,
+  cualquiera podría darse acceso de administrador), y el catálogo se restaura cada día.
+- Las fotos se reducen y se guardan en WebP con GD, en un volumen de Railway.
+- Gráficas con Recharts; Excel con OpenSpout.
+
+**Tests:** 65 tests de la API (sobre todo permisos por rol) y un test de extremo a extremo
+con Playwright (`e2e/main-flow.e2e.ts`): un cliente pide una devolución, atención al cliente
+la aprueba y la reembolsa, el cliente ve el reembolso, almacén prepara un pedido y no puede
+ver clientes, y administración revisa el resumen y el equipo. Se ejecuta en la CI de la API
+en cada push y cada noche.
+
+![El panel en móvil](./docs/screenshots/admin-mobile.png)
 
 ## Stack Técnico
 
@@ -111,6 +166,7 @@ Los invitados usan `localStorage`, los usuarios autenticados usan la API Laravel
 
 ```txt
 src/
+├── admin/             # Panel /admin: páginas, componentes, API y hooks propios
 ├── components/
 │   ├── cart/          # CartDrawer
 │   ├── layout/        # Header, Footer, AnnounceBar, Layout
@@ -179,6 +235,7 @@ npm run test:ci    # ejecuta tests unitarios con Vitest
 npm run build      # build de producción
 npm run preview    # previsualiza dist localmente
 npm run lint       # ESLint
+npm run e2e        # test de extremo a extremo (arranca la API y la tienda)
 ```
 
 Verificado:
@@ -196,7 +253,7 @@ Verificado:
 - Frontend: [`https://obsidian.aleixaj.com`](https://obsidian.aleixaj.com)
 - Backend API: [`https://obsidian-api-production-8b5e.up.railway.app`](https://obsidian-api-production-8b5e.up.railway.app)
 - Health check: [`/api/health`](https://obsidian-api-production-8b5e.up.railway.app/api/health)
-- Usuario demo: `demo@obsidian.test`
+- Demo sin contraseña: botón "Reviewing this project?" en `/auth` y botones de rol en `/admin/login`
 
 Notas de despliegue:
 
@@ -247,8 +304,8 @@ El dinero se almacena en la API como céntimos enteros (`price_cents`). El adapt
 ## OAuth Setup
 
 Las rutas de OAuth con Google/GitHub están implementadas en Laravel
-(`SocialiteController`). Sólo faltan las credenciales, que se añaden como
-variables en Railway:
+(`SocialiteController`). Google ya está configurado en producción; las credenciales
+son variables de Railway:
 
 ```env
 GOOGLE_CLIENT_ID=
@@ -292,7 +349,8 @@ Las dependencias/env placeholders de Stripe/Cashier existen en el backend, pero 
 - [x] Etapa 7 - Wishlist sincronizada entre dispositivos.
 - [x] Etapa 8 - Deploy: Cloudflare Workers + Assets, Railway y usuario demo.
 - [x] Etapa 9 - Páginas legales (`/privacy`, `/terms`) requeridas por el consentimiento de Google.
-- [ ] Pulido final - Activar pagos Stripe y credenciales OAuth.
+- [x] Etapa 10 - Panel de administración: roles, pedidos, stock, clientes, devoluciones, equipo y exportación.
+- [ ] Siguiente - Almacén en 3D (ubicaciones por variante) y pagos reales con Stripe.
 
 ## Por Qué Importa Este Proyecto
 

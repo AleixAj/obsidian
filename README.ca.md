@@ -28,6 +28,10 @@ L'objectiu és demostrar com es planifica, s'implementa i es desplega una aplica
 
 ![Pàgina de producte](./docs/screenshots/product-detail.png)
 
+![Panell d'administració: resum](./docs/screenshots/admin-overview.png)
+
+![Panell: devolucions](./docs/screenshots/admin-returns.png)
+
 ## Abast del projecte
 
 Aquest repositori conté el frontend. El backend és a
@@ -49,6 +53,57 @@ Funcionalitats implementades:
 - Disseny responsive fins a mòbil.
 - Skeletons de càrrega i estats d'error amb opció de reintentar.
 - React Query Devtools en desenvolupament.
+- Panell d'administració a `/admin` amb rols, comandes, estoc, clients, devolucions i equip ([vegeu la secció](#panell-dadministració-admin)).
+- Accés de demostració amb un clic (botiga i panell) per revisar el projecte sense registrar-se.
+- Test d'extrem a extrem amb Playwright del flux principal.
+
+## Panell d'administració (`/admin`)
+
+Una eina interna com la d'una botiga real, dins la mateixa SPA però carregada a part
+(els visitants de la botiga no en descarreguen el codi).
+
+**Proveu-lo sense registrar-vos:** entreu a [`/admin/login`](https://obsidian.aleixaj.com/admin/login)
+i trieu un rol amb els botons de demostració. A l'inici de sessió de la botiga també hi ha
+un accés de "client de demostració". Les dades d'exemple (unes 900 comandes de 90 dies,
+60 clients, estoc i devolucions) es reinicien soles cada 24 hores.
+
+![Fitxa de producte amb la taula d'estoc](./docs/screenshots/admin-product-stock.png)
+
+| Secció | Què fa |
+|---|---|
+| Resum | Vendes, comandes, tiquet mitjà i taxa de devolucions (avui / 7 / 30 dies) comparats amb el període anterior, gràfica, més venuts, darreres comandes i avisos d'estoc baix. |
+| Comandes | Filtres, cerca, detall i canvi d'estat pas a pas (pagada → en preparació → enviada → lliurada) amb historial de qui ho ha fet. |
+| Productes i estoc | Crear i editar productes, colors, talles i fotos (pujades des de l'ordinador). Estoc per color i talla amb historial de moviments. La compra descompta estoc. |
+| Clients | Llistat amb el total gastat i fitxa amb adreces i historial de comandes. |
+| Devolucions | El client la demana des del seu compte (30 dies); atenció al client l'aprova o la rebutja i fa el reemborsament (simulat, encara sense Stripe). L'estoc torna sol. |
+| Usuaris i rols | Equip, taula de permisos, afegir persones i canviar-ne el rol. |
+| Exportar | Cada llistat es descarrega en CSV o Excel. |
+
+**Rols** (l'API els comprova a cada petició, no només a la interfície):
+
+| | Administració | Magatzem | Atenció al client |
+|---|:---:|:---:|:---:|
+| Resum i comandes | ✓ | ✓ | ✓ |
+| Estoc | ✓ | ✓ | |
+| Editar productes | ✓ | | |
+| Clients i devolucions | ✓ | | ✓ |
+| Usuaris i rols | ✓ | | |
+
+**Decisions:**
+
+- Permisos en un sol lloc (`App\Enums\Role` a l'API) i Gates de Laravel a les rutes.
+- Els comptes de demostració són compartits: no poden pujar fitxers ni canviar l'equip
+  (si no, qualsevol es podria donar accés d'administrador), i el catàleg es restaura cada dia.
+- Les fotos es redueixen i es desen en WebP amb GD, en un volum de Railway.
+- Gràfiques amb Recharts; Excel amb OpenSpout.
+
+**Tests:** 65 tests de l'API (sobretot permisos per rol) i un test d'extrem a extrem amb
+Playwright (`e2e/main-flow.e2e.ts`): un client demana una devolució, atenció al client
+l'aprova i la reemborsa, el client veu el reemborsament, magatzem prepara una comanda i
+no pot veure clients, i administració revisa el resum i l'equip. S'executa a la CI de
+l'API a cada push i cada nit.
+
+![El panell al mòbil](./docs/screenshots/admin-mobile.png)
 
 ## Stack tècnic
 
@@ -111,6 +166,7 @@ Els convidats fan servir `localStorage`, els usuaris autenticats fan servir l'AP
 
 ```txt
 src/
+├── admin/             # Panell /admin: pàgines, components, API i hooks propis
 ├── components/
 │   ├── cart/          # CartDrawer
 │   ├── layout/        # Header, Footer, AnnounceBar, Layout
@@ -179,6 +235,7 @@ npm run test:ci    # executa els tests unitaris amb Vitest
 npm run build      # build de producció
 npm run preview    # previsualitza dist en local
 npm run lint       # ESLint
+npm run e2e        # test d'extrem a extrem (arrenca l'API i la botiga)
 ```
 
 Verificat:
@@ -196,7 +253,7 @@ Verificat:
 - Frontend: [`https://obsidian.aleixaj.com`](https://obsidian.aleixaj.com)
 - API del backend: [`https://obsidian-api-production-8b5e.up.railway.app`](https://obsidian-api-production-8b5e.up.railway.app)
 - Health check: [`/api/health`](https://obsidian-api-production-8b5e.up.railway.app/api/health)
-- Usuari de demostració: `demo@obsidian.test`
+- Demostració sense contrasenya: botó "Reviewing this project?" a `/auth` i botons de rol a `/admin/login`
 
 Notes de desplegament:
 
@@ -247,8 +304,8 @@ Els diners es desen a l'API com a cèntims enters (`price_cents`). L'adaptador e
 ## Configuració d'OAuth
 
 Les rutes d'OAuth amb Google/GitHub estan implementades a Laravel
-(`SocialiteController`). Només falten les credencials, que s'afegeixen com a
-variables a Railway:
+(`SocialiteController`). Google ja està configurat a producció; les credencials
+són variables de Railway:
 
 ```env
 GOOGLE_CLIENT_ID=
@@ -292,7 +349,8 @@ Les dependències i els placeholders d'entorn de Stripe/Cashier existeixen al ba
 - [x] Etapa 7 - Wishlist sincronitzada entre dispositius.
 - [x] Etapa 8 - Desplegament: Cloudflare Workers + Assets, Railway i usuari de demostració.
 - [x] Etapa 9 - Pàgines legals (`/privacy`, `/terms`) requerides per la pantalla de consentiment de Google.
-- [ ] Últims retocs - Activar els pagaments amb Stripe i les credencials d'OAuth.
+- [x] Etapa 10 - Panell d'administració: rols, comandes, estoc, clients, devolucions, equip i exportació.
+- [ ] Següent - Magatzem en 3D (ubicacions per variant) i pagaments reals amb Stripe.
 
 ## Per què és important aquest projecte
 
