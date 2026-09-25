@@ -1445,3 +1445,41 @@ ul {
   border-radius: 50%;
   border: 1px solid var(--line-2);
 }
+
+/* ------------ Language switch (EN · ES) ------------ */
+
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}
+
+.lang-switch button {
+  padding: 4px 6px;
+  color: var(--fg-mute);
+  transition: color 0.2s var(--ease);
+}
+
+.lang-switch button:hover {
+  color: var(--fg);
+}
+
+.lang-switch button.is-active {
+  color: var(--gold);
+}
+
+.lang-switch button + button::before {
+  content: "·";
+  margin-right: 6px;
+  color: var(--fg-mute);
+}
+
+/* In the header the tool labels hide on small screens; the switch lives in the menu there. */
+@media (max-width: 900px) {
+  .header-lang {
+    display: none;
+  }
+}

@@ -59,7 +59,7 @@ export const ROLE_LABELS: Record<Role, string> = {
   support: "Customer support",
 };
 
-/** "Marta Soler" → "MS" (for the avatar circle) */
+/** "Aleix Auqué" → "AA" (for the avatar circle) */
 export function initials(name: string): string {
   return name
     .split(" ")

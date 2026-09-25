@@ -14,6 +14,7 @@
  *     to the backend schema; the adapter keeps the boundary explicit.
  */
 
+import { currentLanguage } from "../i18n";
 import type { Product } from "../types";
 
 // ──────────────────────────────────────────────────────────────────────
@@ -247,6 +248,8 @@ export async function request<T>(path: string, init: RequestInit = {}): Promise<
   const headers = new Headers(init.headers);
 
   headers.set("Accept", "application/json");
+  // The API answers its messages (errors, etc.) in this language.
+  headers.set("Accept-Language", currentLanguage());
 
   // Sanctum sets an `XSRF-TOKEN` cookie. Axios mirrors that cookie into
   // this header automatically; the Fetch API doesn't, so we do it here

@@ -36,7 +36,7 @@ test("a customer asks to return a delivered order", async ({ page }) => {
 });
 
 test("customer support approves and refunds the return", async ({ page }) => {
-  await enterAdminAs(page, "Laia Puig");
+  await enterAdminAs(page, "Lucía Fernández");
 
   // Support sees returns, but not products & stock.
   const nav = page.getByRole("navigation", { name: "Admin sections" });
@@ -68,7 +68,7 @@ test("the customer sees the refund", async ({ page }) => {
 });
 
 test("the warehouse prepares a paid order but can't open customers", async ({ page }) => {
-  await enterAdminAs(page, "Omar Haddad");
+  await enterAdminAs(page, "Javier Molina");
 
   await page.goto("/admin/orders?status=paid");
   const firstOrder = page.getByRole("row").nth(1).getByRole("link");
@@ -78,7 +78,7 @@ test("the warehouse prepares a paid order but can't open customers", async ({ pa
   await page.getByRole("button", { name: "Start preparing" }).click();
   await expect(page.getByText(`Order ${number} is now preparing.`)).toBeVisible();
   await expect(page.getByText(/Paid → Preparing/)).toBeVisible();
-  await expect(page.getByText(/by Omar Haddad/)).toBeVisible();
+  await expect(page.getByText(/by Javier Molina/)).toBeVisible();
 
   // Typing the URL by hand doesn't help: the page (and the API) say no.
   await page.goto("/admin/customers");
@@ -86,7 +86,7 @@ test("the warehouse prepares a paid order but can't open customers", async ({ pa
 });
 
 test("the warehouse restocks a location with low stock", async ({ page }) => {
-  await enterAdminAs(page, "Omar Haddad");
+  await enterAdminAs(page, "Javier Molina");
 
   // The plan view (2D) is used here because 3D is not reliable in CI browsers.
   await page.goto("/admin/warehouse?view=plan&filter=low");
@@ -101,14 +101,14 @@ test("the warehouse restocks a location with low stock", async ({ page }) => {
 });
 
 test("the admin sees the overview and the team", async ({ page }) => {
-  await enterAdminAs(page, "Marta Soler");
+  await enterAdminAs(page, "Aleix Auqué");
 
   await expect(page.getByText("Sales", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "7 days" }).click();
   await expect(page.getByRole("heading", { name: "Sales · last 7 days" })).toBeVisible();
 
   await page.getByRole("link", { name: /Users & roles/ }).click();
-  await expect(page.getByText("Laia Puig")).toBeVisible();
+  await expect(page.getByText("Lucía Fernández")).toBeVisible();
   // The shared demo admin can't change the team.
   await expect(page.getByText(/changes to the team are turned off/)).toBeVisible();
   await expect(page.getByRole("button", { name: "Add to the team" })).toBeDisabled();

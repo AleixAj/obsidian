@@ -16,6 +16,8 @@ import { Returns } from "./pages/Returns";
 import { Users } from "./pages/Users";
 import { Warehouse } from "./pages/Warehouse";
 import "./admin.css";
+// Adds the panel texts to the translations (see ./i18n.ts).
+import "./i18n";
 
 /** Shortcut so each route below fits in one line. */
 function only(permission: string, page: ReactNode) {

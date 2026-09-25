@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { useDemoLogin, useLogin, useUser } from "../../hooks/queries";
 import { ApiError } from "../../lib/api";
+import { LanguageSwitch } from "../../components/ui/LanguageSwitch";
 import type { Role } from "../api";
 
 /** The three demo accounts, with what each one can do. */
@@ -9,19 +10,19 @@ const DEMO_ROLES: { role: Role; title: string; name: string; can: string }[] = [
   {
     role: "admin",
     title: "Administrator",
-    name: "Marta Soler",
+    name: "Aleix Auqué",
     can: "Everything: sales, orders, products, customers, returns and users.",
   },
   {
     role: "warehouse",
     title: "Warehouse",
-    name: "Omar Haddad",
+    name: "Javier Molina",
     can: "Orders and stock. Prepares and ships orders.",
   },
   {
     role: "support",
     title: "Customer support",
-    name: "Laia Puig",
+    name: "Lucía Fernández",
     can: "Orders, customers and returns.",
   },
 ];
@@ -60,11 +61,14 @@ export function AdminLogin() {
   return (
     <div className="adm-login">
       <div className="adm-login-card">
-        <Link to="/" className="adm-brand">
-          <img src="/obsidian-logo.png" alt="" />
-          <span>OBSIDIAN</span>
-          <em>Admin</em>
-        </Link>
+        <div className="adm-login-top">
+          <Link to="/" className="adm-brand">
+            <img src="/obsidian-logo.png" alt="" />
+            <span>OBSIDIAN</span>
+            <em>Admin</em>
+          </Link>
+          <LanguageSwitch />
+        </div>
 
         <h1>Back office</h1>
         <p className="adm-login-lead">

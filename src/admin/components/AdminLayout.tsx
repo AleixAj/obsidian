@@ -7,6 +7,7 @@ import { ApiError, mediaUrl } from "../../lib/api";
 import { useDashboard } from "../hooks";
 import { initials, ROLE_LABELS } from "../format";
 import { canSee, LOGISTICS_NAV, MAIN_NAV, type NavItem } from "../navigation";
+import { LanguageSwitch } from "../../components/ui/LanguageSwitch";
 import { AdminIcon } from "./AdminIcon";
 
 /**
@@ -154,6 +155,7 @@ export function AdminLayout() {
             </form>
           )}
 
+          <LanguageSwitch className="adm-lang" />
           <span className="adm-demo-tag">Demo data</span>
         </div>
 

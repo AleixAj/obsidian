@@ -278,8 +278,17 @@
   font-size: 13px;
 }
 
-.adm-demo-tag {
+.adm-lang {
   margin-left: auto;
+}
+
+.adm-login-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.adm-demo-tag {
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.14em;

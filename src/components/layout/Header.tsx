@@ -5,6 +5,7 @@ import { useWishlist } from "../../context/WishlistContext";
 import { useLogout, useProducts, useUser } from "../../hooks/queries";
 import { formatPrice } from "../../utils/format";
 import { Icon } from "../ui/Icon";
+import { LanguageSwitch } from "../ui/LanguageSwitch";
 import { Logo } from "../ui/Logo";
 
 /**
@@ -150,6 +151,7 @@ export function Header() {
           <Logo onClick={scrollTop} />
 
           <div className="header-tools">
+            <LanguageSwitch className="header-lang" />
             <button type="button" aria-label="Search" onClick={openSearch}>
               <Icon.Search /> <span className="tool-label">Search</span>
             </button>
@@ -208,6 +210,7 @@ export function Header() {
           </NavLink>
         ))}
         <div className="tools">
+          <LanguageSwitch />
           <button type="button" onClick={() => navigate(user ? "/account" : "/auth")}>
             {user ? "Account" : "Sign in / Create account"}
           </button>

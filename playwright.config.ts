@@ -25,6 +25,8 @@ export default defineConfig({
 
   use: {
     baseURL: "http://localhost:5173",
+    // The tests read English texts, so the browser says it speaks English.
+    locale: "en-US",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
