@@ -8,6 +8,7 @@ import { formatPrice } from "../../utils/format";
 import { Icon } from "../ui/Icon";
 import { LanguageSwitch } from "../ui/LanguageSwitch";
 import { Logo } from "../ui/Logo";
+import { catalogCategory, catalogType } from "../../i18n/catalog";
 
 /**
  * Top-level navigation.
@@ -53,11 +54,15 @@ export function Header() {
 
     return products
       .filter((product) => {
+        // English words from the API plus their translation,
+        // so "hoodie" and "sudadera" both find the same product.
         const searchable = [
           product.name,
           product.cat,
+          catalogType(product.cat),
           product.tag ?? "",
           product.cats.join(" "),
+          product.cats.map(catalogCategory).join(" "),
           product.colors.join(" "),
           product.sizes.join(" "),
         ]
@@ -263,7 +268,7 @@ export function Header() {
                   <span className="thumb" style={{ backgroundImage: `url(${product.img})` }} />
                   <span className="meta">
                     <span className="name">{product.name}</span>
-                    <span className="cat">{product.cat}</span>
+                    <span className="cat">{catalogType(product.cat)}</span>
                   </span>
                   <span className="price">{formatPrice(product.price)}</span>
                 </button>

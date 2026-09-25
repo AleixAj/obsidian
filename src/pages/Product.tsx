@@ -14,6 +14,7 @@ import { useProduct, useProducts } from "../hooks/queries";
 import { ApiError } from "../lib/api";
 import { formatPrice } from "../utils/format";
 import { NotFound } from "./NotFound";
+import { catalogSize, catalogTag, catalogType } from "../i18n/catalog";
 
 /**
  * Shared product gallery used temporarily across every PDP.
@@ -131,7 +132,7 @@ export function Product() {
       <div className="pdp-breadcrumb">
         <Link to="/">{t("product.home")}</Link>
         <span className="sep">/</span>
-        <Link to="/shop/new">{product.cat.split("·")[0].trim()}</Link>
+        <Link to="/shop/new">{catalogType(product.cat).split("·")[0].trim()}</Link>
         <span className="sep">/</span>
         <span className="here">{product.name}</span>
       </div>
@@ -171,7 +172,7 @@ export function Product() {
         <div className="pdp-info">
           <div className="pdp-meta">
             <span className="dot" />
-            {product.tag || t("product.defaultTag")} · {t("product.inStock")}
+            {product.tag ? catalogTag(product.tag) : t("product.defaultTag")} · {t("product.inStock")}
           </div>
 
           <h1 className="pdp-title">{product.name}</h1>
@@ -217,7 +218,7 @@ export function Product() {
           <div className="pdp-section">
             <h4>
               <span>
-                {t("product.size")} {size && <span style={{ color: "var(--gold)" }}>· {size}</span>}
+                {t("product.size")} {size && <span style={{ color: "var(--gold)" }}>· {catalogSize(size)}</span>}
               </span>
               <span className="extra">{t("product.sizeGuide")}</span>
             </h4>
@@ -230,7 +231,7 @@ export function Product() {
                   disabled={product.sold_out.includes(s)}
                   onClick={() => setSize(s)}
                 >
-                  {s}
+                  {catalogSize(s)}
                 </button>
               ))}
             </div>

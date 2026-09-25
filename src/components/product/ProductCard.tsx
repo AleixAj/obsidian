@@ -7,6 +7,7 @@ import type { Product } from "../../types";
 import { formatPrice } from "../../utils/format";
 import { Icon } from "../ui/Icon";
 import { Placeholder } from "../ui/Placeholder";
+import { catalogTag, catalogType } from "../../i18n/catalog";
 
 /**
  * Compact card used across home, PLP, "complete the look" and wishlist.
@@ -50,7 +51,7 @@ export function ProductCard({ product }: ProductCardProps) {
               product.tag.startsWith("−") ? "" : product.tag === "LAST UNITS" ? "dark" : ""
             }`}
           >
-            {product.tag}
+            {catalogTag(product.tag)}
           </span>
         )}
         {user && (
@@ -83,7 +84,7 @@ export function ProductCard({ product }: ProductCardProps) {
       <div className="product-info">
         <div>
           <div className="name">{product.name}</div>
-          <div className="cat">{product.cat}</div>
+          <div className="cat">{catalogType(product.cat)}</div>
           <div className="swatches">
             {product.colors.map((c, i) => (
               <span key={i} className="swatch" style={{ background: c }} />

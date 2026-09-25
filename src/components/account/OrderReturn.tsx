@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useRequestReturn } from "../../hooks/queries";
 import { ApiError, type ApiOrderDTO, type ReturnRequestPayload } from "../../lib/api";
 import { formatPrice } from "../../utils/format";
+import { catalogSize } from "../../i18n/catalog";
 
 // The label of each reason is in account.json, under "returns.reasons".
 const REASONS: ReturnRequestPayload["reason"][] = ["wrong_size", "damaged", "not_as_described", "changed_mind", "other"];
@@ -79,7 +80,7 @@ export function OrderReturn({ order }: { order: ApiOrderDTO }) {
       {order.items.map((item) => (
         <label key={item.id} className="order-return-line">
           <span>
-            {item.product_name} <small>{t("returns.form.size", { size: item.size_label ?? "—" })}</small>
+            {item.product_name} <small>{t("returns.form.size", { size: item.size_label ? catalogSize(item.size_label) : "—" })}</small>
           </span>
           <select
             value={units[item.id]}

@@ -8,6 +8,7 @@ import { ApiError } from "../../lib/api";
 import { formatPrice } from "../../utils/format";
 import { Icon } from "../ui/Icon";
 import { Placeholder } from "../ui/Placeholder";
+import { catalogSize } from "../../i18n/catalog";
 
 /** Free-shipping threshold in euros. */
 const FREE_SHIP_AT = 200;
@@ -106,7 +107,7 @@ export function CartDrawer() {
                 <div className="info">
                   <div className="nm">{line.name}</div>
                   <div className="meta">
-                    {t("cart.size", { size: line.size })} · {line.colorName || t("cart.defaultColor")}
+                    {t("cart.size", { size: catalogSize(line.size) })} · {line.colorName || t("cart.defaultColor")}
                   </div>
                   <div className="qty">
                     <button type="button" onClick={() => updateQty(i, -1)} aria-label={t("cart.decrease")}>

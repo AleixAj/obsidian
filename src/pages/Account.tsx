@@ -22,6 +22,7 @@ import i18n, { currentLocale } from "../i18n";
 import { mediaUrl, type AddressPayload, type ApiAddressDTO, type ApiOrderDTO } from "../lib/api";
 import type { Product } from "../types";
 import { formatPrice } from "../utils/format";
+import { catalogType } from "../i18n/catalog";
 
 type Order = ApiOrderDTO;
 type ProductMap = Map<string, Product>;
@@ -416,7 +417,7 @@ function WishlistView({ productMap }: { productMap: ProductMap }) {
                 >
                   <div className="name">{product.name}</div>
                   <div className="cat">
-                    {product.cat} · {formatPrice(product.price)}
+                    {catalogType(product.cat)} · {formatPrice(product.price)}
                   </div>
                 </div>
                 <div className="actions">

@@ -151,7 +151,7 @@
   },
   "wishlist": {
     "eyebrowEmpty": "✦ Piezas guardadas",
-    "eyebrow": "✦ {{n}} guardadas · 3 de nuevo en stock",
+    "eyebrow": "✦ {{n}} piezas guardadas · 3 de nuevo en stock",
     "title1": "Tus ",
     "title2": "favoritos",
     "empty": {
@@ -161,7 +161,7 @@
     },
     "share": "Compartir favoritos ↗",
     "removeFromWishlist": "Quitar de favoritos",
-    "addToBag": "Añadir a la bolsa — {{price}}",
+    "addToBag": "Añadir a la cesta — {{price}}",
     "remove": "Quitar"
   },
   "addresses": {
@@ -172,7 +172,7 @@
       "new": "Nueva dirección",
       "edit": "Editar dirección",
       "saved": "Se guarda en tu cuenta de Obsidian.",
-      "label": "Nombre",
+      "label": "Alias",
       "labelPlaceholder": "Casa",
       "fullName": "Nombre completo",
       "line1": "Dirección (línea 1)",

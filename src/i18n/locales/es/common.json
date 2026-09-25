@@ -46,9 +46,9 @@
     "dialog": "Buscar productos",
     "eyebrow": "Buscar ✦ Catálogo",
     "title": "Encuentra tu pieza",
-    "placeholder": "Busca: hoodie, outerwear, men...",
+    "placeholder": "Busca: sudadera, abrigo, hombre...",
     "empty": "No hay piezas.",
-    "emptyHint": "Prueba con \"hoodie\", \"outerwear\" o \"women\"."
+    "emptyHint": "Prueba con \"sudadera\", \"abrigo\" o \"mujer\"."
   },
   "footer": {
     "tagline": "Prendas de peso fundidas en oro. Diseñadas en Barcelona, hechas en Los Ángeles, para llevar después de medianoche en cualquier ciudad que importe.",
@@ -106,8 +106,8 @@
     "total": "Total",
     "checkout": "Pagar",
     "placing": "Creando pedido...",
-    "note": "Pago básico · ",
-    "noteGold": "Stripe más adelante",
+    "note": "Pago de prueba · ",
+    "noteGold": "Stripe próximamente",
     "signInToCheckout": "Inicia sesión para terminar la compra",
     "orderPlaced": "Pedido {{number}} realizado",
     "failed": "No se pudo completar la compra. Inténtalo de nuevo."

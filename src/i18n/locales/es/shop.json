@@ -15,7 +15,7 @@
       "live": "FW 26 / Drop 04 — Ya disponible",
       "text": "Un estudio de sombra y brillo. Punto de peso, herrajes fundidos en oro y siluetas a medida para la ciudad de madrugada.",
       "lookbook": "Lookbook",
-      "scroll": "Baja"
+      "scroll": "Desliza"
     },
     "marquee": {
       "shipping": "Envío gratis a partir de 200 €",
@@ -85,10 +85,49 @@
     }
   },
   "listing": {
-    "defaultMeta": {
-      "eyebrow": "FW 26 ✦ Drop 04",
-      "title": "novedades",
-      "goldWord": "Las"
+    "categories": {
+      "new": {
+        "crumb": "Novedades",
+        "eyebrow": "FW 26 ✦ Drop 04 ✦ Ya disponible",
+        "before": "Las",
+        "gold": "novedades",
+        "after": ""
+      },
+      "men": {
+        "crumb": "Hombre",
+        "eyebrow": "FW 26 ✦ Hombre",
+        "before": "Colección",
+        "gold": "hombre",
+        "after": ""
+      },
+      "women": {
+        "crumb": "Mujer",
+        "eyebrow": "FW 26 ✦ Mujer",
+        "before": "Colección",
+        "gold": "mujer",
+        "after": ""
+      },
+      "outerwear": {
+        "crumb": "Abrigos",
+        "eyebrow": "FW 26 ✦ Categoría",
+        "before": "",
+        "gold": "Abrigos",
+        "after": "y chaquetas"
+      },
+      "knitwear": {
+        "crumb": "Punto",
+        "eyebrow": "FW 26 ✦ Categoría",
+        "before": "",
+        "gold": "Punto",
+        "after": "esencial"
+      },
+      "accessories": {
+        "crumb": "Accesorios",
+        "eyebrow": "FW 26 ✦ Categoría",
+        "before": "",
+        "gold": "Accesorios",
+        "after": "y objetos"
+      }
     },
     "home": "Inicio",
     "shop": "Tienda",
@@ -152,7 +191,7 @@
     "colorCount_other": "{{count}} colores",
     "size": "Talla",
     "sizeGuide": "Guía de tallas ↗",
-    "soldOut": "{{sizes}} agotada · Avísame ↗",
+    "soldOut": "Agotado en {{sizes}} · Avísame ↗",
     "addToBag": "Añadir a la cesta",
     "addToBagDefault": "Añadir a la cesta · talla por defecto",
     "wishlist": "Favoritos",
@@ -173,7 +212,7 @@
       },
       "fit": {
         "title": "Corte y tallas",
-        "body": "Corte holgado y cuadrado con hombro caído. El modelo mide 184 cm y lleva una M. Talla normal: coge una menos si lo quieres más ajustado. En la talla M, el bajo queda 4 cm por debajo de la cintura."
+        "body": "Corte holgado y cuadrado con hombro caído. El modelo mide 184 cm y lleva una M. Elige tu talla habitual, o una menos si lo quieres más ajustado. En la talla M, el bajo queda 4 cm por debajo de la cintura."
       },
       "ship": {
         "title": "Envíos y devoluciones",
@@ -210,5 +249,28 @@
   "notFound": {
     "text": "Esta pieza ya está en el archivo. Vamos a buscarte algo disponible.",
     "back": "Volver al drop"
+  },
+  "catalog": {
+    "tags": {
+      "NEW": "NUEVO",
+      "NEW DROP": "NUEVO DROP",
+      "BESTSELLER": "MÁS VENDIDO",
+      "LAST UNITS": "ÚLTIMAS UNIDADES"
+    },
+    "types": {
+      "Blazer": "Blazer",
+      "Bottom": "Pantalón",
+      "Footwear": "Calzado",
+      "Hoodie": "Sudadera",
+      "Jacket": "Chaqueta",
+      "Loungewear": "Ropa cómoda",
+      "Outerwear": "Abrigo",
+      "Pants": "Pantalón",
+      "T-Shirt": "Camiseta",
+      "Top": "Top"
+    },
+    "sizes": {
+      "ONE": "ÚNICA"
+    }
   }
 }

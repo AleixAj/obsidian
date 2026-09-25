@@ -85,10 +85,49 @@
     }
   },
   "listing": {
-    "defaultMeta": {
-      "eyebrow": "FW 26 ✦ Drop 04",
-      "title": "arrivals",
-      "goldWord": "New"
+    "categories": {
+      "new": {
+        "crumb": "New",
+        "eyebrow": "FW 26 ✦ Drop 04 ✦ Live",
+        "before": "New",
+        "gold": "arrivals",
+        "after": ""
+      },
+      "men": {
+        "crumb": "Men",
+        "eyebrow": "FW 26 ✦ Men",
+        "before": "Men's",
+        "gold": "collection",
+        "after": ""
+      },
+      "women": {
+        "crumb": "Women",
+        "eyebrow": "FW 26 ✦ Women",
+        "before": "Women's",
+        "gold": "collection",
+        "after": ""
+      },
+      "outerwear": {
+        "crumb": "Outerwear",
+        "eyebrow": "FW 26 ✦ Category",
+        "before": "",
+        "gold": "Outerwear",
+        "after": "& coats"
+      },
+      "knitwear": {
+        "crumb": "Knitwear",
+        "eyebrow": "FW 26 ✦ Category",
+        "before": "",
+        "gold": "Knitwear",
+        "after": "essentials"
+      },
+      "accessories": {
+        "crumb": "Accessories",
+        "eyebrow": "FW 26 ✦ Category",
+        "before": "",
+        "gold": "Hardware",
+        "after": "& objects"
+      }
     },
     "home": "Home",
     "shop": "Shop",
@@ -210,5 +249,28 @@
   "notFound": {
     "text": "This piece has been moved to the archive. Let's find you something live.",
     "back": "Back to the drop"
+  },
+  "catalog": {
+    "tags": {
+      "NEW": "NEW",
+      "NEW DROP": "NEW DROP",
+      "BESTSELLER": "BESTSELLER",
+      "LAST UNITS": "LAST UNITS"
+    },
+    "types": {
+      "Blazer": "Blazer",
+      "Bottom": "Bottom",
+      "Footwear": "Footwear",
+      "Hoodie": "Hoodie",
+      "Jacket": "Jacket",
+      "Loungewear": "Loungewear",
+      "Outerwear": "Outerwear",
+      "Pants": "Pants",
+      "T-Shirt": "T-Shirt",
+      "Top": "Top"
+    },
+    "sizes": {
+      "ONE": "ONE"
+    }
   }
 }

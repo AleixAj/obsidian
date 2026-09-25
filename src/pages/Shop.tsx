@@ -8,18 +8,8 @@ import { Icon } from "../components/ui/Icon";
 import { Reveal } from "../components/ui/Reveal";
 import { compareNewCollectionOrder } from "../constants/catalog";
 import { useCategories, useProducts } from "../hooks/queries";
-import type { CategoryMeta } from "../lib/api";
 import type { Category } from "../types";
 import { formatPrice } from "../utils/format";
-
-/**
- * Fallback used when the categories endpoint hasn't responded yet or
- * the route param doesn't map to a known slug (e.g. `/shop/archive`,
- * which still isn't seeded server-side). Keeps the header rendering
- * something on-brand instead of flashing empty text.
- * The texts live in the translations (listing.defaultMeta.*), so the
- * object is built inside the component.
- */
 
 /** Sort modes the user can pick. */
 type SortMode = "featured" | "newest" | "priceAsc" | "priceDesc" | "best";
@@ -52,7 +42,7 @@ const PRICE_MAX = 890;
  * (size · colour · sort) once react-query hands it the list.
  */
 export function Shop() {
-  const { t } = useTranslation("shop");
+  const { t, i18n } = useTranslation("shop");
   const { cat = "new" } = useParams<{ cat: Category }>();
 
   const {
@@ -63,13 +53,11 @@ export function Shop() {
   } = useProducts(cat);
   const { data: categoryMap } = useCategories();
 
-  const defaultMeta: CategoryMeta = {
-    eyebrow: t("listing.defaultMeta.eyebrow"),
-    title: t("listing.defaultMeta.title"),
-    goldWord: t("listing.defaultMeta.goldWord"),
-    count: 0,
-  };
-  const meta = categoryMap?.[cat] ?? defaultMeta;
+  // The header texts of each category live in the translations
+  // (listing.categories.<slug>), because the API only has them in English.
+  // Unknown slugs (e.g. /shop/archive) use the "new" texts.
+  const textKey = i18n.exists(`shop:listing.categories.${cat}`) ? cat : "new";
+  const heading = (part: string) => t(`listing.categories.${textKey}.${part}`);
 
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [color, setColor] = useState<string | null>(null);
@@ -197,7 +185,7 @@ export function Shop() {
   // when available, otherwise fall back to whatever the products query
   // has returned (useful before categories resolve, or for slugs the
   // categories endpoint doesn't know about).
-  const headerCount = meta.count || products?.length || 0;
+  const headerCount = categoryMap?.[cat]?.count || products?.length || 0;
 
   return (
     <main className="fade-in">
@@ -207,23 +195,15 @@ export function Shop() {
           <span className="sep">/</span>
           <span>{t("listing.shop")}</span>
           <span className="sep">/</span>
-          <span className="here">{cat.toUpperCase()}</span>
+          <span className="here">{heading("crumb").toUpperCase()}</span>
         </div>
         <div className="title-row">
           <h1>
-            {meta.goldWord === "The" || meta.goldWord === "Outerwear" || meta.goldWord === "Knitwear" || meta.goldWord === "Hardware" ? (
-              <>
-                <span className="gold">{meta.goldWord}</span> {meta.title}
-              </>
-            ) : (
-              <>
-                {meta.goldWord} <span className="gold">{meta.title}</span>
-              </>
-            )}
+            {heading("before")} <span className="gold">{heading("gold")}</span> {heading("after")}
           </h1>
           <div className="summary">
             <span className="num">{headerCount}</span>
-            {meta.eyebrow}
+            {heading("eyebrow")}
           </div>
         </div>
       </section>

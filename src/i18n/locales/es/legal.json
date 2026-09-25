@@ -13,7 +13,7 @@
         "title": "Qué datos recogemos",
         "p1": "Si creas una cuenta con email y contraseña, guardamos tu nombre, tu dirección de email y una versión cifrada de forma segura (hash) de tu contraseña. La contraseña en sí nunca se guarda de forma legible.",
         "p2": "Si inicias sesión con Google, Google nos comparte tu nombre, tu dirección de email y tu foto de perfil. Guardamos esos tres datos y un identificador que nos permite reconocerte la próxima vez. Nunca recibimos tu contraseña de Google y no podemos leer tu Gmail, tu Drive, tus contactos ni nada más de tu cuenta de Google.",
-        "p3": "También guardamos lo que haces dentro de la tienda: los artículos de tu bolsa, tus favoritos, las direcciones de envío que guardas y los pedidos simulados que realizas."
+        "p3": "También guardamos lo que haces dentro de la tienda: los artículos de tu cesta, tus favoritos, las direcciones de envío que guardas y los pedidos simulados que realizas."
       },
       "never": {
         "title": "Qué datos nunca recogemos",
@@ -22,7 +22,7 @@
       },
       "why": {
         "title": "Para qué los guardamos",
-        "p1": "Únicamente para que la tienda funcione: para mantener tu sesión iniciada, recordar tu bolsa entre visitas y mostrar tu historial de pedidos. Tus datos nunca se venden, alquilan ni comparten con terceros, y nunca se usan para enviarte publicidad."
+        "p1": "Únicamente para que la tienda funcione: para mantener tu sesión iniciada, recordar tu cesta entre visitas y mostrar tu historial de pedidos. Tus datos nunca se venden, alquilan ni comparten con terceros, y nunca se usan para enviarte publicidad."
       },
       "where": {
         "title": "Dónde se guardan",
