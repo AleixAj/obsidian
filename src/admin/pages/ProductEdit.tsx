@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
 import { useUser } from "../../hooks/queries";
+import { catalogCategory } from "../../i18n/catalog";
 import { fetchCategories, mediaUrl } from "../../lib/api";
 import { PRODUCT_IMAGE_MAX_MB, uploadProductImage, type AdminProduct, type ProductPayload } from "../api";
 import { AdminIcon } from "../components/AdminIcon";
@@ -260,7 +261,7 @@ function ProductForm({ product }: { product?: AdminProduct }) {
                       checked={values.categories.includes(category.slug)}
                       onChange={() => toggleCategory(category.slug)}
                     />
-                    {category.name}
+                    {catalogCategory(category.slug)}
                   </label>
                 ))}
               </div>

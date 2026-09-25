@@ -2,6 +2,7 @@ import type { FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useUser } from "../../hooks/queries";
+import { catalogCategory, catalogType } from "../../i18n/catalog";
 import { mediaUrl } from "../../lib/api";
 import type { ProductFilters } from "../api";
 import { AdminIcon } from "../components/AdminIcon";
@@ -140,11 +141,11 @@ export function Products() {
                           <Link to={`/admin/products/${product.slug}`} className="adm-strong">
                             {product.name}
                           </Link>
-                          <small className="adm-cell-sub">{product.sub_label}</small>
+                          <small className="adm-cell-sub">{product.sub_label && catalogType(product.sub_label)}</small>
                         </div>
                       </div>
                     </td>
-                    <td data-label={t("products.columns.categories")} className="adm-muted">{product.categories.join(", ") || "—"}</td>
+                    <td data-label={t("products.columns.categories")} className="adm-muted">{product.categories.map(catalogCategory).join(", ") || "—"}</td>
                     <td data-label={t("common.price")} className="num adm-mono">{money(product.price_cents)}</td>
                     <td data-label={t("products.columns.stock")} className="num adm-mono">{product.total_stock ?? 0}</td>
                     <td data-label={t("products.columns.alerts")}>
