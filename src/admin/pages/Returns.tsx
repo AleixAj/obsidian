@@ -91,7 +91,7 @@ export function Returns() {
 
         {data && data.data.length > 0 && (
           <div className="adm-table-scroll">
-            <table className="adm-table">
+            <table className="adm-table adm-table--cards">
               <thead>
                 <tr>
                   <th>Return</th>
@@ -107,18 +107,18 @@ export function Returns() {
               <tbody>
                 {data.data.map((item) => (
                   <tr key={item.id} onClick={() => navigate(`/admin/returns/${item.id}`)}>
-                    <td>
+                    <td data-label="Return">
                       <Link to={`/admin/returns/${item.id}`} className="adm-mono adm-order-link">
                         {item.number}
                       </Link>
                     </td>
-                    <td className="adm-muted">{dateTime(item.created_at)}</td>
-                    <td className="adm-mono">{item.order?.number}</td>
-                    <td>{item.customer?.name ?? "—"}</td>
-                    <td className="adm-muted">{item.reason_label}</td>
-                    <td className="num">{item.units}</td>
-                    <td className="num adm-mono">{item.status === "refunded" ? money(item.refund_cents) : "—"}</td>
-                    <td>
+                    <td data-label="Requested" className="adm-muted">{dateTime(item.created_at)}</td>
+                    <td data-label="Order" className="adm-mono">{item.order?.number}</td>
+                    <td data-label="Customer">{item.customer?.name ?? "—"}</td>
+                    <td data-label="Reason" className="adm-muted">{item.reason_label}</td>
+                    <td data-label="Units" className="num">{item.units}</td>
+                    <td data-label="Refund" className="num adm-mono">{item.status === "refunded" ? money(item.refund_cents) : "—"}</td>
+                    <td data-label="Status">
                       <ReturnBadge status={item.status} />
                     </td>
                   </tr>

@@ -101,7 +101,7 @@ export function Orders() {
 
         {data && data.data.length > 0 && (
           <div className="adm-table-scroll">
-            <table className="adm-table">
+            <table className="adm-table adm-table--cards">
               <thead>
                 <tr>
                   <th>Order</th>
@@ -116,19 +116,19 @@ export function Orders() {
                 {data.data.map((order) => (
                   // The whole row opens the order. The link inside is for keyboard users.
                   <tr key={order.id} onClick={() => navigate(`/admin/orders/${order.id}`)}>
-                    <td>
+                    <td data-label="Order">
                       <Link to={`/admin/orders/${order.id}`} className="adm-mono adm-order-link">
                         {order.number}
                       </Link>
                     </td>
-                    <td className="adm-muted">{dateTime(order.created_at)}</td>
-                    <td>
+                    <td data-label="Date" className="adm-muted">{dateTime(order.created_at)}</td>
+                    <td data-label="Customer">
                       {order.customer?.name ?? "Guest"}
                       <small className="adm-cell-sub">{order.email}</small>
                     </td>
-                    <td className="num">{order.items_count}</td>
-                    <td className="num adm-mono">{money(order.total_cents)}</td>
-                    <td>
+                    <td data-label="Items" className="num">{order.items_count}</td>
+                    <td data-label="Total" className="num adm-mono">{money(order.total_cents)}</td>
+                    <td data-label="Status">
                       <StatusBadge status={order.status} />
                     </td>
                   </tr>

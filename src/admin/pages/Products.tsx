@@ -116,7 +116,7 @@ export function Products() {
 
         {data && data.data.length > 0 && (
           <div className="adm-table-scroll">
-            <table className="adm-table">
+            <table className="adm-table adm-table--cards">
               <thead>
                 <tr>
                   <th>Product</th>
@@ -130,7 +130,7 @@ export function Products() {
               <tbody>
                 {data.data.map((product) => (
                   <tr key={product.id} onClick={() => navigate(`/admin/products/${product.slug}`)}>
-                    <td>
+                    <td data-label="Product">
                       <div className="adm-product-cell">
                         <img src={mediaUrl(product.img)} alt="" loading="lazy" />
                         <div>
@@ -141,10 +141,10 @@ export function Products() {
                         </div>
                       </div>
                     </td>
-                    <td className="adm-muted">{product.categories.join(", ") || "—"}</td>
-                    <td className="num adm-mono">{money(product.price_cents)}</td>
-                    <td className="num adm-mono">{product.total_stock ?? 0}</td>
-                    <td>
+                    <td data-label="Categories" className="adm-muted">{product.categories.join(", ") || "—"}</td>
+                    <td data-label="Price" className="num adm-mono">{money(product.price_cents)}</td>
+                    <td data-label="Stock" className="num adm-mono">{product.total_stock ?? 0}</td>
+                    <td data-label="Alerts">
                       {product.low_variants_count ? (
                         <span className="adm-stock-alert">
                           {product.low_variants_count} low {product.low_variants_count === 1 ? "variant" : "variants"}
@@ -153,7 +153,7 @@ export function Products() {
                         <span className="adm-muted">—</span>
                       )}
                     </td>
-                    <td>
+                    <td data-label="Status">
                       <span className={`adm-pill ${product.is_active ? "is-on" : ""}`}>
                         {product.is_active ? "Active" : "Archived"}
                       </span>

@@ -92,7 +92,7 @@ export function Customers() {
 
         {data && data.data.length > 0 && (
           <div className="adm-table-scroll">
-            <table className="adm-table">
+            <table className="adm-table adm-table--cards">
               <thead>
                 <tr>
                   <th>Customer</th>
@@ -105,7 +105,7 @@ export function Customers() {
               <tbody>
                 {data.data.map((customer) => (
                   <tr key={customer.id} onClick={() => navigate(`/admin/customers/${customer.id}`)}>
-                    <td>
+                    <td data-label="Customer">
                       <div className="adm-product-cell">
                         <span className="adm-avatar adm-avatar--sm">{initials(customer.name)}</span>
                         <div>
@@ -116,10 +116,10 @@ export function Customers() {
                         </div>
                       </div>
                     </td>
-                    <td className="num">{customer.orders_count}</td>
-                    <td className="num adm-mono">{money(customer.spent_cents)}</td>
-                    <td className="adm-muted">{customer.last_order_at ? shortDate(customer.last_order_at) : "—"}</td>
-                    <td className="adm-muted">{customer.created_at ? monthYear(customer.created_at) : "—"}</td>
+                    <td data-label="Orders" className="num">{customer.orders_count}</td>
+                    <td data-label="Spent" className="num adm-mono">{money(customer.spent_cents)}</td>
+                    <td data-label="Last order" className="adm-muted">{customer.last_order_at ? shortDate(customer.last_order_at) : "—"}</td>
+                    <td data-label="Customer since" className="adm-muted">{customer.created_at ? monthYear(customer.created_at) : "—"}</td>
                   </tr>
                 ))}
               </tbody>

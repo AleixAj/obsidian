@@ -637,6 +637,12 @@
   gap: 4px;
   overflow-x: auto;
   max-width: 100%;
+  /* Scrolls sideways on phones, without showing a scrollbar. */
+  scrollbar-width: none;
+}
+
+.adm-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .adm-tabs button {
@@ -1479,6 +1485,65 @@
   .adm-content {
     padding-left: 16px;
     padding-right: 16px;
+  }
+}
+
+/* Phones: list tables become a stack of cards. Each cell shows its
+   column name from the data-label attribute (see the list pages). */
+@media (max-width: 640px) {
+  .adm-table--cards thead {
+    display: none;
+  }
+
+  .adm-table--cards,
+  .adm-table--cards tbody,
+  .adm-table--cards tr,
+  .adm-table--cards td {
+    display: block;
+    width: 100%;
+  }
+
+  .adm-table--cards tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .adm-table--cards td {
+    padding: 0;
+    border: none;
+    text-align: left;
+    min-width: 0;
+  }
+
+  .adm-table--cards td.num {
+    text-align: left;
+  }
+
+  .adm-table--cards td::before {
+    content: attr(data-label);
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-mute);
+    margin-bottom: 2px;
+  }
+
+  /* The first cell (order, product, customer...) takes the whole row. */
+  .adm-table--cards td:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .adm-table--cards td:first-child::before {
+    display: none;
+  }
+
+  .adm-table--cards .adm-product-cell {
+    min-width: 0;
   }
 }
 
