@@ -127,6 +127,7 @@ every night.
 | Styling | Plain CSS + tokens | Shows CSS fundamentals without relying on a framework. |
 | Backend | Laravel 11 API | Separate repository, REST endpoints, Sanctum auth and MySQL in production. |
 | 3D | react-three-fiber + drei | Three.js as React components, for the panel's warehouse. |
+| Languages | i18next + react-i18next | Shop and panel in Spanish and English. Picked from the browser, switchable with EN · ES. The API answers in the same language. |
 | Deploy | Cloudflare Workers + Assets + Railway | SPA on the Cloudflare edge, Laravel API with managed MySQL. |
 
 ## Architecture
