@@ -18,15 +18,15 @@ El objetivo es demostrar cómo se planifica, implementa y despliega una app de c
 
 ## Capturas
 
-![Hero de la home](./docs/screenshots/home-hero.png)
+![Hero de la home](./docs/screenshots/home-hero.jpg)
 
-![Sección lookbook](./docs/screenshots/home-lookbook.png)
+![Sección lookbook](./docs/screenshots/home-lookbook.jpg)
 
-![Categorías](./docs/screenshots/home-categories.png)
+![Categorías](./docs/screenshots/home-categories.jpg)
 
-![Colección women](./docs/screenshots/shop-women.png)
+![Colección women](./docs/screenshots/shop-women.jpg)
 
-![Página de producto](./docs/screenshots/product-detail.png)
+![Página de producto](./docs/screenshots/product-detail.jpg)
 
 ![Panel de administración: resumen](./docs/screenshots/admin-overview.png)
 
@@ -69,6 +69,11 @@ y elige un rol con los botones de demo: Aleix Auqué (administración), Javier M
 acceso de "cliente demo". Los datos de ejemplo (unos 900 pedidos de 90 días, 60 clientes,
 stock y devoluciones) se reinician solos cada 24 horas y son coherentes: cada comentario de
 devolución encaja con su motivo y cada dirección es de su ciudad.
+
+Las cuentas del equipo (también las demo) ven un botón **Panel** en la cabecera de la tienda
+para entrar directamente; los clientes no lo ven.
+
+![Cabecera de la tienda con el botón del panel](./docs/screenshots/shop-header-admin.png)
 
 ![Ficha de producto con la tabla de stock](./docs/screenshots/admin-product-stock.png)
 
@@ -136,6 +141,8 @@ Toda la web (tienda, cuenta, páginas legales y panel) está en español e ingl�
 - **Datos de la demo:** se guardan una sola vez, en inglés, y la API los traduce al enviarlos
   (notas de stock, comentarios de devoluciones, historial de pedidos…). Lo que escribe una
   persona de verdad se muestra tal cual.
+
+![El panel en español](./docs/screenshots/admin-overview-es.png)
 
 ## Stack Técnico
 

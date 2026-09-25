@@ -18,15 +18,15 @@ L'objectiu és demostrar com es planifica, s'implementa i es desplega una aplica
 
 ## Captures
 
-![Hero de la pàgina d'inici](./docs/screenshots/home-hero.png)
+![Hero de la pàgina d'inici](./docs/screenshots/home-hero.jpg)
 
-![Secció lookbook](./docs/screenshots/home-lookbook.png)
+![Secció lookbook](./docs/screenshots/home-lookbook.jpg)
 
-![Categories](./docs/screenshots/home-categories.png)
+![Categories](./docs/screenshots/home-categories.jpg)
 
-![Col·lecció women](./docs/screenshots/shop-women.png)
+![Col·lecció women](./docs/screenshots/shop-women.jpg)
 
-![Pàgina de producte](./docs/screenshots/product-detail.png)
+![Pàgina de producte](./docs/screenshots/product-detail.jpg)
 
 ![Panell d'administració: resum](./docs/screenshots/admin-overview.png)
 
@@ -69,6 +69,11 @@ i trieu un rol amb els botons de demostració: Aleix Auqué (administració), Ja
 ha un accés de "client de demostració". Les dades d'exemple (unes 900 comandes de 90 dies,
 60 clients, estoc i devolucions) es reinicien soles cada 24 hores i són coherents: cada
 comentari de devolució encaixa amb el seu motiu i cada adreça és de la seva ciutat.
+
+Els comptes de l'equip (també els de demostració) veuen un botó **Admin** / **Panel** a la
+capçalera de la botiga per entrar-hi directament; els clients no el veuen.
+
+![Capçalera de la botiga amb el botó del panell](./docs/screenshots/shop-header-admin.png)
 
 ![Fitxa de producte amb la taula d'estoc](./docs/screenshots/admin-product-stock.png)
 
@@ -135,6 +140,8 @@ Tot el web (botiga, compte, pàgines legals i panell) està en castellà i angl�
 - **Dades de la demostració:** es desen un sol cop, en anglès, i l'API les tradueix en
   enviar-les (notes d'estoc, comentaris de devolucions, historial de comandes…). El que escriu
   una persona de debò es mostra tal com és.
+
+![El panell en castellà](./docs/screenshots/admin-overview-es.png)
 
 ## Stack tècnic
 

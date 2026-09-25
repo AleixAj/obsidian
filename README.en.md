@@ -18,15 +18,15 @@ The goal is to show how a commerce app is planned, built and deployed with a rea
 
 ## Screenshots
 
-![Home hero](./docs/screenshots/home-hero.png)
+![Home hero](./docs/screenshots/home-hero.jpg)
 
-![Lookbook section](./docs/screenshots/home-lookbook.png)
+![Lookbook section](./docs/screenshots/home-lookbook.jpg)
 
-![Categories](./docs/screenshots/home-categories.png)
+![Categories](./docs/screenshots/home-categories.jpg)
 
-![Women collection](./docs/screenshots/shop-women.png)
+![Women collection](./docs/screenshots/shop-women.jpg)
 
-![Product page](./docs/screenshots/product-detail.png)
+![Product page](./docs/screenshots/product-detail.jpg)
 
 ![Admin panel: overview](./docs/screenshots/admin-overview.png)
 
@@ -69,6 +69,11 @@ Lucía Fernández (customer support). The shop login also has a "demo customer" 
 The sample data (about 900 orders over 90 days, 60 customers, stock and returns) resets
 itself every 24 hours and is consistent: every return comment matches its reason and every
 address belongs to its city.
+
+Team accounts (the demo ones too) see an **Admin** button in the shop header to go straight
+to the panel; customers don't see it.
+
+![Shop header with the admin button](./docs/screenshots/shop-header-admin.png)
 
 ![Product page with the stock grid](./docs/screenshots/admin-product-stock.png)
 
@@ -134,6 +139,8 @@ The whole site (shop, account, legal pages and panel) is in Spanish and English.
   language (validation errors, messages, statuses, roles and export headers).
 - **Demo data:** saved once, in English, and translated by the API when it's sent (stock
   notes, return comments, order history…). Anything a real person types is shown as it is.
+
+![The panel in Spanish](./docs/screenshots/admin-overview-es.png)
 
 ## Tech Stack
 
