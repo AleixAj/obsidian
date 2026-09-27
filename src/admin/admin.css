@@ -1886,3 +1886,11 @@
     display: none;
   }
 }
+
+/* Less motion: the mobile menu and warehouse cells change without sliding. */
+@media (prefers-reduced-motion: reduce) {
+  .adm-sidebar,
+  .wh-cell {
+    transition: none;
+  }
+}

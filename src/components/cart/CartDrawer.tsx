@@ -10,6 +10,7 @@ import { Icon } from "../ui/Icon";
 import { Placeholder } from "../ui/Placeholder";
 import { catalogColour, catalogSize } from "../../i18n/catalog";
 import type { CartItem } from "../../types";
+import { sizedImage } from "../../utils/image";
 
 // Same rule as the API checkout (CheckoutController), in cents.
 /** Free shipping from €200. */
@@ -120,7 +121,7 @@ export function CartDrawer() {
           ) : (
             items.map((line, i) => (
               <div key={`${line.id}-${line.size}-${line.colorHex}`} className="cart-item">
-                <Placeholder palette={line.palette} corner={false} img={line.img} />
+                <Placeholder palette={line.palette} corner={false} img={sizedImage(line.img, 200)} />
                 <div className="info">
                   <div className="nm">{line.name}</div>
                   <div className="meta">

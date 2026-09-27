@@ -24,6 +24,7 @@ import type { Product } from "../types";
 import { formatPrice } from "../utils/format";
 import { catalogType } from "../i18n/catalog";
 import { firstAvailableSize } from "../utils/product";
+import { sizedImage } from "../utils/image";
 
 type Order = ApiOrderDTO;
 type ProductMap = Map<string, Product>;
@@ -163,7 +164,7 @@ function OrderRow({ order, productMap, onOpen }: { order: Order; productMap: Pro
           const p = productMap.get(item.product_slug);
           return p ? (
             <div key={i} className="thumb">
-              <Placeholder palette={p.palette} corner={false} img={p.img} />
+              <Placeholder palette={p.palette} corner={false} img={sizedImage(p.img, 200)} />
             </div>
           ) : (
             <div key={i} className="thumb">
@@ -461,7 +462,7 @@ function WishlistView({ productMap }: { productMap: ProductMap }) {
                 <Placeholder
                   palette={product.palette}
                   corner
-                  img={product.img}
+                  img={sizedImage(product.img, 600)}
                   label={product.id.toUpperCase()}
                 />
               </div>

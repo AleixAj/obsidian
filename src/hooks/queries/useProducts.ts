@@ -15,18 +15,29 @@
  * Category filters are passed through to the API, including "new".
  * The New Arrivals page is curated server-side and intentionally no
  * longer mirrors the complete catalogue.
+ *
+ * `enabled: false` keeps the query idle (no request) until it is needed,
+ * e.g. the header search only loads products when it is opened.
  */
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { fetchProducts, toProduct } from "../../lib/api";
 import type { Product } from "../../types";
 
-export function useProducts(category?: string): UseQueryResult<Product[]> {
+interface UseProductsOptions {
+  enabled?: boolean;
+}
+
+export function useProducts(
+  category?: string,
+  { enabled = true }: UseProductsOptions = {},
+): UseQueryResult<Product[]> {
   const effective = category || undefined;
 
   return useQuery({
     queryKey: ["products", effective ?? "all"],
     queryFn: () => fetchProducts(effective),
     select: (data) => data.map(toProduct),
+    enabled,
   });
 }

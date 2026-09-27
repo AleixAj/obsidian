@@ -2,9 +2,9 @@
  * Route guard for pages that require a real Laravel/Sanctum session.
  *
  * While React Query checks `/api/user`, we keep the user on a branded
- * loading card. If the API returns 401, we redirect to `/auth` with a
- * `returnTo` query param so login can bring them back to the intended
- * dashboard section.
+ * loading card. If nobody is signed in (the user is null) or the check
+ * failed, we redirect to `/auth` with a `returnTo` query param so login
+ * can bring them back to the intended dashboard section.
  */
 
 import type { ReactNode } from "react";

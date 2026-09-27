@@ -87,7 +87,8 @@ export function Product() {
 
   if (isPending) {
     return (
-      <main className="fade-in pdp">
+      // Full height while loading so the footer doesn't jump (see App.tsx).
+      <main className="fade-in pdp route-fallback">
         <div className="data-error" style={{ borderStyle: "solid", borderColor: "var(--line-2)" }}>
           <div className="title" style={{ color: "var(--gold)" }}>{t("product.loading")}</div>
           <div>{t("product.loadingSub")}</div>

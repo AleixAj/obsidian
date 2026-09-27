@@ -53,7 +53,7 @@ export const BRAND = {
    */
   wordmarkTransparent: "/obsidian-transparent.png",
   /** Diamond logo mark only. */
-  mark: "/obsidian-logo.png",
+  mark: "/obsidian-logo-96.webp",
 } as const;
 
 /**
@@ -69,15 +69,15 @@ export const BRAND = {
  */
 export const TEMPLATES = {
   /** Signature: blonde model + storefront with "Obsidian" gold sign. */
-  t1: "/template1.jpg",
+  t1: "/template1.webp",
   /** NYC vibe: crop hoodie + graffiti wall + yellow cabs. */
-  t2: "/template2.jpg",
+  t2: "/template2.webp",
   /** Community: group of four laughing at a skatepark. */
-  t3: "/template3.jpg",
+  t3: "/template3.webp",
   /** Polaroid editorial: composite double-panel social shot. */
-  t4: "/template4.jpg",
+  t4: "/template4.webp",
   /** Street portrait: serious pose, quilted jacket, storefront bg. */
-  t5: "/template5.jpg",
+  t5: "/template5.webp",
   /** Flagship: bomber jacket + cap, OBSIDIAN store façade. */
-  t6: "/template6.jpg",
+  t6: "/template6.webp",
 } as const;

@@ -20,3 +20,24 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
   Content-Security-Policy: default-src 'self'; script-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' data: blob: https://cdn.jsdelivr.net; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+
+# Caching.
+# Rules add up: a file that matches several blocks gets all their headers,
+# so the security headers above still apply to these files.
+#
+# Vite puts a hash in every file name inside /assets (index-D6yppPtD.js).
+# A new build means a new name, so the browser can keep them for a year.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Images in /public keep the same name when they change, so only 1 day.
+# ":file" matches a name without "/" or ".", so these only hit files in
+# the root folder and never the /assets files above.
+/:file.webp
+  Cache-Control: public, max-age=86400
+/:file.png
+  Cache-Control: public, max-age=86400
+/:file.jpg
+  Cache-Control: public, max-age=86400
+/:file.avif
+  Cache-Control: public, max-age=86400

@@ -36,8 +36,9 @@ function handleSessionError(error: unknown) {
   if (!(error instanceof ApiError)) return;
   if (error.status !== 401 && error.status !== 419) return;
 
-  // Only when we still think someone is signed in. This also avoids
-  // touching the user query when it is the one that answered 401.
+  // Only when we still think someone is signed in. The user query itself
+  // never lands here on a 401: fetchUser returns null for signed-out
+  // visitors. Setting null doesn't refetch anything, so there's no loop.
   if (queryClient.getQueryData(authKeys.user)) {
     queryClient.setQueryData(authKeys.user, null);
   }

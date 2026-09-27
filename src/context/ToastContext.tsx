@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
@@ -46,8 +47,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     [dismiss],
   );
 
+  // Keep the same object between renders so consumers only re-render
+  // when the toasts really change.
+  const value = useMemo(() => ({ toasts, push, dismiss }), [toasts, push, dismiss]);
+
   return (
-    <ToastContext.Provider value={{ toasts, push, dismiss }}>
+    <ToastContext.Provider value={value}>
       {children}
       <div className="toast-stack" aria-live="polite">
         {toasts.map((t) => (

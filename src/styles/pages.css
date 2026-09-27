@@ -996,6 +996,12 @@
   100% { transform: translateX(100%); }
 }
 
+/* Loading screen while a lazy page downloads (see RouteFallback in
+   App.tsx). Full height so the footer stays below the screen. */
+.route-fallback {
+  min-height: 100vh;
+}
+
 .data-error {
   padding: 80px 24px;
   text-align: center;
@@ -2768,7 +2774,8 @@
   justify-content: center;
   text-align: center;
   padding: 120px 32px;
-  min-height: 60vh;
+  /* Same height as the loading screen, so the footer doesn't move. */
+  min-height: 100vh;
   gap: 24px;
 }
 
@@ -3212,5 +3219,15 @@
 @media (max-width: 700px) {
   .legal {
     padding: 64px 20px 80px;
+  }
+}
+
+/* Less motion: stop the looping dots, lines and loading shimmer. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-meta .row .dot,
+  .scroll-cue .line,
+  .product-card-skeleton .sk-img::after,
+  .product-card-skeleton .sk-line::after {
+    animation: none;
   }
 }

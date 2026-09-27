@@ -1,5 +1,12 @@
-import { describe, expect, it } from "vitest";
-import { toCategoryMap, toProduct, type ApiCategoryDTO, type ApiProductDTO } from "./api";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+  ApiError,
+  fetchUser,
+  toCategoryMap,
+  toProduct,
+  type ApiCategoryDTO,
+  type ApiProductDTO,
+} from "./api";
 
 const productDto: ApiProductDTO = {
   id: 1,
@@ -70,5 +77,21 @@ describe("toCategoryMap", () => {
         count: 18,
       },
     });
+  });
+});
+
+describe("fetchUser", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("returns null when nobody is signed in (401)", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("{}", { status: 401 })));
+    await expect(fetchUser()).resolves.toBeNull();
+  });
+
+  it("still throws other errors", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("{}", { status: 500 })));
+    await expect(fetchUser()).rejects.toBeInstanceOf(ApiError);
   });
 });

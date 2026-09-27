@@ -9,6 +9,7 @@ import { Icon } from "../ui/Icon";
 import { LanguageSwitch } from "../ui/LanguageSwitch";
 import { Logo } from "../ui/Logo";
 import { catalogCategory, catalogColour, catalogType } from "../../i18n/catalog";
+import { sizedImage } from "../../utils/image";
 
 /**
  * Top-level navigation.
@@ -38,9 +39,13 @@ export function Header() {
   const { count: wishlistCount } = useWishlist();
   const { data: user } = useUser();
   const logoutMutation = useLogout();
-  const { data: products = [], refetch: refetchProducts } = useProducts();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  // The header is on every page, so we only load the products when the
+  // search is opened (the list is cached after that).
+  const { data: products = [], isPending: productsLoading } = useProducts(undefined, {
+    enabled: searchOpen,
+  });
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
@@ -126,7 +131,6 @@ export function Header() {
 
   const openSearch = () => {
     setMobileOpen(false);
-    void refetchProducts();
     setSearchOpen(true);
   };
 
@@ -287,7 +291,7 @@ export function Header() {
           </div>
 
           <div className="search-results" aria-live="polite">
-            {searchResults.length > 0 ? (
+            {productsLoading ? null : searchResults.length > 0 ? (
               searchResults.map((product) => (
                 <button
                   type="button"
@@ -295,7 +299,7 @@ export function Header() {
                   key={product.id}
                   onClick={() => goToProduct(product.id)}
                 >
-                  <span className="thumb" style={{ backgroundImage: `url(${product.img})` }} />
+                  <span className="thumb" style={{ backgroundImage: `url(${sizedImage(product.img, 200)})` }} />
                   <span className="meta">
                     <span className="name">{product.name}</span>
                     <span className="cat">{catalogType(product.cat)}</span>

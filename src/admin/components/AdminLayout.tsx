@@ -96,7 +96,7 @@ export function AdminLayout() {
     <div className={`adm${menuOpen ? " menu-open" : ""}`}>
       <aside className="adm-sidebar">
         <Link to="/admin" className="adm-brand">
-          <img src="/obsidian-logo.png" alt="" />
+          <img src="/obsidian-logo-96.webp" alt="" />
           <span>OBSIDIAN</span>
           <em>Admin</em>
         </Link>

@@ -72,10 +72,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const { data: user } = useUser();
   const isAuthenticated = Boolean(user);
   const cartQuery = useCartQuery(isAuthenticated);
-  const addCartItem = useAddCartItem();
-  const updateCartItem = useUpdateCartItem();
-  const deleteCartItem = useDeleteCartItem();
-  const clearCart = useClearCart();
+  // We only keep `mutate`: it never changes between renders (the whole
+  // mutation object does), so the callbacks below stay the same too.
+  const { mutate: addCartItem } = useAddCartItem();
+  const { mutate: updateCartItem } = useUpdateCartItem();
+  const { mutate: deleteCartItem } = useDeleteCartItem();
+  const { mutate: clearCart } = useClearCart();
   const mergeCart = useMergeCart();
   const mergedGuestCartForUser = useRef<number | null>(null);
   const { push } = useToast();
@@ -117,7 +119,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const colorHex = choice.colorHex ?? product.colors[0]?.hex ?? null;
 
       if (isAuthenticated) {
-        addCartItem.mutate(
+        addCartItem(
           {
             product_slug: product.id,
             size_label: size,
@@ -155,7 +157,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const line = serverItems[index];
         const serverLine = cartQuery.data?.items[index];
         if (!line || !serverLine) return;
-        updateCartItem.mutate(
+        updateCartItem(
           { id: serverLine.id, quantity: clampQty(line.qty + delta) },
           { onError: (error) => push(apiErrorMessage(error) ?? t("cart.updateFailed"), "warn") },
         );
@@ -180,7 +182,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (isAuthenticated) {
         const serverLine = cartQuery.data?.items[index];
         if (!serverLine) return;
-        deleteCartItem.mutate(serverLine.id);
+        deleteCartItem(serverLine.id);
         return;
       }
 
@@ -191,7 +193,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clear = useCallback(() => {
     if (isAuthenticated) {
-      clearCart.mutate();
+      clearCart();
       return;
     }
 
@@ -212,18 +214,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
   const subtotalCents = isAuthenticated ? (cartQuery.data?.subtotal_cents ?? 0) : guestSubtotalCents;
 
-  const value: CartContextValue = {
-    items,
-    isOpen,
-    totalCount,
-    subtotalCents,
-    add,
-    updateQty,
-    remove,
-    clear,
-    open,
-    close,
-  };
+  // Same object between renders unless something inside changed, so the
+  // components that use the cart don't re-render for nothing.
+  const value = useMemo<CartContextValue>(
+    () => ({ items, isOpen, totalCount, subtotalCents, add, updateQty, remove, clear, open, close }),
+    [items, isOpen, totalCount, subtotalCents, add, updateQty, remove, clear, open, close],
+  );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

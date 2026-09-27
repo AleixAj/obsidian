@@ -6,7 +6,7 @@
  */
 
 export { useCategories } from "./useCategories";
-export { useProduct } from "./useProduct";
+export { prefetchProduct, useProduct } from "./useProduct";
 export { useProducts } from "./useProducts";
 export {
   useDeleteAvatar,

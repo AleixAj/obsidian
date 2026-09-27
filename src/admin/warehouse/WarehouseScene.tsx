@@ -2,6 +2,7 @@ import monoFont from "@fontsource/jetbrains-mono/files/jetbrains-mono-latin-700-
 import { Edges, OrbitControls, Text } from "@react-three/drei";
 import { Canvas, type ThreeEvent } from "@react-three/fiber";
 import { useEffect, useState } from "react";
+import { BoxGeometry } from "three";
 import type { Warehouse, WarehouseLocation } from "../api";
 import { fillRatio, STATE_COLORS } from "./states";
 
@@ -24,6 +25,12 @@ const CELL = 1; // width and depth of one location
 const LEVEL_HEIGHT = 0.8; // height between shelves
 const BAY_GAP = 0.1; // space between two bays
 const AISLE_GAP = 2.4; // space between two aisles (the corridor)
+const BOX_HEIGHT = LEVEL_HEIGHT * 0.85; // height of one location box
+
+// Every location uses the same two box shapes, so we create them once and
+// share them, instead of one copy per location (hundreds of them).
+const outlineGeometry = new BoxGeometry(CELL * 0.92, BOX_HEIGHT, CELL * 0.92);
+const stockGeometry = new BoxGeometry(CELL * 0.8, BOX_HEIGHT, CELL * 0.8);
 
 interface SceneProps {
   warehouse: Warehouse;
@@ -61,6 +68,11 @@ export default function WarehouseScene({ warehouse, selectedId, onSelect, isMatc
 
   return (
     <Canvas
+      // Only draw a new frame when something changes (hover, click, camera
+      // move...) instead of 60 times per second. Saves battery and CPU.
+      frameloop="demand"
+      // Sharp enough on retina screens without drawing 3x the pixels.
+      dpr={[1, 1.5]}
       // The camera starts in front of the warehouse, a bit to the right and above.
       camera={{ position: [width / 2 + 10, 13, depth + 13], fov: 45 }}
       // Clicking the background (not a box) closes the details.
@@ -179,7 +191,7 @@ interface BoxProps {
 /** One shelf position: an outline, plus a coloured box as full as the stock. */
 function LocationBox({ location, position, selected, faded, highlighted, onSelect }: BoxProps) {
   const [hovered, setHovered] = useState(false);
-  const size = LEVEL_HEIGHT * 0.85;
+  const size = BOX_HEIGHT;
   // Empty or out of stock locations still show a thin slice, so you can click them.
   const fill = Math.max(0.08, fillRatio(location));
   const color = STATE_COLORS[location.state];
@@ -195,6 +207,7 @@ function LocationBox({ location, position, selected, faded, highlighted, onSelec
     <group position={position}>
       {/* The space on the shelf (outline). Gold when selected. */}
       <mesh
+        geometry={outlineGeometry}
         onClick={handleClick}
         onPointerOver={(event) => {
           event.stopPropagation();
@@ -206,9 +219,9 @@ function LocationBox({ location, position, selected, faded, highlighted, onSelec
           document.body.style.cursor = "";
         }}
       >
-        <boxGeometry args={[CELL * 0.92, size, CELL * 0.92]} />
-        {/* Invisible, but still clickable. Only its outline (Edges) is drawn. */}
-        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+        {/* Not drawn at all, but still clickable (clicks test the shape,
+            not the material). Only its outline (Edges) is drawn. */}
+        <meshBasicMaterial visible={false} />
         <Edges
           color={selected ? "#d4af37" : hovered ? "#e8c87a" : highlighted ? STATE_COLORS.empty : "#4a4439"}
           transparent
@@ -219,16 +232,14 @@ function LocationBox({ location, position, selected, faded, highlighted, onSelec
       {/* A free location has no box. When it's what you're looking for
           (e.g. the "Free" filter), show a solid box in the "free" colour. */}
       {location.state === "empty" && highlighted && (
-        <mesh>
-          <boxGeometry args={[CELL * 0.8, size, CELL * 0.8]} />
+        <mesh geometry={stockGeometry}>
           <meshStandardMaterial color={STATE_COLORS.empty} emissive={STATE_COLORS.empty} emissiveIntensity={0.35} />
         </mesh>
       )}
 
       {/* The stock: a box that grows from the bottom of the shelf. */}
       {location.state !== "empty" && (
-        <mesh position={[0, -size / 2 + (size * fill) / 2, 0]} scale={[1, fill, 1]}>
-          <boxGeometry args={[CELL * 0.8, size, CELL * 0.8]} />
+        <mesh geometry={stockGeometry} position={[0, -size / 2 + (size * fill) / 2, 0]} scale={[1, fill, 1]}>
           <meshStandardMaterial
             color={color}
             transparent

@@ -44,10 +44,12 @@ const Shop = lazy(() =>
   import("./pages/Shop").then((module) => ({ default: module.Shop })),
 );
 
+// Shown while a page's code downloads. It is as tall as the screen so
+// the footer doesn't jump up and down when the real page arrives.
 function RouteFallback() {
   const { t } = useTranslation();
   return (
-    <main className="fade-in">
+    <main className="fade-in route-fallback">
       <div
         className="data-error"
         style={{ borderStyle: "solid", borderColor: "var(--line-2)" }}

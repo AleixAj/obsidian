@@ -341,9 +341,19 @@ export const fetchCategories = async (): Promise<ApiCategoryDTO[]> => {
   return data;
 };
 
-export const fetchUser = async (): Promise<ApiUserDTO> => {
-  const { data } = await request<ApiItemEnvelope<ApiUserDTO>>("/api/user");
-  return data;
+/**
+ * The signed-in user, or null for a visitor who is not signed in.
+ * A 401 here is normal (not an error), so React Query keeps the answer
+ * cached instead of asking again every time a component mounts.
+ */
+export const fetchUser = async (): Promise<ApiUserDTO | null> => {
+  try {
+    const { data } = await request<ApiItemEnvelope<ApiUserDTO>>("/api/user");
+    return data;
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) return null;
+    throw error;
+  }
 };
 
 export const updateUser = async (payload: UpdateUserPayload): Promise<ApiUserDTO> => {

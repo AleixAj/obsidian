@@ -53,7 +53,7 @@ export function AdminLogin() {
       <div className="adm-login-card">
         <div className="adm-login-top">
           <Link to="/" className="adm-brand">
-            <img src="/obsidian-logo.png" alt="" />
+            <img src="/obsidian-logo-96.webp" alt="" />
             <span>OBSIDIAN</span>
             <em>Admin</em>
           </Link>
