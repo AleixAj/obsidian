@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
+import { useUser } from "../../hooks/queries";
 import { mediaUrl } from "../../lib/api";
 import type { WarehouseLocation } from "../api";
 import { errorMessage } from "../errors";
@@ -20,6 +21,8 @@ interface PanelProps {
  */
 export function LocationPanel({ location, onClose }: PanelProps) {
   const { t } = useTranslation("admin");
+  // Demo accounts can't empty a location (see the API).
+  const isDemo = useUser().data?.is_demo ?? false;
   const { push } = useToast();
   const restock = useRestockLocation();
   const assign = useAssignLocation();
@@ -108,10 +111,11 @@ export function LocationPanel({ location, onClose }: PanelProps) {
             <button type="button" className="adm-btn adm-btn--gold" onClick={handleRestock} disabled={busy || missing <= 0}>
               {missing > 0 ? t("warehouse.panel.restock", { count: missing }) : t("warehouse.panel.full")}
             </button>
-            <button type="button" className="adm-btn" onClick={() => handleAssign(null)} disabled={busy}>
+            <button type="button" className="adm-btn" onClick={() => handleAssign(null)} disabled={busy || isDemo}>
               {t("warehouse.panel.free")}
             </button>
           </div>
+          {isDemo && <p className="adm-muted adm-small">{t("warehouse.panel.demoNoFree")}</p>}
         </>
       ) : (
         <div className="adm-form">

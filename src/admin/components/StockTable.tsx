@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useToast } from "../../context/ToastContext";
+import { useUser } from "../../hooks/queries";
 import { catalogColour } from "../../i18n/catalog";
 import { ApiError } from "../../lib/api";
 import type { AdminProduct, ProductVariant } from "../api";
@@ -34,6 +35,8 @@ export function StockTable({ product }: { product: AdminProduct }) {
   const colors = product.colors ?? [];
   const sizes = product.sizes ?? [];
   const { t } = useTranslation("admin");
+  // Demo accounts can only raise stock (the API refuses lowering it).
+  const isDemo = useUser().data?.is_demo ?? false;
   const { push } = useToast();
   const updateStock = useUpdateStock(product.slug);
   const { refetch } = useAdminProduct(product.slug);
@@ -184,6 +187,7 @@ export function StockTable({ product }: { product: AdminProduct }) {
           </button>
         </div>
         {!isValid && <p className="adm-alert">{t("stock.invalid")}</p>}
+        {isDemo && <p className="adm-muted adm-small">{t("stock.demoNote")}</p>}
         <p className="adm-muted adm-small">
           <span className="adm-legend-dot is-low" /> {t("stock.legendLow")} <span className="adm-legend-dot is-out" />{" "}
           {t("stock.legendOut")}

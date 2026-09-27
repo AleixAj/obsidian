@@ -307,7 +307,8 @@
       "restock": "Reposición",
       "return": "Devolución",
       "cancel": "Pedido cancelado"
-    }
+    },
+    "demoNote": "Las cuentas demo pueden añadir stock pero no quitarlo, así la tienda nunca se queda agotada."
   },
   "customers": {
     "title": "Clientes",
@@ -511,7 +512,8 @@
       "restockError": "No se ha podido reponer.",
       "placed": "Producto colocado en {{code}}.",
       "freed": "{{code}} ya está libre.",
-      "updateError": "No se ha podido actualizar la ubicación."
+      "updateError": "No se ha podido actualizar la ubicación.",
+      "demoNoFree": "Las cuentas demo no pueden liberar ubicaciones, así el almacén nunca se queda vacío."
     }
   }
 }

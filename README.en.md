@@ -117,9 +117,11 @@ page opens, and phones or browsers without WebGL open the Plan view.
 **Decisions:**
 
 - Permissions live in one place (`App\Enums\Role` in the API), with Laravel Gates on the routes.
-- Demo accounts are shared: they only see demo data and can't upload files, change the
-  public catalogue or the team (otherwise anyone could give themselves admin access). Demo
-  data is restored every day.
+- Demo accounts are shared: they can open every section of their role and see the demo
+  data, but can't upload files, change the public catalogue or the team (otherwise anyone
+  could give themselves admin access). They also can't lower stock or free warehouse
+  locations, so the shop never looks sold out and the warehouse is never empty for the next
+  visitor. Demo data is restored every day.
 - Photos are resized and saved as WebP with GD, on a Railway volume.
 - Charts with Recharts; Excel with OpenSpout.
 
@@ -164,7 +166,8 @@ protected against abuse and mistakes:
 - **Security headers** on the site and the API (HSTS, `nosniff`, `X-Frame-Options`,
   `Referrer-Policy`, `Permissions-Policy`) and a Content-Security-Policy that blocks scripts from other sites.
 - **Isolated demo accounts:** they only see and change demo data (made-up customers and
-  orders) and can't change the public catalogue, upload files or manage the team.
+  orders), can't change the public catalogue, upload files or manage the team, and can only
+  add stock (never lower it or empty locations).
 - **Accounts:** signing in with Google to an account created earlier with a password
   cancels that password (stops someone registering your email before you). Only accounts
   that have signed in with Google/GitHub can join the team, and the owner's account becomes

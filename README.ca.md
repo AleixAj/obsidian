@@ -118,9 +118,11 @@ es descarrega en obrir aquesta pàgina, i al mòbil o sense WebGL s'obre la vist
 **Decisions:**
 
 - Permisos en un sol lloc (`App\Enums\Role` a l'API) i Gates de Laravel a les rutes.
-- Els comptes de demostració són compartits: només veuen dades de demostració i no poden
-  pujar fitxers, canviar el catàleg públic ni l'equip (si no, qualsevol es podria donar
-  accés d'administrador). Les dades de demostració es restauren cada dia.
+- Els comptes de demostració són compartits: poden entrar a totes les seccions del seu rol
+  i veure les dades de demostració, però no poden pujar fitxers, canviar el catàleg públic ni
+  l'equip (si no, qualsevol es podria donar accés d'administrador). Tampoc poden baixar
+  l'estoc ni alliberar ubicacions del magatzem, així la botiga mai queda "esgotada" ni el
+  magatzem buit per al següent visitant. Les dades de demostració es restauren cada dia.
 - Les fotos es redueixen i es desen en WebP amb GD, en un volum de Railway.
 - Gràfiques amb Recharts; Excel amb OpenSpout.
 
@@ -167,7 +169,8 @@ que es protegeix contra abusos i errors tant a l'API com a la interfície:
 - **Capçaleres de seguretat** al web i a l'API (HSTS, `nosniff`, `X-Frame-Options`,
   `Referrer-Policy`, `Permissions-Policy`) i una Content-Security-Policy que bloqueja scripts d'altres llocs.
 - **Comptes de demostració aïllats:** només veuen i modifiquen dades de demostració (clients
-  i comandes inventats) i no poden canviar el catàleg públic, pujar fitxers ni tocar l'equip.
+  i comandes inventats), no poden canviar el catàleg públic, pujar fitxers ni tocar l'equip,
+  i només poden pujar l'estoc (mai baixar-lo ni buidar ubicacions).
 - **Comptes:** si algú entra amb Google en un compte creat abans amb contrasenya, aquesta
   contrasenya s'anul·la (evita que un altre registri el teu email abans que tu). A l'equip
   només s'hi afegeixen comptes que ja han entrat amb Google/GitHub, i el compte del

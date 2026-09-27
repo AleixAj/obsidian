@@ -307,7 +307,8 @@
       "restock": "Restock",
       "return": "Return",
       "cancel": "Order cancelled"
-    }
+    },
+    "demoNote": "Demo accounts can add stock but not remove it, so the shop never looks sold out."
   },
   "customers": {
     "title": "Customers",
@@ -511,7 +512,8 @@
       "restockError": "Could not restock.",
       "placed": "Product placed in {{code}}.",
       "freed": "{{code}} is free now.",
-      "updateError": "Could not update the location."
+      "updateError": "Could not update the location.",
+      "demoNoFree": "Demo accounts can't free locations, so the warehouse never ends up empty."
     }
   }
 }

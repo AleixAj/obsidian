@@ -118,9 +118,11 @@ guarda una variante y su stock, y al reponer se crea un movimiento de stock norm
 **Decisiones:**
 
 - Permisos en un solo sitio (`App\Enums\Role` en la API) y Gates de Laravel en las rutas.
-- Las cuentas demo son compartidas: solo ven datos de demo y no pueden subir archivos,
-  cambiar el catálogo público ni el equipo (si no, cualquiera podría darse acceso de
-  administrador). Los datos de demo se restauran cada día.
+- Las cuentas demo son compartidas: pueden entrar en todas las secciones de su rol y ver
+  los datos de demo, pero no pueden subir archivos, cambiar el catálogo público ni el equipo
+  (si no, cualquiera podría darse acceso de administrador). Tampoco pueden bajar stock ni
+  liberar ubicaciones del almacén, así la tienda nunca queda "agotada" ni el almacén vacío
+  para el siguiente visitante. Los datos de demo se restauran cada día.
 - Las fotos se reducen y se guardan en WebP con GD, en un volumen de Railway.
 - Gráficas con Recharts; Excel con OpenSpout.
 
@@ -168,7 +170,8 @@ se protege contra abusos y errores tanto en la API como en la interfaz:
 - **Cabeceras de seguridad** en la web y en la API (HSTS, `nosniff`, `X-Frame-Options`,
   `Referrer-Policy`, `Permissions-Policy`) y una Content-Security-Policy que bloquea scripts de otros sitios.
 - **Cuentas demo aisladas:** solo ven y modifican datos de demo (clientes y pedidos
-  inventados), no pueden cambiar el catálogo público, subir archivos ni tocar el equipo.
+  inventados), no pueden cambiar el catálogo público, subir archivos ni tocar el equipo, y
+  solo pueden subir stock (nunca bajarlo ni vaciar ubicaciones).
 - **Cuentas:** si alguien entra con Google en una cuenta creada antes con contraseña, esa
   contraseña se anula (evita que otro registre tu email antes que tú). Al equipo solo se
   añaden cuentas que ya han entrado con Google/GitHub, y la cuenta del dueño es
