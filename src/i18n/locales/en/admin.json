@@ -459,6 +459,7 @@
     "showPlan": "Show the plan",
     "states": {
       "ok": "In stock",
+      "medium": "Half empty",
       "low": "Low stock",
       "out": "Out of stock",
       "empty": "Free"
@@ -490,6 +491,7 @@
     "panel": {
       "region": "Location {{code}}",
       "title": "Location",
+      "empty": "Click a box in the warehouse to see what's stored there, restock it or free it.",
       "close": "Close details",
       "position": "Aisle {{aisle}} · bay {{bay}} · level {{level}}",
       "size": "size {{size}}",

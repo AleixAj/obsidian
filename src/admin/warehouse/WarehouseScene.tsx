@@ -32,7 +32,7 @@ const FLOOR_Y = -LEVEL_HEIGHT / 2; // the floor is under the first level
 const PALLET_HEIGHT = 0.06;
 
 // Colours of the scene (the stock colours come from states.ts). The racks are
-// grey steel on purpose: amber and red already mean "low" and "out of stock".
+// grey steel on purpose: yellow, orange and red already mean stock states.
 const COLORS = {
   background: "#0b0a08",
   floor: "#11100d",

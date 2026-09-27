@@ -85,13 +85,23 @@ para entrar directamente; los clientes no lo ven.
 | Clientes | Listado con total gastado y ficha con direcciones e historial de pedidos. |
 | Devoluciones | El cliente la pide desde su cuenta (30 días); atención al cliente la aprueba o rechaza y hace el reembolso (simulado, sin Stripe todavía). El stock vuelve solo. |
 | Usuarios y roles | Equipo, tabla de permisos, añadir personas y cambiar su rol. |
-| Almacén 3D | 192 ubicaciones (pasillo, módulo y nivel) dibujadas en 3D: cada caja tiene el color de su stock y la altura de lo llena que está. Vistas Plano y Lista para móvil, búsqueda por SKU o ubicación, reponer y mover productos. |
+| Almacén 3D | 192 ubicaciones (pasillo, módulo y nivel) dibujadas en 3D: cada caja tiene el color de su estado (con stock, medio, bajo, agotado o libre) y la altura de lo llena que está. Vistas Plano y Lista para móvil, búsqueda por SKU o ubicación, reponer y mover productos. |
 | Exportar | Cada listado se descarga en CSV o Excel. |
 
 **Almacén en 3D** (`/admin/warehouse`): hecho con react-three-fiber (Three.js escrito como
 componentes de React). Los datos son los mismos que en el resto del panel: cada ubicación
 guarda una variante y su stock, y al reponer se crea un movimiento de stock normal. El código
 3D se descarga solo al abrir esa página, y en móvil o sin WebGL se abre la vista Plano.
+
+- **Estados de cada ubicación:** verde (con stock), amarillo (stock medio: 40 % de la
+  capacidad o menos), naranja (stock bajo, en el aviso), rojo (agotado) y azul (libre). Cada
+  estado tiene su filtro y, al filtrar, las baldas se vuelven transparentes para que se vean
+  las ubicaciones buscadas.
+- **Escena:** estanterías de acero con palés, suelo con marcas alineadas con las estanterías
+  (líneas por módulo, líneas de seguridad, pasillos y números de módulo), luz en tres puntos,
+  sombras suaves y un marcador dorado sobre la ubicación elegida.
+- **Detalle fijo:** la columna de la derecha está siempre reservada, así la vista no cambia
+  de tamaño al elegir una ubicación.
 
 ![Almacén en 3D](./docs/screenshots/admin-warehouse-3d.png)
 

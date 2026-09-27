@@ -895,7 +895,7 @@
 .adm-stock-alert {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: #e0a44a;
+  color: var(--stock-low);
 }
 
 .adm-pill {
@@ -1117,13 +1117,13 @@
 }
 
 .adm-stock-input.is-low {
-  border-color: #e0a44a;
-  color: #e0a44a;
+  border-color: var(--stock-low);
+  color: var(--stock-low);
 }
 
 .adm-stock-input.is-out {
-  border-color: var(--accent-warn);
-  color: var(--accent-warn);
+  border-color: var(--stock-out);
+  color: var(--stock-out);
 }
 
 .adm-stock-footer {
@@ -1162,8 +1162,8 @@
   vertical-align: middle;
 }
 
-.adm-legend-dot.is-low { background: #e0a44a; }
-.adm-legend-dot.is-out { background: var(--accent-warn); }
+.adm-legend-dot.is-low { background: var(--stock-low); }
+.adm-legend-dot.is-out { background: var(--stock-out); }
 
 .adm-movements {
   display: flex;
@@ -1217,13 +1217,13 @@
 .adm-stock-low {
   font-family: var(--font-mono);
   font-size: 12px;
-  color: #e0a44a;
+  color: var(--stock-low);
 }
 
 .adm-stock-out {
   font-family: var(--font-mono);
   font-size: 12px;
-  color: var(--accent-warn);
+  color: var(--stock-out);
 }
 
 /* ------------ Export buttons ------------ */
@@ -1332,18 +1332,41 @@
   border-color: var(--gold-soft);
 }
 
-.wh-text-low { color: #e0a44a; }
-.wh-text-out { color: var(--accent-warn); }
+/* Stock state colours (the same as STATE_COLORS in warehouse/states.ts). */
+:root {
+  --stock-ok: #6fb38b;
+  --stock-medium: #e5c54f;
+  --stock-low: #ec8a2f;
+  --stock-out: #e5392f;
+  --stock-free: #7f9cc9;
+}
+
+.wh-text-low { color: var(--stock-low); }
+.wh-text-out { color: var(--stock-out); }
 
 .wh-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 320px;
   gap: 16px;
   align-items: start;
 }
 
-.wh-layout.has-panel {
-  grid-template-columns: minmax(0, 1fr) 320px;
+/* Before choosing a location: a quiet hint in the details column. */
+.wh-panel-empty {
+  align-items: center;
+  text-align: center;
+  padding-bottom: 32px;
+}
+
+.wh-panel-empty .adm-card-head {
+  align-self: stretch;
+}
+
+.wh-panel-empty svg {
+  width: 32px;
+  height: 32px;
+  margin-top: 24px;
+  color: var(--gold-soft);
 }
 
 .wh-view {
@@ -1429,10 +1452,11 @@
   transform: scale(1.2);
 }
 
-.wh-cell.is-ok { background: #6fb38b; }
-.wh-cell.is-low { background: #e0a44a; }
-.wh-cell.is-out { background: #d96446; }
-.wh-cell.is-empty { background: rgba(127, 156, 201, 0.35); border: 1px dashed #7f9cc9; }
+.wh-cell.is-ok { background: var(--stock-ok); }
+.wh-cell.is-medium { background: var(--stock-medium); }
+.wh-cell.is-low { background: var(--stock-low); }
+.wh-cell.is-out { background: var(--stock-out); }
+.wh-cell.is-empty { background: rgba(127, 156, 201, 0.35); border: 1px dashed var(--stock-free); }
 .wh-cell.is-faded { opacity: 0.15; }
 
 .wh-cell.is-selected {
@@ -1463,9 +1487,10 @@
   height: 100%;
 }
 
-.wh-bar .is-ok { background: #6fb38b; }
-.wh-bar .is-low { background: #e0a44a; }
-.wh-bar .is-out { background: #d96446; }
+.wh-bar .is-ok { background: var(--stock-ok); }
+.wh-bar .is-medium { background: var(--stock-medium); }
+.wh-bar .is-low { background: var(--stock-low); }
+.wh-bar .is-out { background: var(--stock-out); }
 
 .wh-state {
   font-family: var(--font-mono);
@@ -1474,10 +1499,11 @@
   text-transform: uppercase;
 }
 
-.wh-state.is-ok { color: #6fb38b; }
-.wh-state.is-low { color: #e0a44a; }
-.wh-state.is-out { color: #d96446; }
-.wh-state.is-empty { color: #7f9cc9; }
+.wh-state.is-ok { color: var(--stock-ok); }
+.wh-state.is-medium { color: var(--stock-medium); }
+.wh-state.is-low { color: var(--stock-low); }
+.wh-state.is-out { color: var(--stock-out); }
+.wh-state.is-empty { color: var(--stock-free); }
 
 .adm-table tr.is-selected {
   background: #15130e;
@@ -1721,8 +1747,13 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  /* The panel goes under the view instead of next to it. */
-  .wh-layout.has-panel {
+  /* The panel goes under the view instead of next to it,
+     and the empty hint isn't needed on small screens. */
+  .wh-panel-empty {
+    display: none;
+  }
+
+  .wh-layout {
     grid-template-columns: minmax(0, 1fr);
   }
 }

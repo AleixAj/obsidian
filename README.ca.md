@@ -85,13 +85,23 @@ capçalera de la botiga per entrar-hi directament; els clients no el veuen.
 | Clients | Llistat amb el total gastat i fitxa amb adreces i historial de comandes. |
 | Devolucions | El client la demana des del seu compte (30 dies); atenció al client l'aprova o la rebutja i fa el reemborsament (simulat, encara sense Stripe). L'estoc torna sol. |
 | Usuaris i rols | Equip, taula de permisos, afegir persones i canviar-ne el rol. |
-| Magatzem 3D | 192 ubicacions (passadís, mòdul i nivell) dibuixades en 3D: cada caixa té el color del seu estoc i l'alçada de com de plena està. Vistes Pla i Llista per al mòbil, cerca per SKU o ubicació, reposar i moure productes. |
+| Magatzem 3D | 192 ubicacions (passadís, mòdul i nivell) dibuixades en 3D: cada caixa té el color del seu estat (amb estoc, mitjà, baix, esgotat o lliure) i l'alçada de com de plena està. Vistes Pla i Llista per al mòbil, cerca per SKU o ubicació, reposar i moure productes. |
 | Exportar | Cada llistat es descarrega en CSV o Excel. |
 
 **Magatzem en 3D** (`/admin/warehouse`): fet amb react-three-fiber (Three.js escrit com a
 components de React). Fa servir les mateixes dades que la resta del panell: cada ubicació
 guarda una variant i el seu estoc, i reposar crea un moviment d'estoc normal. El codi 3D només
 es descarrega en obrir aquesta pàgina, i al mòbil o sense WebGL s'obre la vista Pla.
+
+- **Estats de cada ubicació:** verd (amb estoc), groc (estoc mitjà: 40 % de la capacitat o
+  menys), taronja (estoc baix, a l'avís), vermell (esgotat) i blau (lliure). Cada estat té el
+  seu filtre i, en filtrar, els prestatges es tornen transparents perquè es vegin les
+  ubicacions cercades.
+- **Escena:** prestatgeries d'acer amb palets, terra amb marques alineades amb les
+  prestatgeries (línies per mòdul, línies de seguretat, passadissos i números de mòdul), llum
+  en tres punts, ombres suaus i un marcador daurat sobre la ubicació triada.
+- **Detall fix:** la columna de la dreta sempre està reservada, així la vista no canvia de
+  mida en triar una ubicació.
 
 ![Magatzem en 3D](./docs/screenshots/admin-warehouse-3d.png)
 

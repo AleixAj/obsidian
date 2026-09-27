@@ -459,6 +459,7 @@
     "showPlan": "Ver el plano",
     "states": {
       "ok": "Con stock",
+      "medium": "Stock medio",
       "low": "Stock bajo",
       "out": "Agotado",
       "empty": "Libre"
@@ -490,6 +491,7 @@
     "panel": {
       "region": "Ubicación {{code}}",
       "title": "Ubicación",
+      "empty": "Haz clic en una caja del almacén para ver qué hay guardado, reponerla o liberarla.",
       "close": "Cerrar detalles",
       "position": "Pasillo {{aisle}} · módulo {{bay}} · nivel {{level}}",
       "size": "talla {{size}}",

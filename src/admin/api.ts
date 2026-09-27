@@ -495,7 +495,7 @@ function defaultFileName(section: ExportSection, format: ExportFormat): string {
 // ──────────────────────────────────────────────────────────────────────
 
 /** ok = enough units, low = at or below the alert, out = 0 units, empty = nothing stored. */
-export type LocationState = "ok" | "low" | "out" | "empty";
+export type LocationState = "ok" | "medium" | "low" | "out" | "empty";
 
 export interface WarehouseLocation {
   id: number;

@@ -23,6 +23,7 @@ const VIEWS: View[] = ["3d", "plan", "list"];
 // "label" is a translation key (admin.json).
 const FILTERS: { value: StateFilter; label: string }[] = [
   { value: "all", label: "common.all" },
+  { value: "medium", label: STATE_LABELS.medium },
   { value: "low", label: STATE_LABELS.low },
   { value: "out", label: STATE_LABELS.out },
   { value: "empty", label: STATE_LABELS.empty },
@@ -167,7 +168,9 @@ export function Warehouse() {
         </label>
       </div>
 
-      <div className={`wh-layout${selected ? " has-panel" : ""}`}>
+      {/* The details column is always there (empty until you pick a location),
+          so the 3D view and the plan keep the same size when you click. */}
+      <div className="wh-layout">
         <div className="adm-card wh-view">
           {view === "3d" && (
             <>
@@ -221,7 +224,17 @@ export function Warehouse() {
         </div>
 
         {/* key: a new location starts with a clean panel (no half-filled form). */}
-        {selected && <LocationPanel key={selected.id} location={selected} onClose={() => select(null)} />}
+        {selected ? (
+          <LocationPanel key={selected.id} location={selected} onClose={() => select(null)} />
+        ) : (
+          <section className="adm-card wh-panel wh-panel-empty">
+            <div className="adm-card-head">
+              <h2>{t("warehouse.panel.title")}</h2>
+            </div>
+            <AdminIcon.Warehouse />
+            <p className="adm-muted">{t("warehouse.panel.empty")}</p>
+          </section>
+        )}
       </div>
     </>
   );

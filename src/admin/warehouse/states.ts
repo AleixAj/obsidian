@@ -6,14 +6,16 @@ import type { LocationState, WarehouseLocation } from "../api";
  */
 export const STATE_COLORS: Record<LocationState, string> = {
   ok: "#6fb38b", // green: enough units
-  low: "#e0a44a", // amber: at or below the alert level
-  out: "#d96446", // red: no units left
+  medium: "#e5c54f", // yellow: 40% full or less
+  low: "#ec8a2f", // orange: at or below the alert level
+  out: "#e5392f", // red: no units left
   empty: "#7f9cc9", // blue-grey: nothing stored here (free to use)
 };
 
 /** Translation keys (admin.json), shown with t(STATE_LABELS[state]). */
 export const STATE_LABELS: Record<LocationState, string> = {
   ok: "warehouse.states.ok",
+  medium: "warehouse.states.medium",
   low: "warehouse.states.low",
   out: "warehouse.states.out",
   empty: "warehouse.states.empty",
@@ -26,7 +28,7 @@ export function fillRatio(location: WarehouseLocation): number {
 }
 
 /** The filter chips above the views. */
-export type StateFilter = "all" | "low" | "out" | "empty";
+export type StateFilter = "all" | "medium" | "low" | "out" | "empty";
 
 /**
  * Does this location match the search box and the filter chip?

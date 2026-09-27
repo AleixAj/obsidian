@@ -85,13 +85,22 @@ to the panel; customers don't see it.
 | Customers | List with total spent, and a profile with addresses and order history. |
 | Returns | The customer asks from their account (30 days); support approves or rejects it and refunds (simulated, no Stripe yet). Stock comes back automatically. |
 | Users & roles | Team, permissions table, adding people and changing their role. |
-| Warehouse 3D | 192 locations (aisle, bay and level) drawn in 3D: each box has the colour of its stock and the height of how full it is. Plan and List views for phones, search by SKU or location, restock and move products. |
+| Warehouse 3D | 192 locations (aisle, bay and level) drawn in 3D: each box has the colour of its state (in stock, half empty, low, out or free) and the height of how full it is. Plan and List views for phones, search by SKU or location, restock and move products. |
 | Export | Every list downloads as CSV or Excel. |
 
 **3D warehouse** (`/admin/warehouse`): made with react-three-fiber (Three.js written as React
 components). It uses the same data as the rest of the panel: each location holds a variant and
 its stock, and a restock creates a normal stock movement. The 3D code only downloads when that
 page opens, and phones or browsers without WebGL open the Plan view.
+
+- **Location states:** green (in stock), yellow (half empty: 40% of the capacity or less),
+  orange (low stock, at the alert), red (out of stock) and blue (free). Each state has its
+  filter and, while filtering, the shelves turn see-through so the matching locations stand out.
+- **Scene:** steel racks with pallets, floor markings aligned with the racks (a line per bay,
+  safety lines, corridors and bay numbers), three-point lighting, soft shadows and a gold
+  marker over the chosen location.
+- **Fixed details column:** the right column is always there, so the view doesn't change size
+  when you pick a location.
 
 ![3D warehouse](./docs/screenshots/admin-warehouse-3d.png)
 
