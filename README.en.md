@@ -168,6 +168,20 @@ protected against abuse and mistakes:
 - **Errors:** if part of a page fails, a message is shown instead of a blank screen, and
   after a deploy the site reloads itself to get the new version.
 
+## Performance
+
+Measured in production (home page, first visit):
+
+- Products show up in **~1.5 s** (it was 8-10 s) with no layout shifts (CLS 0).
+- **Database and API in the same region** (EU West): each query went from hundreds of
+  milliseconds to a few.
+- **Catalogue cache** in the API (60 s, cleared when a product or its stock changes), and
+  cookie sessions, so most visits don't touch the database.
+- **Images** in WebP at the size they're shown: the home page went from ~2.2 MB to ~0.6 MB.
+- Files in `/assets` are cached for a year by the browser (their names carry a hash).
+- The 3D warehouse only redraws when something changes, and the product page is preloaded
+  when the mouse goes over its card.
+
 ## Tech Stack
 
 | Layer | Choice | Reason |

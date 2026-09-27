@@ -171,6 +171,20 @@ se protege contra abusos y errores tanto en la API como en la interfaz:
 - **Errores:** si una parte de la página falla se muestra un aviso en vez de una pantalla en
   blanco, y tras un despliegue la web se recarga sola para coger la versión nueva.
 
+## Rendimiento
+
+Medido en producción (portada, primera visita):
+
+- Los productos aparecen en **~1,5 s** (antes 8-10 s) y no hay saltos de diseño (CLS 0).
+- **Base de datos y API en la misma región** (EU West): cada consulta pasó de cientos de
+  milisegundos a unos pocos.
+- **Caché del catálogo** en la API (60 s, se vacía al cambiar un producto o su stock), y
+  sesiones en cookie, así la mayoría de visitas no tocan la base de datos.
+- **Imágenes** en WebP y al tamaño en que se muestran: la portada pasa de ~2,2 MB a ~0,6 MB.
+- Los archivos de `/assets` se guardan un año en el navegador (llevan un hash en el nombre).
+- El almacén 3D solo se redibuja cuando algo cambia, y la ficha de producto se precarga al
+  pasar el ratón por la tarjeta.
+
 ## Stack Técnico
 
 | Capa | Elección | Motivo |

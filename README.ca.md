@@ -170,6 +170,20 @@ que es protegeix contra abusos i errors tant a l'API com a la interfície:
 - **Errors:** si una part de la pàgina falla es mostra un avís en lloc d'una pantalla en
   blanc, i després d'un desplegament el web es recarrega sol per agafar la versió nova.
 
+## Rendiment
+
+Mesurat a producció (pàgina d'inici, primera visita):
+
+- Els productes apareixen en **~1,5 s** (abans 8-10 s) i no hi ha salts de disseny (CLS 0).
+- **Base de dades i API a la mateixa regió** (EU West): cada consulta ha passat de centenars
+  de mil·lisegons a uns pocs.
+- **Memòria cau del catàleg** a l'API (60 s, es buida quan canvia un producte o el seu
+  estoc), i sessions en galeta, així la majoria de visites no toquen la base de dades.
+- **Imatges** en WebP i a la mida en què es mostren: la pàgina d'inici passa de ~2,2 MB a ~0,6 MB.
+- Els fitxers de `/assets` es guarden un any al navegador (porten un hash al nom).
+- El magatzem 3D només es redibuixa quan alguna cosa canvia, i la fitxa de producte es
+  precarrega en passar el ratolí per la targeta.
+
 ## Stack tècnic
 
 | Capa | Elecció | Motiu |
