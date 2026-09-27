@@ -86,6 +86,11 @@
     "returned": "Returned",
     "cancelled": "Cancelled"
   },
+  "tiers": {
+    "silver": "Silver",
+    "gold": "Gold",
+    "onyx": "Onyx"
+  },
   "dates": {
     "pending": "Pending",
     "pendingSync": "Pending sync",
@@ -99,7 +104,7 @@
     "addresses": "Addresses",
     "settings": "Settings",
     "rewards": "Inner Circle",
-    "tier": "Inner Circle · Gold",
+    "tier": "Inner Circle · {{tier}}",
     "signingOut": "Signing out...",
     "signOut": "Sign out"
   },
@@ -121,15 +126,18 @@
       "lifetimeSpend": "Lifetime spend",
       "tierUnlocked": "{{tier}} tier unlocked",
       "rewardPoints": "Reward points",
-      "credit": "+€48 credit available",
+      "credit": "+{{amount}} credit available",
       "wishlist": "Wishlist",
       "backInStock": "3 back in stock"
     },
     "tier": {
-      "tag": "Inner Circle ✦ Gold",
-      "title": "You're {{amount}} from Onyx tier.",
-      "text": "Onyx unlocks 24h early access to every drop, a personal stylist via WhatsApp, and the FW26 archive jacket as a welcome gift. Limited to 200 members worldwide.",
-      "progress": "{{percent}}% to Onyx"
+      "tag": "Inner Circle ✦ {{tier}}",
+      "title": "You're {{amount}} from {{tier}} tier.",
+      "textGold": "Gold unlocks 12h early access to every drop, free shipping on every order and a −15% birthday gift.",
+      "textOnyx": "Onyx unlocks 24h early access to every drop, a personal stylist via WhatsApp, and the FW26 archive jacket as a welcome gift. Limited to 200 members worldwide.",
+      "topTitle": "You're in our highest tier.",
+      "topText": "Onyx members get 24h early access to every drop and a personal stylist. Thank you for being part of Obsidian.",
+      "progress": "{{percent}}% to {{tier}}"
     },
     "recent": "Recent orders ",
     "recentRange": "— Last 30 days",
@@ -228,11 +236,13 @@
     }
   },
   "rewards": {
-    "eyebrow": "✦ Members only · Gold tier",
-    "current": "Current ✦ Gold",
-    "points": "2,180 points · €48 credit available",
+    "title1": "Inner",
+    "title2": "Circle",
+    "eyebrow": "✦ Members only · {{tier}} tier",
+    "current": "Current ✦ {{tier}}",
+    "points": "{{points}} points · {{credit}} credit available",
     "text": "Spend €4 to earn 1 point. Redeem 100 points = €2 off. Points never expire while your tier is active.",
-    "progress": " / 3,200 to Onyx",
+    "progress": " to {{tier}}",
     "redeem": "Redeem points",
     "benefits": "Tier benefits",
     "badgeCurrent": "Current",

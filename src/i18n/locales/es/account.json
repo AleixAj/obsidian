@@ -8,7 +8,7 @@
       "demo": "No se ha podido abrir la cuenta demo. Inténtalo de nuevo en un momento."
     },
     "side": {
-      "badge": "FW 26 ✦ Miembros del Inner Circle",
+      "badge": "FW 26 ✦ Miembros del Círculo Obsidian",
       "title": {
         "the": "La ",
         "night": "noche",
@@ -61,7 +61,7 @@
       "terms": "Condiciones",
       "and": " y la ",
       "privacy": "Política de privacidad",
-      "end": ". Suscríbeme a la newsletter del Inner Circle para recibir drops anticipados y piezas exclusivas."
+      "end": ". Suscríbeme a la newsletter del Círculo Obsidian para recibir drops anticipados y piezas exclusivas."
     },
     "submit": {
       "working": "Un momento...",
@@ -86,6 +86,11 @@
     "returned": "Devuelto",
     "cancelled": "Cancelado"
   },
+  "tiers": {
+    "silver": "Plata",
+    "gold": "Oro",
+    "onyx": "Ónice"
+  },
   "dates": {
     "pending": "Pendiente",
     "pendingSync": "Pendiente de sincronizar",
@@ -98,8 +103,8 @@
     "wishlist": "Favoritos",
     "addresses": "Direcciones",
     "settings": "Ajustes",
-    "rewards": "Inner Circle",
-    "tier": "Inner Circle · Gold",
+    "rewards": "Círculo Obsidian",
+    "tier": "Círculo Obsidian · {{tier}}",
     "signingOut": "Cerrando sesión...",
     "signOut": "Cerrar sesión"
   },
@@ -121,15 +126,18 @@
       "lifetimeSpend": "Gasto total",
       "tierUnlocked": "Nivel {{tier}} desbloqueado",
       "rewardPoints": "Puntos",
-      "credit": "+48 € de saldo disponible",
+      "credit": "+{{amount}} de saldo disponible",
       "wishlist": "Favoritos",
       "backInStock": "3 de nuevo en stock"
     },
     "tier": {
-      "tag": "Inner Circle ✦ Gold",
-      "title": "Te faltan {{amount}} para el nivel Onyx.",
-      "text": "Onyx te da acceso 24 h antes a cada drop, un estilista personal por WhatsApp y la chaqueta de archivo FW26 como regalo de bienvenida. Limitado a 200 miembros en todo el mundo.",
-      "progress": "{{percent}}% hacia Onyx"
+      "tag": "Círculo Obsidian ✦ {{tier}}",
+      "title": "Te faltan {{amount}} para el nivel {{tier}}.",
+      "textGold": "El nivel Oro te da acceso 12 h antes a cada drop, envío gratis en todos los pedidos y un regalo de cumpleaños de −15%.",
+      "textOnyx": "El nivel Ónice te da acceso 24 h antes a cada drop, un estilista personal por WhatsApp y la chaqueta de archivo FW26 como regalo de bienvenida. Limitado a 200 miembros en todo el mundo.",
+      "topTitle": "Estás en nuestro nivel más alto.",
+      "topText": "Los miembros Ónice tienen acceso 24 h antes a cada drop y un estilista personal. Gracias por formar parte de Obsidian.",
+      "progress": "{{percent}}% hacia {{tier}}"
     },
     "recent": "Pedidos recientes ",
     "recentRange": "— Últimos 30 días",
@@ -219,7 +227,7 @@
     },
     "notifications": {
       "title": "Notificaciones",
-      "text": "Cómo y cuándo te escribimos. Los miembros del Inner Circle reciben un SMS privado antes de cada drop público.",
+      "text": "Cómo y cuándo te escribimos. Los miembros del Círculo Obsidian reciben un SMS privado antes de cada drop público.",
       "drops": "Avisos de drops",
       "updates": "Novedades de tus pedidos",
       "backInStock": "Avisos de reposición",
@@ -228,11 +236,13 @@
     }
   },
   "rewards": {
-    "eyebrow": "✦ Solo miembros · Nivel Gold",
-    "current": "Actual ✦ Gold",
-    "points": "2180 puntos · 48 € de saldo disponible",
+    "title1": "Círculo",
+    "title2": "Obsidian",
+    "eyebrow": "✦ Solo miembros · Nivel {{tier}}",
+    "current": "Actual ✦ {{tier}}",
+    "points": "{{points}} puntos · {{credit}} de saldo disponible",
     "text": "Gana 1 punto por cada 4 € que gastes. Canjea 100 puntos = 2 € de descuento. Los puntos no caducan mientras tu nivel siga activo.",
-    "progress": " / 3200 para Onyx",
+    "progress": " para {{tier}}",
     "redeem": "Canjear puntos",
     "benefits": "Ventajas de cada nivel",
     "badgeCurrent": "Actual",

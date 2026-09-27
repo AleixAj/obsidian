@@ -36,6 +36,35 @@ function euroFromCents(cents: number): number {
   return cents / 100;
 }
 
+type AccountStats = { orders_count: number; lifetime_spend_cents: number; reward_points: number; tier: string };
+
+/**
+ * The member tiers, from the lowest. "from" is how much you must have spent (in euros).
+ * The API decides the tier; the names are translated with t(`tiers.${key}`).
+ */
+const TIERS = [
+  { key: "silver", from: 0 },
+  { key: "gold", from: 2000 },
+  { key: "onyx", from: 7000 },
+];
+
+/** "Gold" (from the API) → the tier and the next one to reach (none at the top). */
+function tierInfo(apiTier: string) {
+  const index = Math.max(0, TIERS.findIndex((tier) => tier.key === apiTier.toLowerCase()));
+  return { key: TIERS[index].key, next: TIERS[index + 1] ?? null };
+}
+
+/** How close (0-100%) the member is to the next tier. Full bar at the top tier. */
+function progressTo(next: { from: number } | null, spend: number): number {
+  if (!next) return 100;
+  return Math.min(100, Math.round((spend / next.from) * 100));
+}
+
+/** 100 points = €2 of credit. */
+function creditFromPoints(points: number): number {
+  return Math.floor(points / 100) * 2;
+}
+
 // These helpers live outside components, so they use i18n.t() directly
 // instead of the useTranslation() hook.
 const ORDER_STATUSES = ["pending", "paid", "preparing", "shipped", "delivered", "returned", "cancelled"];
@@ -184,19 +213,22 @@ function Overview({
   userName: string;
   lastLoginAt: string | null | undefined;
   orders: Order[];
-  stats: { orders_count: number; lifetime_spend_cents: number; reward_points: number; tier: string };
+  stats: AccountStats;
 }) {
   const { t } = useTranslation("account");
   const { ids: wishlist } = useWishlist();
   const lifetimeSpend = euroFromCents(stats.lifetime_spend_cents);
-  const nextTierSpend = Math.max(0, 7000 - lifetimeSpend);
+  const tier = tierInfo(stats.tier);
+  const tierName = t(`tiers.${tier.key}`);
+  const nextName = tier.next ? t(`tiers.${tier.next.key}`) : "";
+  const percent = progressTo(tier.next, lifetimeSpend);
   return (
     <>
       <div className="account-hello">
         <div>
           <div className="eyebrow">
             <span className="dot" />
-            {t("overview.memberSince", { tier: stats.tier })}
+            {t("overview.memberSince", { tier: tierName })}
           </div>
           <h1>
             <span>{t("overview.welcome")}</span>
@@ -220,12 +252,12 @@ function Overview({
         <div className="stat-card gold">
           <span className="lbl">{t("overview.stats.lifetimeSpend")}</span>
           <span className="val">{formatPrice(lifetimeSpend)}</span>
-          <span className="delta">{t("overview.stats.tierUnlocked", { tier: stats.tier })}</span>
+          <span className="delta">{t("overview.stats.tierUnlocked", { tier: tierName })}</span>
         </div>
         <div className="stat-card">
           <span className="lbl">{t("overview.stats.rewardPoints")}</span>
           <span className="val">{stats.reward_points}</span>
-          <span className="delta">{t("overview.stats.credit")}</span>
+          <span className="delta">{t("overview.stats.credit", { amount: formatPrice(creditFromPoints(stats.reward_points)) })}</span>
         </div>
         <div className="stat-card">
           <span className="lbl">{t("overview.stats.wishlist")}</span>
@@ -238,22 +270,38 @@ function Overview({
         <div className="info">
           <span className="tag">
             <span className="dot" />
-            {t("overview.tier.tag")}
+            {t("overview.tier.tag", { tier: tierName })}
           </span>
-          <h3>{t("overview.tier.title", { amount: formatPrice(nextTierSpend) })}</h3>
-          <p>{t("overview.tier.text")}</p>
+          {tier.next ? (
+            <>
+              <h3>
+                {t("overview.tier.title", {
+                  amount: formatPrice(Math.max(0, tier.next.from - lifetimeSpend)),
+                  tier: nextName,
+                })}
+              </h3>
+              <p>{t(tier.next.key === "gold" ? "overview.tier.textGold" : "overview.tier.textOnyx")}</p>
+            </>
+          ) : (
+            <>
+              <h3>{t("overview.tier.topTitle")}</h3>
+              <p>{t("overview.tier.topText")}</p>
+            </>
+          )}
         </div>
-        <div className="progress">
-          <div className="meta">
-            <span className="gold">{formatPrice(lifetimeSpend)}</span> / {formatPrice(7000)}
+        {tier.next && (
+          <div className="progress">
+            <div className="meta">
+              <span className="gold">{formatPrice(lifetimeSpend)}</span> / {formatPrice(tier.next.from)}
+            </div>
+            <div className="bar">
+              <div style={{ width: `${percent}%` }} />
+            </div>
+            <div className="meta">
+              {t("overview.tier.progress", { percent, tier: nextName })}
+            </div>
           </div>
-          <div className="bar">
-            <div />
-          </div>
-          <div className="meta">
-            {t("overview.tier.progress", { percent: Math.min(100, Math.round((lifetimeSpend / 7000) * 100)) })}
-          </div>
-        </div>
+        )}
       </div>
 
       <div className="acc-section-head">
@@ -844,22 +892,23 @@ function Settings() {
   );
 }
 
-function Rewards() {
+function Rewards({ stats }: { stats: AccountStats }) {
   const { t } = useTranslation("account");
+  const current = tierInfo(stats.tier);
+  const currentIndex = TIERS.findIndex((tier) => tier.key === current.key);
+  const lifetimeSpend = euroFromCents(stats.lifetime_spend_cents);
   const tiers = [
     {
-      tier: "Silver",
+      key: "silver",
       spend: `${formatPrice(0)} — ${formatPrice(2000)}`,
       perks: [
         t("rewards.tiers.silver.perk1"),
         t("rewards.tiers.silver.perk2"),
         t("rewards.tiers.silver.perk3"),
       ],
-      active: false,
-      locked: false,
     },
     {
-      tier: "Gold",
+      key: "gold",
       spend: `${formatPrice(2000)} — ${formatPrice(7000)}`,
       perks: [
         t("rewards.tiers.gold.perk1"),
@@ -867,11 +916,9 @@ function Rewards() {
         t("rewards.tiers.gold.perk3"),
         t("rewards.tiers.gold.perk4"),
       ],
-      active: true,
-      locked: false,
     },
     {
-      tier: "Onyx",
+      key: "onyx",
       spend: `${formatPrice(7000)}+`,
       perks: [
         t("rewards.tiers.onyx.perk1"),
@@ -880,10 +927,13 @@ function Rewards() {
         t("rewards.tiers.onyx.perk4"),
         t("rewards.tiers.onyx.perk5"),
       ],
-      active: false,
-      locked: true,
     },
-  ];
+  ].map((tier, index) => ({
+    ...tier,
+    // The member's tier is highlighted; the ones above it are still locked.
+    active: index === currentIndex,
+    locked: index > currentIndex,
+  }));
 
   return (
     <>
@@ -891,10 +941,10 @@ function Rewards() {
         <div>
           <div className="eyebrow">
             <span className="dot" />
-            {t("rewards.eyebrow")}
+            {t("rewards.eyebrow", { tier: t(`tiers.${current.key}`) })}
           </div>
           <h1>
-            Inner <span className="gold">Circle</span>
+            {t("rewards.title1")} <span className="gold">{t("rewards.title2")}</span>
           </h1>
         </div>
       </div>
@@ -903,18 +953,25 @@ function Rewards() {
         <div className="info">
           <span className="tag">
             <span className="dot" />
-            {t("rewards.current")}
+            {t("rewards.current", { tier: t(`tiers.${current.key}`) })}
           </span>
-          <h3>{t("rewards.points")}</h3>
+          <h3>
+            {t("rewards.points", {
+              points: stats.reward_points.toLocaleString(currentLocale()),
+              credit: formatPrice(creditFromPoints(stats.reward_points)),
+            })}
+          </h3>
           <p>{t("rewards.text")}</p>
         </div>
         <div className="progress">
-          <div className="meta">
-            <span className="gold">{(2180).toLocaleString(currentLocale())}</span>
-            {t("rewards.progress")}
-          </div>
+          {current.next && (
+            <div className="meta">
+              <span className="gold">{formatPrice(lifetimeSpend)}</span> / {formatPrice(current.next.from)}
+              {t("rewards.progress", { tier: t(`tiers.${current.next.key}`) })}
+            </div>
+          )}
           <div className="bar">
-            <div />
+            <div style={{ width: `${progressTo(current.next, lifetimeSpend)}%` }} />
           </div>
           <button type="button" className="btn btn-primary" style={{ marginTop: 8 }}>
             {t("rewards.redeem")} <Icon.Arrow />
@@ -928,7 +985,7 @@ function Rewards() {
       <div className="addr-grid">
         {tiers.map((tier) => (
           <div
-            key={tier.tier}
+            key={tier.key}
             className={`addr-card ${tier.active ? "default" : ""}`}
             style={tier.locked ? { opacity: 0.7 } : {}}
           >
@@ -945,7 +1002,7 @@ function Rewards() {
                 {t("rewards.badgeLocked")}
               </span>
             )}
-            <h4>{tier.tier}</h4>
+            <h4>{t(`tiers.${tier.key}`)}</h4>
             <div className="name">{tier.spend}</div>
             <div className="lines" style={{ marginTop: 12 }}>
               {tier.perks.map((p, i) => (
@@ -1045,7 +1102,7 @@ export function Account() {
             <div className="name">{displayName}</div>
             <div className="tier">
               <span className="dot" />
-              {t("nav.tier")}
+              {t("nav.tier", { tier: t(`tiers.${tierInfo(stats.tier).key}`) })}
             </div>
           </div>
         </div>
@@ -1091,7 +1148,7 @@ export function Account() {
         {/* key: a different user gets a fresh form. We don't copy the user
             into the form on every refresh, or it would wipe what is being typed. */}
         {current === "settings" && <Settings key={user.id} />}
-        {current === "rewards" && <Rewards />}
+        {current === "rewards" && <Rewards stats={stats} />}
       </div>
     </main>
   );

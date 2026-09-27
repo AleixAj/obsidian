@@ -20,7 +20,7 @@
   "announce": {
     "drop": "✦ Drop 04 — Aurum ya disponible",
     "shipping": "Envío gratis a partir de 200 €",
-    "innerCircle": "Inner Circle ✦ Acceso anticipado",
+    "innerCircle": "Círculo Obsidian ✦ Acceso anticipado",
     "madeIn": "Hecho en Barcelona · Fundido en oro",
     "limited": "Limitado a 200 unidades por pieza"
   },
@@ -82,7 +82,7 @@
       "faq": "Preguntas frecuentes"
     },
     "newsletter": {
-      "title": "Únete al Inner Circle",
+      "title": "Únete al Círculo Obsidian",
       "text": "Acceso anticipado a los drops, piezas exclusivas y eventos privados.",
       "placeholder": "tu@email.com",
       "subscribe": "Suscribirme →"
