@@ -1,8 +1,6 @@
 /**
- * Barrel for the data-layer hooks so pages can do
- * `import { useProducts, useProduct, useCategories } from "../hooks/queries"`
- * regardless of how the file tree evolves later (e.g. when we split
- * mutations into their own folder for Etapa 3+).
+ * All the data hooks in one place, so pages can write
+ * `import { useProducts, useUser } from "../hooks/queries"`.
  */
 
 export { useCategories } from "./useCategories";
@@ -20,7 +18,6 @@ export {
 } from "./useAuth";
 export {
   useAccount,
-  useAddresses,
   useCreateAddress,
   useDeleteAddress,
   useOrders,

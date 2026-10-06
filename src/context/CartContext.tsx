@@ -28,18 +28,17 @@ import { useToast } from "./ToastContext";
 export const MAX_QTY = 99;
 
 /**
- * Shape exposed by `useCart()` to the rest of the app.
+ * What useCart() gives to the components.
  *
- * The cart is intentionally kept simple (no SKUs, no taxes): every
- * unique combination of (productId + size + colour) becomes a line item,
- * and line items are merged when the user adds the same combo twice.
+ * Each line is one product + size + colour. Adding the same one again
+ * adds 1 to that line instead of making a new one.
  */
 interface CartContextValue {
-  /** Current line items. */
+  /** The lines of the cart. */
   items: CartItem[];
   /** Whether the cart drawer is currently open. */
   isOpen: boolean;
-  /** Total count, summing the `qty` of every line. */
+  /** Number of units (the sum of every line's qty). */
   totalCount: number;
   /** Sum of `price * qty` across every line, in cents (same as the API). */
   subtotalCents: number;
@@ -48,7 +47,7 @@ interface CartContextValue {
    * and without a colour the first colour. Opens the drawer when it worked.
    */
   add: (product: Product, choice?: { size?: string; colorHex?: string | null }) => void;
-  /** Increment / decrement qty for a given line index. */
+  /** Adds `delta` (+1 or -1) to the qty of the line at `index`. */
   updateQty: (index: number, delta: number) => void;
   /** Remove a line entirely. */
   remove: (index: number) => void;
@@ -62,9 +61,10 @@ interface CartContextValue {
 const CartContext = createContext<CartContextValue | undefined>(undefined);
 
 /**
- * Provider that owns the cart state and persists it to localStorage.
- * Wrap the application root with `<CartProvider>` (already done in
- * `App.tsx`) and access the API anywhere via `useCart()`.
+ * Keeps the cart. There are two carts:
+ *   - guest: saved in localStorage, in this browser only.
+ *   - signed in: saved in the API (useCartSync), so it's the same on any device.
+ * When a guest signs in, their cart is added to the one in the API.
  */
 export function CartProvider({ children }: { children: ReactNode }) {
   const [guestItems, setGuestItems] = useLocalStorage<CartItem[]>("obsidian:cart", []);
@@ -89,6 +89,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
   const items = isAuthenticated ? serverItems : guestItems;
 
+  // After signing in: send the guest cart to the API, then empty it here.
   useEffect(() => {
     if (!user) {
       mergedGuestCartForUser.current = null;
@@ -202,7 +203,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const open = useCallback(() => setIsOpen(true), []);
   const close = useCallback(() => setIsOpen(false), []);
 
-  // Derived values are memoised so consumers only re-render on real changes.
   const totalCount = useMemo(
     () => items.reduce((sum, line) => sum + line.qty, 0),
     [items],
@@ -249,11 +249,7 @@ function toCartPayload(items: CartItem[]): CartLinePayload[] {
   }));
 }
 
-/**
- * Hook for consuming the cart from any component.
- * Throws when used outside a `<CartProvider>` so we never silently
- * read stale state during refactors.
- */
+/** The cart, from any component. It must be inside <CartProvider> (App.tsx). */
 export function useCart(): CartContextValue {
   const ctx = useContext(CartContext);
   if (!ctx) throw new Error("useCart must be used within a <CartProvider>");

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Logo } from "../ui/Logo";
 
 /**
- * Footer navigation columns — kept as data so they're easy to extend.
+ * The link columns of the footer.
  * Titles and labels are translation keys (footer.columns.* and footer.links.*).
  */
 const COLUMNS: { title: string; links: { to: string; label: string }[] }[] = [
@@ -70,7 +70,7 @@ export function Footer() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              // The newsletter submit is a UI mock for now.
+              // The newsletter is only a design for now: it doesn't send anything.
             }}
           >
             <input type="email" placeholder={t("footer.newsletter.placeholder")} required />

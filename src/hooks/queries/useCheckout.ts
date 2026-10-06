@@ -1,8 +1,7 @@
 /**
- * Checkout mutation for the basic no-Stripe flow.
- *
- * The backend turns the authenticated cart into an order and clears the cart
- * in one transaction. We invalidate every screen that reflects those records.
+ * "Place order". There is no real payment: the API turns the cart into
+ * an order and empties the cart. Then we reload the cart, the account
+ * and the orders, because all three changed.
  */
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";

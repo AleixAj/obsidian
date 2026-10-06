@@ -1,11 +1,7 @@
 /**
- * `useCategories` — feeds the PLP header copy and the "count" pills.
- *
- * The hook flattens the response into a `Record<slug, CategoryMeta>`
- * via `toCategoryMap`. That makes consumers O(1) on lookups (the PLP
- * does one per render) and lets the existing JSX (`meta.eyebrow`,
- * `meta.goldWord`, …) keep working without a single line change at
- * the call site.
+ * The shop categories, as an object by slug: categories["men"].
+ * The shop page uses it to know if a category exists and how many
+ * products it has.
  */
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";

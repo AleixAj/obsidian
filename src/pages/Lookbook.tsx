@@ -3,14 +3,12 @@ import { Link } from "react-router-dom";
 import { Icon } from "../components/ui/Icon";
 import { Placeholder } from "../components/ui/Placeholder";
 import { Reveal } from "../components/ui/Reveal";
-import { BRAND, TEMPLATES } from "../data/products";
+import { BRAND, TEMPLATES } from "../data/images";
 
 /**
- * Editorial lookbook page — long-form scrollable story of the drop.
- *
- * Kept intentionally light on product chrome: this is the "brand
- * mood" surface, not a shopping page. The CTA at the bottom bounces
- * back to the shop.
+ * The lookbook: big campaign photos of the collection.
+ * It's about the brand, not about buying, so there are no products
+ * here; only a button to the shop at the end.
  */
 export function Lookbook() {
   const { t } = useTranslation("shop");

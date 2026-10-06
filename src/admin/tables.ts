@@ -11,6 +11,20 @@ export function pageFromUrl(params: URLSearchParams): number {
 }
 
 /**
+ * A copy of the URL params with one value changed (an empty value removes it).
+ * Changing a filter or the search goes back to page 1.
+ *
+ * @example setParams(changeParam(params, "status", "paid"))
+ */
+export function changeParam(params: URLSearchParams, key: string, value: string): URLSearchParams {
+  const next = new URLSearchParams(params);
+  if (value) next.set(key, value);
+  else next.delete(key);
+  if (key !== "page") next.delete("page");
+  return next;
+}
+
+/**
  * Click handler for a table row that opens a page.
  * It does nothing when the click was on a link (the link already opens it)
  * or when Ctrl/Cmd/Shift is pressed (the browser opens a new tab or window).

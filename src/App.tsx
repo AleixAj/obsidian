@@ -64,20 +64,14 @@ function RouteFallback() {
 }
 
 /**
- * Root component.
+ * The root of the app.
  *
- * Composition order matters:
- *   1. `ToastProvider`     → notifications.
- *   2. `WishlistProvider`  → wishlist state (persisted).
- *   3. `CartProvider`      → cart state (persisted).
- *   4. `BrowserRouter`     → URL → component mapping.
- *   5. `/admin/*`          → admin panel (own layout, lazy chunk).
- *   6. `Layout`            → header / footer / cart drawer shell for the shop.
+ * The providers wrap everything, so any page can use the toasts, the
+ * wishlist and the cart. The cart uses the toasts, so ToastProvider
+ * must be outside it.
  *
- * The router lives inside the providers so any route can read or
- * write to those contexts, including the layout itself.
- * Route components are lazy-loaded so the first payload stays focused
- * on the shell and current page.
+ * Every page is loaded with lazy(): the browser only downloads the
+ * code of the page you open, not the whole shop at once.
  */
 export default function App() {
   return (
@@ -120,7 +114,7 @@ function ShopRoutes() {
           <Routes>
             <Route path="/" element={<Home />} />
 
-            {/* Shop redirects `/shop` to the default category. */}
+            {/* "/shop" alone opens the new collection. */}
             <Route path="/shop" element={<Navigate to="/shop/new" replace />} />
             <Route path="/shop/:cat" element={<Shop />} />
 

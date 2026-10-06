@@ -13,15 +13,14 @@ import { firstAvailableSize } from "../../utils/product";
 import { sizedImage } from "../../utils/image";
 
 /**
- * Compact card used across home, PLP, "complete the look" and wishlist.
+ * The product card of the home page, the shop and "complete the look".
  *
- * - Clicking the card opens the PDP. The name is also a real link, so
- *   keyboard users can open the product too.
- * - "Quick add" appears on hover and pushes the product into the cart
- *   with the first size that isn't sold out (so the user keeps browsing
- *   without leaving the listing).
- * - Two images swap on hover for a subtle look-shot effect.
- * - Hovering also preloads the product, so its page opens instantly.
+ * - Clicking the card opens the product. The name is also a real link,
+ *   so keyboard users can open it too.
+ * - "Quick add" shows on hover and adds the first size that isn't sold
+ *   out, so the user can keep browsing.
+ * - On hover the photo changes to the second one.
+ * - Hovering also loads the product data, so its page opens at once.
  */
 interface ProductCardProps {
   product: Product;
@@ -58,11 +57,7 @@ export function ProductCard({ product }: ProductCardProps) {
     <article className="product-card" onClick={goToProduct} onMouseEnter={prefetch}>
       <div className="product-img">
         {product.tag && (
-          <span
-            className={`product-tag ${
-              product.tag.startsWith("−") ? "" : product.tag === "LAST UNITS" ? "dark" : ""
-            }`}
-          >
+          <span className={`product-tag ${product.tag === "LAST UNITS" ? "dark" : ""}`}>
             {catalogTag(product.tag)}
           </span>
         )}

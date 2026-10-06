@@ -222,6 +222,7 @@ El frontend manté clara la frontera amb l'API:
 DTOs de l'API Laravel
       |
 src/lib/api.ts
+  - send()            (POST/PATCH/DELETE: cookie CSRF + JSON)
   - fetchProducts()
   - fetchProduct()
   - fetchCategories()
@@ -262,12 +263,15 @@ Els convidats fan servir `localStorage`, els usuaris autenticats fan servir l'AP
 src/
 ├── admin/             # Panell /admin: pàgines, components, API i hooks propis
 ├── components/
+│   ├── account/       # OrderReturn, ProfilePhoto (compte i devolucions)
+│   ├── auth/          # ProtectedRoute
 │   ├── cart/          # CartDrawer
 │   ├── layout/        # Header, Footer, AnnounceBar, Layout
 │   ├── product/       # ProductCard, ProductCardSkeleton
 │   └── ui/            # Logo, Icon, Marquee, Placeholder, Reveal
+├── constants/         # Ordre de la nova col·lecció
 ├── context/           # CartContext, WishlistContext, ToastContext
-├── data/              # Recursos visuals/editorials de marca
+├── data/              # Fotos i fons de marca (/public)
 ├── hooks/
 │   ├── queries/       # Hooks de React Query
 │   ├── useLocalStorage.ts
@@ -275,9 +279,10 @@ src/
 ├── i18n/              # Traduccions ES/EN (i18next) i paraules del catàleg
 ├── lib/               # Client de l'API + QueryClient
 ├── pages/             # Home, Shop, Product, Lookbook, Auth, Account, Legal, NotFound
+│   └── account/       # Seccions de "El meu compte" (resum, comandes, adreces...)
 ├── styles/            # Tokens CSS, estils globals i estils per pàgina
 ├── types/             # Product, CartItem, Category
-└── utils/             # formatPrice, pad
+└── utils/             # formatPrice, pad, sizedImage, firstAvailableSize
 ```
 
 ## Configuració local full-stack

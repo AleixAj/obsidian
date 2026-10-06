@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Marquee } from "../ui/Marquee";
 
-/** Thin marquee strip at the very top of the page. Stores translation keys (announce.*). */
+/** The messages of the thin bar at the very top. They are translation keys (announce.*). */
 const TOP_MESSAGES = ["drop", "shipping", "innerCircle", "madeIn", "limited"];
 
 export function AnnounceBar() {

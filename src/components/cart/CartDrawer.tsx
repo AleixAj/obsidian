@@ -19,11 +19,10 @@ const FREE_SHIP_AT_CENTS = 20000;
 const FLAT_SHIPPING_CENTS = 800;
 
 /**
- * Side drawer showing the cart's content.
+ * The cart panel that slides in from the right.
  *
- * Renders both the backdrop (for click-outside-to-close) and the
- * panel itself. Visibility is driven by the `isOpen` flag from
- * `CartContext`, which is flipped to `true` when a product is added.
+ * It also draws the dark layer behind it (click it to close). It opens
+ * when `isOpen` in CartContext is true, e.g. right after adding a product.
  */
 export function CartDrawer() {
   const { t } = useTranslation();

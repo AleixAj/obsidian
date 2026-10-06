@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Icon } from "../components/ui/Icon";
 
-/** Friendly 404 — keeps the brand voice rather than a sterile message. */
+/** The 404 page, with a button back to the shop. */
 export function NotFound() {
   const { t } = useTranslation("shop");
   return (

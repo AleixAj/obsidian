@@ -1,10 +1,8 @@
 /**
- * `useProduct` — single-resource query for the PDP.
+ * One product, for the product page.
  *
- * The slug arrives from `useParams`, which is typed as `string | undefined`.
- * The hook guards against the undefined case via `enabled`, so React
- * Query stays idle until the router has resolved the param — no
- * `/api/products/undefined` requests in flight.
+ * The slug comes from the URL and could be undefined. `enabled` waits
+ * until there is one, so we never ask for /api/products/undefined.
  */
 
 import { useQuery, type QueryClient, type UseQueryResult } from "@tanstack/react-query";

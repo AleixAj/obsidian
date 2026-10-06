@@ -1,17 +1,14 @@
 /**
- * Domain types shared across the Obsidian store.
- *
- * Centralising the model here keeps every component, context and
- * util in sync. If a new field is added (eg. a SKU, a discount type)
- * it only needs to be declared once.
+ * The types the whole shop shares. The API's own types are in
+ * lib/api.ts; toProduct() turns an API product into this `Product`.
  */
 
-/** A product as defined in the static catalogue. */
+/** A product, as the components see it. */
 export interface Product {
-  /** Stable identifier used as the React key and the URL slug. */
+  /** The product slug ("p7"). Used in the URL and as the React key. */
   id: string;
   name: string;
-  /** Short categorical line shown under the title (eg. "Hoodie · FW26"). */
+  /** Short line shown under the name (e.g. "Hoodie · Urban Man"). */
   cat: string;
   /** Price in euros. It can have cents (e.g. 49.99). */
   price: number;
@@ -25,17 +22,13 @@ export interface Product {
   sizes: string[];
   /** Sizes currently out of stock (still rendered, but disabled). */
   sold_out: string[];
-  /** Visual palette hint for the placeholder backgrounds. */
+  /** Background colour of the image box while the photo loads. */
   palette: "warm" | "gold";
   /** Primary image url. */
   img: string;
-  /** Hover / alternative image. */
+  /** Second image, shown on hover. */
   imgAlt: string;
-  /**
-   * Category slugs this product belongs to (used for PLP filtering).
-   * Always includes "new" so the product appears in the default listing.
-   * Examples: ["men","new"], ["women","knitwear","new"], ["men","women","accessories","new"]
-   */
+  /** Slugs of its categories, e.g. ["men", "outerwear"]. Used by the search. */
   cats: string[];
 }
 
@@ -56,7 +49,7 @@ export interface CartItem extends Product {
   qty: number;
 }
 
-/** Available top-level categories for the shop / PLP. */
+/** The shop categories (/shop/men, /shop/women...). */
 export type Category =
   | "new"
   | "men"

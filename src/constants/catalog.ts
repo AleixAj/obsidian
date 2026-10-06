@@ -1,8 +1,7 @@
 /**
- * Editorial order for the "new collection" surfaces.
- *
- * The API owns product data; the SPA owns this campaign-specific ordering
- * so Home, PLP and PDP recommendations stay visually consistent.
+ * The order of the new collection, chosen by hand for the campaign.
+ * The home page, the "New" page and "complete the look" all use it,
+ * so the products always appear in the same order.
  */
 export const NEW_COLLECTION_ORDER = [
   "p7",

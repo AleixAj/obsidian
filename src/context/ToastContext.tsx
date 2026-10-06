@@ -8,16 +8,15 @@ import {
 } from "react";
 
 /**
- * Lightweight toast/notification system. Used to confirm small
- * actions like "added to wishlist" without taking over the screen.
+ * Small messages at the bottom of the screen ("Added to wishlist").
+ * They close by themselves after a few seconds.
  *
- * For "added to bag" we open the cart drawer instead, which feels
- * more native to a real e-commerce.
+ * "Added to bag" doesn't use one: it opens the cart drawer instead.
  */
 interface Toast {
   id: number;
   message: string;
-  /** "gold" = neutral confirmation, "warn" = destructive */
+  /** "gold" = all good, "warn" = something failed */
   variant: "gold" | "warn";
 }
 
@@ -41,14 +40,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     (message, variant = "gold") => {
       const id = Date.now() + Math.random();
       setToasts((prev) => [...prev, { id, message, variant }]);
-      // Auto-dismiss after 2.6s — enough to read, short enough to feel snappy.
+      // 2.6 seconds: enough to read it, short enough not to bother.
       window.setTimeout(() => dismiss(id), 2600);
     },
     [dismiss],
   );
 
-  // Keep the same object between renders so consumers only re-render
-  // when the toasts really change.
+  // The same object between renders, so the components that use it
+  // only re-render when the toasts really change.
   const value = useMemo(() => ({ toasts, push, dismiss }), [toasts, push, dismiss]);
 
   return (

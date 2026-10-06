@@ -19,9 +19,8 @@ import { useLocalStorage } from "../hooks/useLocalStorage";
 import { ApiError } from "../lib/api";
 
 /**
- * The wishlist is intentionally a `string[]` of product ids — every
- * other piece of data (image, price) can be re-derived from the
- * catalogue, so there is nothing to keep in sync.
+ * The wishlist is just a list of product slugs. The name, photo and
+ * price come from the products we already load, so they're never out of date.
  */
 interface WishlistContextValue {
   ids: string[];
@@ -34,8 +33,12 @@ interface WishlistContextValue {
 
 const WishlistContext = createContext<WishlistContextValue | undefined>(undefined);
 
+/**
+ * Keeps the wishlist. Same idea as the cart: guests keep it in
+ * localStorage, signed-in users in the API, and a guest's list is
+ * added to the API one when they sign in.
+ */
 export function WishlistProvider({ children }: { children: ReactNode }) {
-  // A new visitor starts with an empty wishlist.
   const [guestIds, setGuestIds] = useLocalStorage<string[]>("obsidian:wishlist", []);
   const { data: user } = useUser();
   const isAuthenticated = Boolean(user);
@@ -49,6 +52,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const serverIds = wishlistQuery.data ?? [];
   const ids = isAuthenticated ? serverIds : guestIds;
 
+  // After signing in: send the guest list to the API, then empty it here.
   useEffect(() => {
     if (!user) {
       mergedGuestWishlistForUser.current = null;

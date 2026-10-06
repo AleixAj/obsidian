@@ -18,8 +18,8 @@ import { catalogColour, catalogSize, catalogTag, catalogType } from "../i18n/cat
 import { firstAvailableSize } from "../utils/product";
 
 /**
- * Shared product gallery used temporarily across every PDP.
- * Each view is a translation key (product.views.*).
+ * The 3 photos of the product page gallery. For now every product uses
+ * the same model photos. Each view is a translation key (product.views.*).
  */
 const VIEW_LABELS = ["front", "back", "fullLook"] as const;
 
@@ -37,17 +37,14 @@ const MODEL_PHOTO_TONE: Record<string, string> = {
 };
 
 /**
- * Static accordion sections — would come from a CMS in a real app.
- * The title and text of each id live in the translations (product.accordion.*).
+ * The sections that open and close under the product (same for every product).
+ * The title and text of each one are in the translations (product.accordion.*).
  */
 const ACCORDION = ["details", "fit", "ship", "story"];
 
 /**
- * Product Detail Page.
- *
- * Reads the product id from the URL. If the slug doesn't match any
- * catalogue entry, falls back to a 404 — better than rendering broken
- * data.
+ * The product page (/product/:id).
+ * If the product doesn't exist, it shows the 404 page.
  */
 export function Product() {
   const { t } = useTranslation("shop");
@@ -70,7 +67,7 @@ export function Product() {
   const [colorIdx, setColorIdx] = useState(0);
   const [openAcc, setOpenAcc] = useState<string | null>("details");
 
-  // Reset local state whenever the user navigates to a different product.
+  // Going to another product starts again with the first photo, no size, etc.
   useEffect(() => {
     setActiveImg(0);
     setSize(null);
@@ -78,9 +75,7 @@ export function Product() {
     setOpenAcc("details");
   }, [id]);
 
-  // A 404 from the API means the slug isn't in the catalogue — render
-  // the same `NotFound` page the router uses, instead of an error card
-  // that would look out of place mid-flow.
+  // A 404 from the API means there is no product with this slug.
   if (isError && error instanceof ApiError && error.status === 404) {
     return <NotFound />;
   }

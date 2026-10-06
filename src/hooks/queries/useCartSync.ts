@@ -1,11 +1,12 @@
 /**
- * Authenticated cart queries/mutations.
+ * The cart saved in the API, for signed-in users.
  *
- * CartContext remains the UI-facing abstraction. These hooks are the
- * backend transport layer used when a Laravel/Sanctum user is logged in.
+ * Components don't use these hooks directly: they use useCart()
+ * (CartContext), which picks this cart or the guest one.
+ * Every API call returns the whole cart, so we just save the answer.
  */
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import {
   addCartItem,
   clearCart,
@@ -21,7 +22,7 @@ export const cartKeys = {
   cart: ["cart"] as const,
 };
 
-function setCart(queryClient: ReturnType<typeof useQueryClient>, cart: ApiCartDTO) {
+function setCart(queryClient: QueryClient, cart: ApiCartDTO) {
   queryClient.setQueryData(cartKeys.cart, cart);
 }
 

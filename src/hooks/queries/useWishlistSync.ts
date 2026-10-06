@@ -1,11 +1,11 @@
 /**
- * Authenticated wishlist transport layer.
+ * The wishlist saved in the API, for signed-in users.
  *
- * WishlistContext exposes the stable UI API. These hooks only handle the
- * server-side list for logged-in users.
+ * Components use useWishlist() (WishlistContext) instead, which picks
+ * this list or the guest one. Every call returns the whole list.
  */
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import {
   addWishlistItem,
   clearWishlist,
@@ -18,7 +18,7 @@ export const wishlistKeys = {
   wishlist: ["wishlist"] as const,
 };
 
-function setWishlist(queryClient: ReturnType<typeof useQueryClient>, ids: string[]) {
+function setWishlist(queryClient: QueryClient, ids: string[]) {
   queryClient.setQueryData(wishlistKeys.wishlist, ids);
 }
 

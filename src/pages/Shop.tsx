@@ -36,12 +36,10 @@ const PRICE_MIN = 0;
 const PRICE_STEP = 5;
 
 /**
- * Product Listing Page.
+ * A shop category page (/shop/men, /shop/new...).
  *
- * The category comes from the route param (`/shop/:cat`). The backend
- * narrows the catalogue server-side (`/api/products?category=`), so
- * this page only handles the in-memory refinements the sidebar offers
- * (size · colour · sort) once react-query hands it the list.
+ * The API already sends only the products of the category. This page
+ * filters that list by size, colour and price, and sorts it.
  */
 export function Shop() {
   const { t, i18n } = useTranslation("shop");
@@ -80,24 +78,15 @@ export function Shop() {
   const priceRangeRef = useRef<HTMLDivElement>(null);
   const [minPrice, maxPrice] = priceRange ?? [PRICE_MIN, priceMax];
 
-  // Reset filters whenever the category changes so active filters from
-  // one section don't bleed into another (e.g. size "28" has no matches
-  // in Women after navigating from Men).
+  // A new category starts without filters (size "28" from Men could
+  // leave Women empty).
   useEffect(() => {
     setSelectedSizes([]);
     setColor(null);
     setPriceRange(null);
   }, [cat]);
 
-  /**
-   * Derive the visible product list from the filters. Recomputed only
-   * when one of the dependencies actually changes.
-   *
-   * The category filter is applied server-side by `useProducts(cat)`
-   * for any value other than "new" (which by design contains the full
-   * catalogue), so this block only handles the in-memory refinements
-   * the sidebar offers (size · colour · sort).
-   */
+  // The products to show, after the filters and the sort.
   const visible = useMemo(() => {
     let list = products ? [...products] : [];
 
@@ -115,9 +104,11 @@ export function Shop() {
         list.sort((a, b) => b.price - a.price);
         break;
       case "newest":
+        // Simply the API order, backwards.
         list.reverse();
         break;
       case "best":
+        // There are no real sales numbers here: products with a tag go first.
         list.sort((a, b) => (b.tag ? 1 : 0) - (a.tag ? 1 : 0));
         break;
       default:
@@ -144,9 +135,12 @@ export function Shop() {
     setPriceRange(null);
   };
 
+  // The price slider is drawn by hand (two handles on one bar).
+  // These are the positions of the two handles, in % of the bar.
   const priceStart = ((minPrice - PRICE_MIN) / (priceMax - PRICE_MIN)) * 100;
   const priceEnd = ((maxPrice - PRICE_MIN) / (priceMax - PRICE_MIN)) * 100;
 
+  /** The price under the mouse or finger, rounded to steps of €5. */
   const priceFromPointer = (clientX: number) => {
     const rect = priceRangeRef.current?.getBoundingClientRect();
     if (!rect) return null;
@@ -170,6 +164,7 @@ export function Shop() {
     });
   };
 
+  /** Moves one handle while the mouse button (or finger) is down. */
   const startPriceDrag = (handle: PriceHandle, event: ReactPointerEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
@@ -187,6 +182,7 @@ export function Shop() {
     window.addEventListener("pointerup", stopDragging, { once: true });
   };
 
+  /** Clicking the bar (not a handle) moves the handle that is closest. */
   const startNearestPriceDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
     const nextPrice = priceFromPointer(event.clientX);
     if (nextPrice === null) return;
@@ -195,10 +191,8 @@ export function Shop() {
     startPriceDrag(handle, event);
   };
 
-  // Header count: prefer the authoritative total from /api/categories
-  // when available, otherwise fall back to whatever the products query
-  // has returned (useful before categories resolve, or for slugs the
-  // categories endpoint doesn't know about).
+  // The number in the header: the category total from the API, or the
+  // products we have while the categories are still loading.
   const headerCount = categoryMap?.[cat]?.count || products?.length || 0;
 
   if (isUnknownCategory) {

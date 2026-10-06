@@ -1,22 +1,15 @@
 /**
- * Single `QueryClient` instance shared across the SPA.
+ * The React Query client (the cache of everything we load from the API).
  *
- * Tuning notes:
- *   - `staleTime: 60s` — the catalogue barely changes during a session,
- *     so a minute of "fresh" lets us avoid refetching every PLP/PDP
- *     remount. React Query still refetches on window focus by default,
- *     which we keep — it's the cheapest way to stay in sync if the
- *     user leaves a tab open overnight.
- *   - `retry: 1` — one extra attempt is enough to recover from a
- *     transient backend hiccup without making the user wait through
- *     three exponential backoffs. Errors that won't change by trying
- *     again (401, 403, 404, 419) are not retried.
- *   - `refetchOnWindowFocus: false` for products — they're effectively
- *     static for the duration of a browsing session and refetching on
- *     every tab switch produces noisy loading flickers.
- *   - Session expired: if any request answers 401 (not signed in) or
- *     419 (old CSRF token), we forget the saved user. The shop then shows
- *     you as signed out and the admin panel sends you to its login page.
+ * - staleTime 60s: data loaded less than a minute ago is used as it is,
+ *   so going back and forth between pages doesn't ask the API again.
+ * - retry: one more try if a request fails, in case the server had a
+ *   small hiccup. Not for 401, 403, 404 or 419: trying again won't help.
+ * - refetchOnWindowFocus off: coming back to the tab doesn't reload
+ *   everything (it made the pages flicker for nothing).
+ * - Session expired: if any request answers 401 (not signed in) or
+ *   419 (old CSRF token), we forget the saved user. The shop then shows
+ *   you as signed out and the admin panel sends you to its login page.
  */
 
 import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";

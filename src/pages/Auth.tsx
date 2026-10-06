@@ -3,21 +3,10 @@ import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Icon } from "../components/ui/Icon";
 import { Placeholder } from "../components/ui/Placeholder";
-import { BRAND } from "../data/products";
+import { BRAND } from "../data/images";
 import { useDemoLogin, useLogin, useRegister, useUser } from "../hooks/queries";
 import { ApiError, oauthRedirectUrl } from "../lib/api";
 
-/**
- * Sign-in / Sign-up page (UI mock).
- *
- * The form submits don't hit a backend yet — they just navigate to
- * the `/account` view so the rest of the flow can be demoed. When
- * real auth is plugged in, only the `handleSubmit` function below
- * needs to be replaced.
- *
- * Toggle between tabs via `?mode=signup` if you want to link straight
- * to the sign-up state.
- */
 type AuthMode = "signin" | "signup";
 
 /**
@@ -30,6 +19,13 @@ function safeReturnTo(value: string | null): string {
   return value;
 }
 
+/**
+ * Sign in / create account page. It also has the demo button, and
+ * Google and GitHub sign in.
+ *
+ * /auth?mode=signup opens on the "Create account" tab.
+ * /auth?returnTo=/account/orders goes there after signing in.
+ */
 export function Auth() {
   const { t } = useTranslation("account");
   const navigate = useNavigate();
@@ -48,17 +44,15 @@ export function Auth() {
   const { data: user } = useUser();
   const isSubmitting = loginMutation.isPending || registerMutation.isPending;
 
+  // Already signed in (or just signed in): leave this page.
   useEffect(() => {
     if (user) {
       navigate(returnTo, { replace: true });
     }
   }, [navigate, returnTo, user]);
 
-  const authError =
-    formError ??
-    (oauthError
-      ? t("auth.errors.oauth")
-      : null);
+  // The API sends ?error=... back here when Google or GitHub sign in fails.
+  const authError = formError ?? (oauthError ? t("auth.errors.oauth") : null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

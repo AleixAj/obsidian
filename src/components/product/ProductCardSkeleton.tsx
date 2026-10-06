@@ -1,10 +1,7 @@
 /**
- * Lightweight skeleton that mirrors `ProductCard`'s footprint.
- *
- * Renders the same layout boxes (image · name · cat · price) as plain
- * divs with a subtle shimmer so the grid doesn't reflow when real
- * cards mount. Kept dependency-free — animation lives in `pages.css`
- * under the `.product-card-skeleton` selector.
+ * A grey "loading" card with the same size as ProductCard, so the grid
+ * doesn't jump when the real cards arrive. The shine animation is in
+ * pages.css (.product-card-skeleton).
  */
 export function ProductCardSkeleton() {
   return (
@@ -20,9 +17,9 @@ export function ProductCardSkeleton() {
 }
 
 interface ProductGridSkeletonProps {
-  /** How many ghost cards to render. Defaults to 4. */
+  /** How many loading cards to show. 4 by default. */
   count?: number;
-  /** Optional wrapper class — defaults to the shared `.product-grid` look. */
+  /** Class of the grid around them. "product-grid" by default. */
   className?: string;
 }
 

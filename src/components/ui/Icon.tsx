@@ -1,11 +1,9 @@
 import type { SVGProps } from "react";
 
 /**
- * Inline SVG icon set.
- *
- * Keeping every icon in one tree-shakable module means we never ship
- * an unused glyph, and `currentColor` lets a single component pick up
- * the parent's text colour (hover states, gold accents, etc.).
+ * The shop icons, drawn with SVG.
+ * They use `currentColor`, so they take the text colour of their parent
+ * (gold on hover, etc.).
  */
 export const Icon = {
   Search: (p: SVGProps<SVGSVGElement>) => (
@@ -80,10 +78,9 @@ export const Icon = {
     </svg>
   ),
   /**
-   * Brand marks for the social sign-in buttons. Unlike the rest of the set
-   * these are filled logos, not `currentColor` line art: Google's guidelines
-   * require its four-colour G, so it keeps its palette on hover while the
-   * GitHub mark follows the button's text colour like every other icon.
+   * Logos for the "Sign in with..." buttons. Google asks to always show
+   * its G in its four colours, so that one keeps them. The GitHub logo
+   * follows the text colour like the other icons.
    */
   Google: (p: SVGProps<SVGSVGElement>) => (
     <svg width={16} height={16} viewBox="0 0 48 48" aria-hidden {...p}>

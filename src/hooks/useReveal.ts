@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * Returns a ref + boolean tuple that toggles to `true` once the
- * referenced element scrolls into view. Used by the `<Reveal>` wrapper
- * for the subtle fade-in-on-scroll effect across the site.
+ * Tells when an element appears on screen while scrolling.
+ * Returns a ref to put on the element, and `visible`, which becomes true
+ * the first time it shows up. Used by <Reveal> for the fade-in effect.
  *
- * @param delay  Milliseconds to wait before triggering the reveal,
- *               useful for staggering grids of cards.
+ * @param delay  Milliseconds to wait before showing it, so cards in a
+ *               grid appear one after the other.
  */
 export function useReveal<T extends HTMLElement = HTMLDivElement>(
   delay = 0,
@@ -17,6 +17,8 @@ export function useReveal<T extends HTMLElement = HTMLDivElement>(
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    // IntersectionObserver calls us when the element enters the screen
+    // (12% of it is visible). After the first time we stop watching.
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {

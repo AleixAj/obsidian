@@ -1,23 +1,12 @@
 /**
- * `useProducts` — list query for the PLP, the featured grid and the
- * "complete the look" rail.
+ * A list of products: the shop pages, the home grid, "complete the look"...
  *
- * The hook keeps two boundaries clean:
- *
- * 1. Wire shape (`ApiProductDTO`) stays internal: the `select` step
- *    runs `toProduct` so every consumer sees the SPA's `Product` type
- *    and never touches `price_cents` or `img_alt`.
- * 2. Cache key includes the `category` filter so React Query stores
- *    one bucket per PLP. Switching tabs (`/shop/men` → `/shop/women`)
- *    swaps cached lists without a refetch flicker once both have been
- *    visited.
- *
- * Category filters are passed through to the API, including "new".
- * The New Arrivals page is curated server-side and intentionally no
- * longer mirrors the complete catalogue.
- *
- * `enabled: false` keeps the query idle (no request) until it is needed,
- * e.g. the header search only loads products when it is opened.
+ * - The API filters by category (also "new", which the API decides).
+ * - Each category is cached on its own, so going back to a category you
+ *   already saw shows it at once.
+ * - `select: toProduct` gives the components our `Product` type.
+ * - `enabled: false` waits without asking (the header search only loads
+ *   the products when it's opened).
  */
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
@@ -32,11 +21,9 @@ export function useProducts(
   category?: string,
   { enabled = true }: UseProductsOptions = {},
 ): UseQueryResult<Product[]> {
-  const effective = category || undefined;
-
   return useQuery({
-    queryKey: ["products", effective ?? "all"],
-    queryFn: () => fetchProducts(effective),
+    queryKey: ["products", category || "all"],
+    queryFn: () => fetchProducts(category),
     select: (data) => data.map(toProduct),
     enabled,
   });

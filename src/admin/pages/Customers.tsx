@@ -8,7 +8,7 @@ import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../components/Pagination";
 import { initials, money, monthYear, shortDate } from "../format";
 import { useAdminCustomers } from "../hooks";
-import { openRow, pageFromUrl } from "../tables";
+import { changeParam, openRow, pageFromUrl } from "../tables";
 
 type Sort = NonNullable<CustomerFilters["sort"]>;
 
@@ -27,12 +27,9 @@ export function Customers() {
 
   const { data, isPending, isError, isFetching } = useAdminCustomers({ search, sort, page });
 
-  function setParam(key: string, value: string) {
-    const next = new URLSearchParams(params);
-    if (value) next.set(key, value);
-    else next.delete(key);
-    if (key !== "page") next.delete("page");
-    setParams(next);
+  /** Changes one value in the URL (see changeParam). */
+  function setParam(key: "sort" | "search" | "page", value: string) {
+    setParams(changeParam(params, key, value));
   }
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
@@ -72,6 +69,7 @@ export function Customers() {
             name="search"
             defaultValue={search}
             onChange={(event) => {
+              // Clearing the box with the "x" shows everyone again.
               if (event.target.value === "") setParam("search", "");
             }}
             placeholder={t("customers.searchPlaceholder")}

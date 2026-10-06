@@ -1,24 +1,20 @@
 /**
- * Tiny typed client for the Obsidian backend (Laravel, obsidian-api).
+ * All the calls from the shop to the Laravel API (obsidian-api).
  *
- * This is the only module that knows the Laravel wire format. Components
- * and hooks consume UI-facing types after the adapters at the bottom of
- * this file have translated API DTOs into frontend domain objects.
+ * This is the only file that knows how the API names things. The API
+ * sends "price_cents" and "img_alt"; the rest of the app uses the
+ * `Product` type, and the small functions at the end of this file
+ * (toProduct...) translate from one to the other.
  *
- * Design notes:
- *   - Prices are stored as integer **cents** in the backend so currency
- *     math never goes through a float. The `toProduct` adapter divides
- *     by 100 to get euros, keeping the cents (129.99, not 130).
- *   - The wire shape (`ApiProductDTO`) is purposely *different* from
- *     the UI shape (`Product`). Mixing both would couple every render
- *     to the backend schema; the adapter keeps the boundary explicit.
+ * Money: the API saves prices as whole cents (12999), so there are no
+ * rounding problems. We only divide by 100 when we need euros (129.99).
  */
 
 import { currentLanguage } from "../i18n";
 import type { Product } from "../types";
 
 // ──────────────────────────────────────────────────────────────────────
-// Wire types (what /api/* actually returns)
+// What the API sends back
 // ──────────────────────────────────────────────────────────────────────
 
 export interface ApiColorDTO {
@@ -58,16 +54,8 @@ export interface ApiCategoryDTO {
   title: string | null;
   gold_word: string | null;
   position: number;
-  /** Present when the endpoint includes withCount('products'). */
+  /** How many products it has (only some endpoints send it). */
   count?: number;
-}
-
-export interface ApiHealth {
-  status: "ok" | "degraded";
-  service: string;
-  env: string;
-  time: string;
-  db: boolean;
 }
 
 export interface ApiUserDTO {
@@ -196,20 +184,23 @@ export interface CartLinePayload {
   quantity: number;
 }
 
-interface ApiListEnvelope<T> {
+// Laravel wraps every answer in { data: ... }.
+interface ApiList<T> {
   data: T[];
 }
 
-interface ApiItemEnvelope<T> {
+interface ApiItem<T> {
   data: T;
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// Fetch helpers
+// Sending requests
 // ──────────────────────────────────────────────────────────────────────
 
 const configuredApiUrl = import.meta.env.VITE_API_URL as string | undefined;
 
+// In production the shop and the API are on the same domain, so the paths
+// are enough ("/api/products"). In development the API runs on its own port.
 export const API_URL = (
   import.meta.env.PROD
     ? ""
@@ -217,10 +208,8 @@ export const API_URL = (
 ).replace(/\/+$/, "");
 
 export class ApiError extends Error {
-  // Plain field declarations (no constructor parameter properties) keep
-  // the file compatible with TS 6.0's `erasableSyntaxOnly` setting,
-  // which forbids any syntax that emits runtime code outside of JS-spec
-  // class fields.
+  // Normal fields instead of `constructor(readonly status...)`: TypeScript's
+  // `erasableSyntaxOnly` setting doesn't allow that shortcut.
   readonly status: number;
   readonly url: string;
   readonly payload?: unknown;
@@ -242,6 +231,7 @@ function getCookie(name: string): string | null {
   return match ? decodeURIComponent(match.split("=").slice(1).join("=")) : null;
 }
 
+/** Calls the API and returns its JSON. Throws an ApiError when the answer is not OK. */
 export async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const url = `${API_URL}${path}`;
   const method = (init.method ?? "GET").toUpperCase();
@@ -251,9 +241,9 @@ export async function request<T>(path: string, init: RequestInit = {}): Promise<
   // The API answers its messages (errors, etc.) in this language.
   headers.set("Accept-Language", currentLanguage());
 
-  // Sanctum sets an `XSRF-TOKEN` cookie. Axios mirrors that cookie into
-  // this header automatically; the Fetch API doesn't, so we do it here
-  // for POST/PUT/PATCH/DELETE requests.
+  // Laravel (Sanctum) puts a token in the XSRF-TOKEN cookie and wants it
+  // back in this header on every change (POST, PATCH, DELETE...). Axios
+  // does this by itself; with fetch we have to do it.
   if (method !== "GET" && method !== "HEAD") {
     const xsrfToken = getCookie("XSRF-TOKEN");
     if (xsrfToken) {
@@ -272,7 +262,7 @@ export async function request<T>(path: string, init: RequestInit = {}): Promise<
     try {
       payload = await res.json();
     } catch {
-      /* response was not JSON, ignore */
+      // The error had no JSON body. That's fine, we still throw below.
     }
     throw new ApiError(res.status, url, payload);
   }
@@ -285,6 +275,7 @@ export async function request<T>(path: string, init: RequestInit = {}): Promise<
   return (text ? JSON.parse(text) : undefined) as T;
 }
 
+/** Asks Laravel for a fresh XSRF-TOKEN cookie. Needed before any change. */
 export const csrfCookie = (): Promise<void> =>
   fetch(`${API_URL}/sanctum/csrf-cookie`, {
     credentials: "include",
@@ -293,6 +284,24 @@ export const csrfCookie = (): Promise<void> =>
       throw new ApiError(res.status, `${API_URL}/sanctum/csrf-cookie`);
     }
   });
+
+/**
+ * For requests that change something (POST, PUT, PATCH, DELETE).
+ * Gets the CSRF cookie first, and sends `body` as JSON when there is one.
+ */
+export async function send<T>(method: string, path: string, body?: unknown): Promise<T> {
+  await csrfCookie();
+
+  if (body === undefined) {
+    return request<T>(path, { method });
+  }
+
+  return request<T>(path, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
 
 /**
  * The message the API sent with an error (already in the user's language),
@@ -308,38 +317,29 @@ export function apiErrorMessage(error: unknown): string | undefined {
   return firstError ?? payload.message;
 }
 
-const jsonRequest = <T>(path: string, payload: unknown): Promise<T> =>
-  request<T>(path, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-
 // ──────────────────────────────────────────────────────────────────────
-// Public endpoints
+// Catalogue
 // ──────────────────────────────────────────────────────────────────────
-
-export const health = (): Promise<ApiHealth> => request<ApiHealth>("/api/health");
 
 export const fetchProducts = async (category?: string): Promise<ApiProductDTO[]> => {
   const qs = category ? `?category=${encodeURIComponent(category)}` : "";
-  const { data } = await request<ApiListEnvelope<ApiProductDTO>>(`/api/products${qs}`);
+  const { data } = await request<ApiList<ApiProductDTO>>(`/api/products${qs}`);
   return data;
 };
 
 export const fetchProduct = async (slug: string): Promise<ApiProductDTO> => {
-  const { data } = await request<ApiItemEnvelope<ApiProductDTO>>(
-    `/api/products/${encodeURIComponent(slug)}`,
-  );
+  const { data } = await request<ApiItem<ApiProductDTO>>(`/api/products/${encodeURIComponent(slug)}`);
   return data;
 };
 
 export const fetchCategories = async (): Promise<ApiCategoryDTO[]> => {
-  const { data } = await request<ApiListEnvelope<ApiCategoryDTO>>("/api/categories");
+  const { data } = await request<ApiList<ApiCategoryDTO>>("/api/categories");
   return data;
 };
+
+// ──────────────────────────────────────────────────────────────────────
+// User and account
+// ──────────────────────────────────────────────────────────────────────
 
 /**
  * The signed-in user, or null for a visitor who is not signed in.
@@ -348,7 +348,7 @@ export const fetchCategories = async (): Promise<ApiCategoryDTO[]> => {
  */
 export const fetchUser = async (): Promise<ApiUserDTO | null> => {
   try {
-    const { data } = await request<ApiItemEnvelope<ApiUserDTO>>("/api/user");
+    const { data } = await request<ApiItem<ApiUserDTO>>("/api/user");
     return data;
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) return null;
@@ -357,173 +357,125 @@ export const fetchUser = async (): Promise<ApiUserDTO | null> => {
 };
 
 export const updateUser = async (payload: UpdateUserPayload): Promise<ApiUserDTO> => {
-  await csrfCookie();
-  const { data } = await request<ApiItemEnvelope<ApiUserDTO>>("/api/user", {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
+  const { data } = await send<ApiItem<ApiUserDTO>>("PATCH", "/api/user", payload);
   return data;
 };
 
 export const fetchAccount = async (): Promise<ApiAccountDTO> => {
-  const { data } = await request<ApiItemEnvelope<ApiAccountDTO>>("/api/account");
+  const { data } = await request<ApiItem<ApiAccountDTO>>("/api/account");
   return data;
 };
 
 export const fetchOrders = async (): Promise<ApiOrderDTO[]> => {
-  const { data } = await request<ApiListEnvelope<ApiOrderDTO>>("/api/orders");
+  const { data } = await request<ApiList<ApiOrderDTO>>("/api/orders");
   return data;
 };
 
 export const requestReturn = async (orderId: number, payload: ReturnRequestPayload): Promise<void> => {
-  await csrfCookie();
-  await jsonRequest<unknown>(`/api/orders/${orderId}/returns`, payload);
-};
-
-export const fetchAddresses = async (): Promise<ApiAddressDTO[]> => {
-  const { data } = await request<ApiListEnvelope<ApiAddressDTO>>("/api/addresses");
-  return data;
+  await send<unknown>("POST", `/api/orders/${orderId}/returns`, payload);
 };
 
 export const createAddress = async (payload: AddressPayload): Promise<ApiAddressDTO> => {
-  await csrfCookie();
-  const { data } = await jsonRequest<ApiItemEnvelope<ApiAddressDTO>>("/api/addresses", payload);
+  const { data } = await send<ApiItem<ApiAddressDTO>>("POST", "/api/addresses", payload);
   return data;
 };
 
-export const updateAddress = async (
-  id: number,
-  payload: Partial<AddressPayload>,
-): Promise<ApiAddressDTO> => {
-  await csrfCookie();
-  const { data } = await request<ApiItemEnvelope<ApiAddressDTO>>(`/api/addresses/${id}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
+export const updateAddress = async (id: number, payload: Partial<AddressPayload>): Promise<ApiAddressDTO> => {
+  const { data } = await send<ApiItem<ApiAddressDTO>>("PATCH", `/api/addresses/${id}`, payload);
   return data;
 };
 
 export const deleteAddress = async (id: number): Promise<void> => {
-  await csrfCookie();
-  await request<void>(`/api/addresses/${id}`, {
-    method: "DELETE",
-  });
+  await send<void>("DELETE", `/api/addresses/${id}`);
 };
 
+// ──────────────────────────────────────────────────────────────────────
+// Cart (signed-in users; guests keep it in localStorage)
+// Every call returns the whole cart, so the screen is always up to date.
+// ──────────────────────────────────────────────────────────────────────
+
 export const fetchCart = async (): Promise<ApiCartDTO> => {
-  const { data } = await request<ApiItemEnvelope<ApiCartDTO>>("/api/cart");
+  const { data } = await request<ApiItem<ApiCartDTO>>("/api/cart");
   return data;
 };
 
 export const addCartItem = async (payload: CartLinePayload): Promise<ApiCartDTO> => {
-  await csrfCookie();
-  const { data } = await jsonRequest<ApiItemEnvelope<ApiCartDTO>>("/api/cart/items", payload);
+  const { data } = await send<ApiItem<ApiCartDTO>>("POST", "/api/cart/items", payload);
   return data;
 };
 
 export const updateCartItem = async (id: number, quantity: number): Promise<ApiCartDTO> => {
-  await csrfCookie();
-  const { data } = await request<ApiItemEnvelope<ApiCartDTO>>(`/api/cart/items/${id}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ quantity }),
-  });
+  const { data } = await send<ApiItem<ApiCartDTO>>("PATCH", `/api/cart/items/${id}`, { quantity });
   return data;
 };
 
 export const deleteCartItem = async (id: number): Promise<ApiCartDTO> => {
-  await csrfCookie();
-  const { data } = await request<ApiItemEnvelope<ApiCartDTO>>(`/api/cart/items/${id}`, {
-    method: "DELETE",
-  });
+  const { data } = await send<ApiItem<ApiCartDTO>>("DELETE", `/api/cart/items/${id}`);
   return data;
 };
 
 export const clearCart = async (): Promise<ApiCartDTO> => {
-  await csrfCookie();
-  const { data } = await request<ApiItemEnvelope<ApiCartDTO>>("/api/cart/items", {
-    method: "DELETE",
-  });
+  const { data } = await send<ApiItem<ApiCartDTO>>("DELETE", "/api/cart/items");
   return data;
 };
 
+/** Adds the guest cart (from localStorage) to the user's cart after signing in. */
 export const mergeCart = async (items: CartLinePayload[]): Promise<ApiCartDTO> => {
-  await csrfCookie();
-  const { data } = await jsonRequest<ApiItemEnvelope<ApiCartDTO>>("/api/cart/merge", { items });
+  const { data } = await send<ApiItem<ApiCartDTO>>("POST", "/api/cart/merge", { items });
   return data;
 };
 
+/** Turns the cart into an order (there is no real payment). */
 export const checkout = async (): Promise<ApiOrderDTO> => {
-  await csrfCookie();
-  const { data } = await jsonRequest<ApiItemEnvelope<ApiOrderDTO>>("/api/checkout", {});
+  const { data } = await send<ApiItem<ApiOrderDTO>>("POST", "/api/checkout", {});
   return data;
 };
+
+// ──────────────────────────────────────────────────────────────────────
+// Wishlist: just a list of product slugs
+// ──────────────────────────────────────────────────────────────────────
 
 export const fetchWishlist = async (): Promise<string[]> => {
-  const { data } = await request<ApiListEnvelope<string>>("/api/wishlist");
+  const { data } = await request<ApiList<string>>("/api/wishlist");
   return data;
 };
 
 export const addWishlistItem = async (productSlug: string): Promise<string[]> => {
-  await csrfCookie();
-  const { data } = await jsonRequest<ApiListEnvelope<string>>("/api/wishlist/items", {
-    product_slug: productSlug,
-  });
+  const { data } = await send<ApiList<string>>("POST", "/api/wishlist/items", { product_slug: productSlug });
   return data;
 };
 
 export const deleteWishlistItem = async (productSlug: string): Promise<string[]> => {
-  await csrfCookie();
-  const { data } = await request<ApiListEnvelope<string>>(
-    `/api/wishlist/items/${encodeURIComponent(productSlug)}`,
-    {
-      method: "DELETE",
-    },
-  );
+  const { data } = await send<ApiList<string>>("DELETE", `/api/wishlist/items/${encodeURIComponent(productSlug)}`);
   return data;
 };
 
 export const clearWishlist = async (): Promise<string[]> => {
-  await csrfCookie();
-  const { data } = await request<ApiListEnvelope<string>>("/api/wishlist/items", {
-    method: "DELETE",
-  });
+  const { data } = await send<ApiList<string>>("DELETE", "/api/wishlist/items");
   return data;
 };
 
 export const mergeWishlist = async (productSlugs: string[]): Promise<string[]> => {
-  await csrfCookie();
-  const { data } = await jsonRequest<ApiListEnvelope<string>>("/api/wishlist/merge", {
-    product_slugs: productSlugs,
-  });
+  const { data } = await send<ApiList<string>>("POST", "/api/wishlist/merge", { product_slugs: productSlugs });
   return data;
 };
 
+// ──────────────────────────────────────────────────────────────────────
+// Sign in / sign out
+// ──────────────────────────────────────────────────────────────────────
+
 export const login = async (payload: AuthCredentials): Promise<ApiUserDTO> => {
-  await csrfCookie();
-  const { data } = await jsonRequest<ApiItemEnvelope<ApiUserDTO>>("/api/auth/login", payload);
+  const { data } = await send<ApiItem<ApiUserDTO>>("POST", "/api/auth/login", payload);
   return data;
 };
 
 export const register = async (payload: RegisterPayload): Promise<ApiUserDTO> => {
-  await csrfCookie();
-  const { data } = await jsonRequest<ApiItemEnvelope<ApiUserDTO>>("/api/auth/register", payload);
+  const { data } = await send<ApiItem<ApiUserDTO>>("POST", "/api/auth/register", payload);
   return data;
 };
 
 export const logout = async (): Promise<void> => {
-  await csrfCookie();
-  await request<{ message: string }>("/api/auth/logout", {
-    method: "POST",
-  });
+  await send<unknown>("POST", "/api/auth/logout");
 };
 
 /** Accounts behind the "Try the demo" buttons. */
@@ -534,9 +486,16 @@ export type DemoRole = "customer" | "admin" | "warehouse" | "support";
  * shop and the admin panel without creating an account.
  */
 export const demoLogin = async (role: DemoRole): Promise<void> => {
-  await csrfCookie();
-  await jsonRequest<unknown>("/api/demo-login", { role });
+  await send<unknown>("POST", "/api/demo-login", { role });
 };
+
+/** The Laravel page that starts "Sign in with Google / GitHub". */
+export const oauthRedirectUrl = (provider: "google" | "github"): string =>
+  `${API_URL}/auth/${provider}/redirect`;
+
+// ──────────────────────────────────────────────────────────────────────
+// Profile photo
+// ──────────────────────────────────────────────────────────────────────
 
 /**
  * Photos uploaded to our API come back as "/api/media/...". In production
@@ -559,28 +518,22 @@ export const uploadAvatar = async (file: File): Promise<ApiUserDTO> => {
   // Content-Type header: the browser adds it with the right boundary.
   const body = new FormData();
   body.append("avatar", file);
-  const { data } = await request<ApiItemEnvelope<ApiUserDTO>>("/api/user/avatar", { method: "POST", body });
+  const { data } = await request<ApiItem<ApiUserDTO>>("/api/user/avatar", { method: "POST", body });
   return data;
 };
 
 export const deleteAvatar = async (): Promise<ApiUserDTO> => {
-  await csrfCookie();
-  const { data } = await request<ApiItemEnvelope<ApiUserDTO>>("/api/user/avatar", { method: "DELETE" });
+  const { data } = await send<ApiItem<ApiUserDTO>>("DELETE", "/api/user/avatar");
   return data;
 };
 
-export const oauthRedirectUrl = (provider: "google" | "github"): string =>
-  `${API_URL}/auth/${provider}/redirect`;
-
 // ──────────────────────────────────────────────────────────────────────
-// Adapter: ApiProductDTO → Product (the UI's domain model)
+// From the API's shape to the shop's shape
 // ──────────────────────────────────────────────────────────────────────
 
 /**
- * Map a backend product onto the SPA's existing `Product` type so the
- * cart/PDP/PLP components don't need to know the wire format. The slug
- * becomes `id` because every existing reference (`product.id === "p1"`)
- * already uses the slug-shaped identifier.
+ * API product → the `Product` the components use.
+ * The slug becomes the `id`, because the product URLs use it (/product/p7).
  */
 export function toProduct(dto: ApiProductDTO): Product {
   return {
@@ -601,17 +554,7 @@ export function toProduct(dto: ApiProductDTO): Product {
   };
 }
 
-// ──────────────────────────────────────────────────────────────────────
-// Adapter: ApiCategoryDTO → CategoryMeta (the shape PLP renders)
-// ──────────────────────────────────────────────────────────────────────
-
-/**
- * UI-facing copy block for a PLP header.
- *
- * Kept structurally identical to the legacy `CATEGORY_META` record so
- * existing JSX (`meta.eyebrow`, `meta.goldWord`, …) keeps working
- * without touching every page.
- */
+/** The texts at the top of a shop category page. */
 export interface CategoryMeta {
   eyebrow: string;
   title: string;
@@ -619,21 +562,20 @@ export interface CategoryMeta {
   count: number;
 }
 
-/** Map a backend category onto the SPA's `CategoryMeta`. */
-export function toCategoryMeta(dto: ApiCategoryDTO): CategoryMeta {
-  return {
-    eyebrow: dto.eyebrow ?? "",
-    title: dto.title ?? "",
-    goldWord: dto.gold_word ?? "",
-    count: dto.count ?? 0,
-  };
-}
-
 /**
- * Turn the categories list into a `Record<slug, CategoryMeta>` so
- * lookups stay O(1) on the PLP without scanning the array on every
- * render.
+ * The categories list → an object by slug ({ men: {...}, women: {...} }),
+ * so the shop page can read one with `categories[slug]`.
  */
 export function toCategoryMap(dtos: ApiCategoryDTO[]): Record<string, CategoryMeta> {
-  return Object.fromEntries(dtos.map((c) => [c.slug, toCategoryMeta(c)]));
+  return Object.fromEntries(
+    dtos.map((c) => [
+      c.slug,
+      {
+        eyebrow: c.eyebrow ?? "",
+        title: c.title ?? "",
+        goldWord: c.gold_word ?? "",
+        count: c.count ?? 0,
+      },
+    ]),
+  );
 }

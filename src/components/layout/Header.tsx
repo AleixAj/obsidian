@@ -12,13 +12,10 @@ import { catalogCategory, catalogColour, catalogType } from "../../i18n/catalog"
 import { sizedImage } from "../../utils/image";
 
 /**
- * Top-level navigation.
+ * Links of the main menu. `label` is a translation key (nav.*).
  *
- * Desktop layout: 3-column grid (nav · logo · tools).
- * On tablet/mobile the inline nav collapses behind a hamburger that
- * opens a full-height drawer.
- *
- * `label` is a translation key (nav.*).
+ * On a computer the header has 3 columns (menu · logo · buttons).
+ * On tablets and phones the menu hides behind the hamburger button.
  */
 const NAV_ITEMS: { to: string; label: string; end?: boolean }[] = [
   { to: "/", label: "home", end: true },
@@ -28,7 +25,7 @@ const NAV_ITEMS: { to: string; label: string; end?: boolean }[] = [
   { to: "/lookbook", label: "lookbook" },
 ];
 
-/** Scrolls the page to the top instantly. Used on logo/home clicks. */
+/** Scrolls smoothly to the top. Used when clicking the logo or a menu link. */
 function scrollTop() {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -55,6 +52,7 @@ export function Header() {
   const searchTerm = searchQuery.trim().toLowerCase();
   const isWishlistPage = location.pathname === "/account/wishlist";
   const isAccountPage = location.pathname === "/account" || location.pathname.startsWith("/account/");
+  // Empty search: the first 6 products. Otherwise up to 8 that match.
   const searchResults = useMemo(() => {
     if (!searchTerm) return products.slice(0, 6);
 
@@ -80,7 +78,7 @@ export function Header() {
       .slice(0, 8);
   }, [products, searchTerm]);
 
-  // Close the mobile menu whenever we navigate away.
+  // Close the mobile menu and the search when we go to another page.
   useEffect(() => {
     setMobileOpen(false);
     setSearchOpen(false);
@@ -94,11 +92,13 @@ export function Header() {
     };
   }, [mobileOpen, searchOpen]);
 
+  // While the search is open: focus the input and close it with Escape.
   useEffect(() => {
     if (!searchOpen) return;
 
     // Remember the button that opened the search, to focus it again on close.
     const opener = document.activeElement as HTMLElement | null;
+    // Wait one moment: the panel has to be visible before it can get the focus.
     const id = window.setTimeout(() => searchInputRef.current?.focus(), 0);
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {

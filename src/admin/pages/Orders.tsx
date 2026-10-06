@@ -9,7 +9,7 @@ import { Pagination } from "../components/Pagination";
 import { StatusBadge } from "../components/StatusBadge";
 import { count, dateTime, money, STATUS_LABELS } from "../format";
 import { useAdminOrders } from "../hooks";
-import { openRow, pageFromUrl } from "../tables";
+import { changeParam, openRow, pageFromUrl } from "../tables";
 
 const STATUS_TABS: (OrderStatus | "")[] = ["", "paid", "preparing", "shipped", "delivered", "returned", "cancelled", "pending"];
 
@@ -30,25 +30,15 @@ export function Orders() {
 
   const { data, isPending, isError, isFetching } = useAdminOrders({ status, search, page });
 
-  /** Changes one filter in the URL and goes back to page 1. */
-  function setFilter(key: "status" | "search", value: string) {
-    const next = new URLSearchParams(params);
-    if (value) next.set(key, value);
-    else next.delete(key);
-    next.delete("page");
-    setParams(next);
-  }
-
-  function goToPage(newPage: number) {
-    const next = new URLSearchParams(params);
-    next.set("page", String(newPage));
-    setParams(next);
+  /** Changes one filter in the URL (see changeParam). */
+  function setParam(key: "status" | "search" | "page", value: string) {
+    setParams(changeParam(params, key, value));
   }
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const text = new FormData(event.currentTarget).get("search");
-    setFilter("search", String(text ?? "").trim());
+    setParam("search", String(text ?? "").trim());
   }
 
   return (
@@ -68,7 +58,7 @@ export function Orders() {
               role="tab"
               aria-selected={status === tab}
               className={status === tab ? "is-active" : ""}
-              onClick={() => setFilter("status", tab)}
+              onClick={() => setParam("status", tab)}
             >
               {tab ? t(STATUS_LABELS[tab]) : t("common.all")}
             </button>
@@ -84,7 +74,7 @@ export function Orders() {
             defaultValue={search}
             onChange={(event) => {
               // Clearing the box with the "x" shows all orders again.
-              if (event.target.value === "") setFilter("search", "");
+              if (event.target.value === "") setParam("search", "");
             }}
             placeholder={t("orders.searchPlaceholder")}
             aria-label={t("orders.searchLabel")}
@@ -141,7 +131,7 @@ export function Orders() {
           </div>
         )}
 
-        {data && <Pagination page={page} lastPage={data.meta.last_page} onChange={goToPage} />}
+        {data && <Pagination page={page} lastPage={data.meta.last_page} onChange={(p) => setParam("page", String(p))} />}
       </div>
     </>
   );

@@ -2,9 +2,8 @@ import type { ReactNode } from "react";
 import { useReveal } from "../../hooks/useReveal";
 
 /**
- * Wraps children in a div that fades & slides up when scrolled into
- * view. The `delay` prop lets us stagger grids of cards so they feel
- * choreographed rather than popping in all at once.
+ * Its content fades in and moves up a little when it appears on screen.
+ * With `delay`, the cards of a grid can appear one after the other.
  */
 interface RevealProps {
   children: ReactNode;

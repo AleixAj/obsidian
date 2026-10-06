@@ -42,11 +42,12 @@ export function AdminLogin() {
     login.mutate({ email, password });
   }
 
-  const demoError = demoLogin.error instanceof ApiError && demoLogin.error.status === 503
-    ? t("login.demoNotInstalled")
-    : demoLogin.error
-      ? t("login.demoFailed")
-      : null;
+  // 503: the API doesn't have the demo accounts yet.
+  let demoError: string | null = null;
+  if (demoLogin.error) {
+    const notInstalled = demoLogin.error instanceof ApiError && demoLogin.error.status === 503;
+    demoError = notInstalled ? t("login.demoNotInstalled") : t("login.demoFailed");
+  }
 
   return (
     <div className="adm-login">

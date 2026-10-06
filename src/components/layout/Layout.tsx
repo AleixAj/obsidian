@@ -6,15 +6,11 @@ import { Footer } from "./Footer";
 import { Header } from "./Header";
 
 /**
- * Site shell that wraps every routed page.
+ * What every shop page has around it: the top bar, the header, the
+ * footer and the cart drawer.
  *
- * Responsibilities:
- *   - Mounts the `Header`, `Footer`, `AnnounceBar`, `CartDrawer`.
- *   - Scrolls back to the top on every route change so the user
- *     never lands halfway down a freshly mounted page.
- *
- * Excludes the footer on auth/account screens where the dashboard
- * already fills the viewport.
+ * The sign-in and account pages already fill the screen, so they have
+ * no footer.
  */
 interface LayoutProps {
   children: ReactNode;
@@ -23,6 +19,7 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   const location = useLocation();
 
+  // A new page starts at the top, not where the last one was scrolled to.
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [location.pathname]);

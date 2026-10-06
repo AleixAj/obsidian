@@ -9,7 +9,7 @@ import { Pagination } from "../components/Pagination";
 import { ReturnBadge } from "../components/ReturnBadge";
 import { dateTime, money, RETURN_STATUS_LABELS } from "../format";
 import { useAdminReturns } from "../hooks";
-import { openRow, pageFromUrl } from "../tables";
+import { changeParam, openRow, pageFromUrl } from "../tables";
 
 const TABS: (ReturnStatus | "")[] = ["requested", "approved", "refunded", "rejected", ""];
 
@@ -24,18 +24,16 @@ export function Returns() {
 
   // No ?status in the URL → show "To review". "all" shows everything.
   const statusParam = params.get("status");
-  const status = (statusParam === null ? "requested" : statusParam === "all" ? "" : statusParam) as ReturnStatus | "";
+  let status = (statusParam ?? "requested") as ReturnStatus | "";
+  if (statusParam === "all") status = "";
   const search = params.get("search") ?? "";
   const page = pageFromUrl(params);
 
   const { data, isPending, isError, isFetching } = useAdminReturns({ status, search, page });
 
-  function setParam(key: string, value: string) {
-    const next = new URLSearchParams(params);
-    next.set(key, value);
-    if (key === "search" && !value) next.delete("search");
-    if (key !== "page") next.delete("page");
-    setParams(next);
+  /** Changes one value in the URL (see changeParam). */
+  function setParam(key: "status" | "search" | "page", value: string) {
+    setParams(changeParam(params, key, value));
   }
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {

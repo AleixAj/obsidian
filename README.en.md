@@ -219,6 +219,7 @@ The frontend keeps a clear boundary with the API:
 Laravel API DTOs
       |
 src/lib/api.ts
+  - send()            (POST/PATCH/DELETE: CSRF cookie + JSON)
   - fetchProducts()
   - fetchProduct()
   - fetchCategories()
@@ -259,12 +260,15 @@ Guests use `localStorage`, authenticated users use the Laravel API, and both sta
 src/
 ├── admin/             # /admin panel: its own pages, components, API and hooks
 ├── components/
+│   ├── account/       # OrderReturn, ProfilePhoto (account and returns)
+│   ├── auth/          # ProtectedRoute
 │   ├── cart/          # CartDrawer
 │   ├── layout/        # Header, Footer, AnnounceBar, Layout
 │   ├── product/       # ProductCard, ProductCardSkeleton
 │   └── ui/            # Logo, Icon, Marquee, Placeholder, Reveal
+├── constants/         # Order of the new collection
 ├── context/           # CartContext, WishlistContext, ToastContext
-├── data/              # Brand visual/editorial assets
+├── data/              # Brand photos and backgrounds (/public)
 ├── hooks/
 │   ├── queries/       # React Query hooks
 │   ├── useLocalStorage.ts
@@ -272,9 +276,10 @@ src/
 ├── i18n/              # ES/EN translations (i18next) and catalogue words
 ├── lib/               # API client + QueryClient
 ├── pages/             # Home, Shop, Product, Lookbook, Auth, Account, Legal, NotFound
+│   └── account/       # "My account" sections (overview, orders, addresses...)
 ├── styles/            # CSS tokens, globals and per-page styles
 ├── types/             # Product, CartItem, Category
-└── utils/             # formatPrice, pad
+└── utils/             # formatPrice, pad, sizedImage, firstAvailableSize
 ```
 
 ## Local Full-Stack Setup

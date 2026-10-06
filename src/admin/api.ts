@@ -1,12 +1,12 @@
 /**
- * Admin API calls (Laravel routes under /api/admin).
+ * Calls to the admin part of the API (Laravel routes under /api/admin).
  *
- * It reuses the same `request()` helper as the shop, so cookies,
+ * They use the same `request()` and `send()` as the shop, so cookies,
  * CSRF and errors work the same way. All money is in cents.
  */
 
 import { currentLanguage } from "../i18n";
-import { API_URL, ApiError, csrfCookie, request } from "../lib/api";
+import { API_URL, ApiError, csrfCookie, request, send } from "../lib/api";
 
 export type Role = "admin" | "warehouse" | "support";
 
@@ -143,12 +143,7 @@ export const updateOrderStatus = async (
   status: OrderStatus,
   note?: string,
 ): Promise<AdminOrder> => {
-  await csrfCookie();
-  const { data } = await request<{ data: AdminOrder }>(`/api/admin/orders/${id}/status`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status, note }),
-  });
+  const { data } = await send<{ data: AdminOrder }>("PATCH", `/api/admin/orders/${id}/status`, { status, note });
   return data;
 };
 
@@ -233,15 +228,9 @@ export const fetchProduct = async (slug: string): Promise<AdminProduct> => {
 
 /** Create (no slug) or edit (with slug) a product. */
 export const saveProduct = async (payload: ProductPayload, slug?: string): Promise<AdminProduct> => {
-  await csrfCookie();
-  const { data } = await request<{ data: AdminProduct }>(
-    slug ? `/api/admin/products/${encodeURIComponent(slug)}` : "/api/admin/products",
-    {
-      method: slug ? "PUT" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    },
-  );
+  const { data } = slug
+    ? await send<{ data: AdminProduct }>("PUT", `/api/admin/products/${encodeURIComponent(slug)}`, payload)
+    : await send<{ data: AdminProduct }>("POST", "/api/admin/products", payload);
   return data;
 };
 
@@ -271,11 +260,9 @@ export interface StockChange {
 }
 
 export const updateStock = async (slug: string, variants: StockChange[], note?: string): Promise<AdminProduct> => {
-  await csrfCookie();
-  const { data } = await request<{ data: AdminProduct }>(`/api/admin/products/${encodeURIComponent(slug)}/stock`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ variants, note }),
+  const { data } = await send<{ data: AdminProduct }>("PATCH", `/api/admin/products/${encodeURIComponent(slug)}/stock`, {
+    variants,
+    note,
   });
   return data;
 };
@@ -385,12 +372,7 @@ export const returnAction = async (
   action: "approve" | "reject" | "refund",
   body: { restock?: boolean; note?: string } = {},
 ): Promise<AdminReturn> => {
-  await csrfCookie();
-  const { data } = await request<{ data: AdminReturn }>(`/api/admin/returns/${id}/${action}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  const { data } = await send<{ data: AdminReturn }>("POST", `/api/admin/returns/${id}/${action}`, body);
   return data;
 };
 
@@ -419,28 +401,17 @@ export const fetchTeam = (): Promise<{ data: StaffMember[]; roles: RoleInfo[] }>
   request<{ data: StaffMember[]; roles: RoleInfo[] }>("/api/admin/users");
 
 export const addStaff = async (payload: { name: string; email: string; role: Role }): Promise<StaffMember> => {
-  await csrfCookie();
-  const { data } = await request<{ data: StaffMember }>("/api/admin/users", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+  const { data } = await send<{ data: StaffMember }>("POST", "/api/admin/users", payload);
   return data;
 };
 
 export const changeRole = async (id: number, role: Role): Promise<StaffMember> => {
-  await csrfCookie();
-  const { data } = await request<{ data: StaffMember }>(`/api/admin/users/${id}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ role }),
-  });
+  const { data } = await send<{ data: StaffMember }>("PATCH", `/api/admin/users/${id}`, { role });
   return data;
 };
 
 export const removeStaff = async (id: number): Promise<void> => {
-  await csrfCookie();
-  await request<unknown>(`/api/admin/users/${id}`, { method: "DELETE" });
+  await send<unknown>("DELETE", `/api/admin/users/${id}`);
 };
 
 // ──────────────────────────────────────────────────────────────────────
@@ -494,7 +465,7 @@ function defaultFileName(section: ExportSection, format: ExportFormat): string {
 // Warehouse
 // ──────────────────────────────────────────────────────────────────────
 
-/** ok = enough units, low = at or below the alert, out = 0 units, empty = nothing stored. */
+/** ok = enough units, medium = 40% full or less, low = at or below the alert, out = 0 units, empty = nothing stored. */
 export type LocationState = "ok" | "medium" | "low" | "out" | "empty";
 
 export interface WarehouseLocation {
@@ -545,20 +516,14 @@ export const fetchUnplaced = async (): Promise<UnplacedVariant[]> => {
 
 /** Fills a location up to its capacity. */
 export const restockLocation = async (id: number): Promise<WarehouseLocation> => {
-  await csrfCookie();
-  const { data } = await request<{ data: WarehouseLocation }>(`/api/admin/warehouse/locations/${id}/restock`, {
-    method: "POST",
-  });
+  const { data } = await send<{ data: WarehouseLocation }>("POST", `/api/admin/warehouse/locations/${id}/restock`);
   return data;
 };
 
 /** Puts a variant in a location, or frees it with null. */
 export const assignLocation = async (id: number, variantId: number | null): Promise<WarehouseLocation> => {
-  await csrfCookie();
-  const { data } = await request<{ data: WarehouseLocation }>(`/api/admin/warehouse/locations/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ product_variant_id: variantId }),
+  const { data } = await send<{ data: WarehouseLocation }>("PUT", `/api/admin/warehouse/locations/${id}`, {
+    product_variant_id: variantId,
   });
   return data;
 };

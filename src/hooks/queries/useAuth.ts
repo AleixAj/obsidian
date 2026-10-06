@@ -1,10 +1,10 @@
 /**
- * Auth data layer for Sanctum SPA sessions.
+ * Who is signed in, and the actions that change it (sign in, sign up,
+ * sign out, profile and photo).
  *
- * The Laravel backend owns the session cookie. React Query owns the
- * client-side cache of the current user, and mutations update that cache
- * immediately after login/register/logout so the UI reacts without a
- * full page reload.
+ * Laravel keeps the session in a cookie. Here we keep a copy of the user
+ * in React Query, and update it right after each action, so the whole app
+ * changes at once without reloading the page.
  */
 
 import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";

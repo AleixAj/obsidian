@@ -1,9 +1,7 @@
 /**
- * Account dashboard queries.
- *
- * These hooks sit on top of authenticated `/api/*` endpoints. The route
- * itself is already protected by `ProtectedRoute`, so consumers can focus
- * on rendering loading/error/data states instead of auth redirects.
+ * Data for the "My account" pages: the account summary, orders,
+ * returns and addresses. Only used behind ProtectedRoute, so the user
+ * is always signed in here.
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -11,7 +9,6 @@ import {
   createAddress,
   deleteAddress,
   fetchAccount,
-  fetchAddresses,
   fetchOrders,
   requestReturn,
   updateAddress,
@@ -21,7 +18,6 @@ import {
 
 export const accountKeys = {
   account: ["account"] as const,
-  addresses: ["addresses"] as const,
   orders: ["orders"] as const,
 };
 
@@ -49,22 +45,14 @@ export function useRequestReturn(orderId: number) {
   });
 }
 
-export function useAddresses() {
-  return useQuery({
-    queryKey: accountKeys.addresses,
-    queryFn: fetchAddresses,
-  });
-}
+// The addresses come inside the account data, so after a change we reload it.
 
 export function useCreateAddress() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (payload: AddressPayload) => createAddress(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: accountKeys.account });
-      queryClient.invalidateQueries({ queryKey: accountKeys.addresses });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: accountKeys.account }),
   });
 }
 
@@ -74,10 +62,7 @@ export function useUpdateAddress() {
   return useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: Partial<AddressPayload> }) =>
       updateAddress(id, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: accountKeys.account });
-      queryClient.invalidateQueries({ queryKey: accountKeys.addresses });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: accountKeys.account }),
   });
 }
 
@@ -86,9 +71,6 @@ export function useDeleteAddress() {
 
   return useMutation({
     mutationFn: (id: number) => deleteAddress(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: accountKeys.account });
-      queryClient.invalidateQueries({ queryKey: accountKeys.addresses });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: accountKeys.account }),
   });
 }

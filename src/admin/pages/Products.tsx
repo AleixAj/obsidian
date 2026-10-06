@@ -11,7 +11,7 @@ import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../components/Pagination";
 import { money } from "../format";
 import { useAdminProducts } from "../hooks";
-import { openRow, pageFromUrl } from "../tables";
+import { changeParam, openRow, pageFromUrl } from "../tables";
 
 type StockTab = NonNullable<ProductFilters["stock"]>;
 
@@ -39,25 +39,15 @@ export function Products() {
 
   const { data, isPending, isError, isFetching } = useAdminProducts({ stock, search, page });
 
-  /** Changes one filter in the URL and goes back to page 1. */
-  function setFilter(key: "stock" | "search", value: string) {
-    const next = new URLSearchParams(params);
-    if (value) next.set(key, value);
-    else next.delete(key);
-    next.delete("page");
-    setParams(next);
-  }
-
-  function goToPage(newPage: number) {
-    const next = new URLSearchParams(params);
-    next.set("page", String(newPage));
-    setParams(next);
+  /** Changes one filter in the URL (see changeParam). */
+  function setParam(key: "stock" | "search" | "page", value: string) {
+    setParams(changeParam(params, key, value));
   }
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const text = new FormData(event.currentTarget).get("search");
-    setFilter("search", String(text ?? "").trim());
+    setParam("search", String(text ?? "").trim());
   }
 
   return (
@@ -86,7 +76,7 @@ export function Products() {
               role="tab"
               aria-selected={stock === tab.value}
               className={stock === tab.value ? "is-active" : ""}
-              onClick={() => setFilter("stock", tab.value)}
+              onClick={() => setParam("stock", tab.value)}
             >
               {t(tab.label)}
             </button>
@@ -101,7 +91,7 @@ export function Products() {
             name="search"
             defaultValue={search}
             onChange={(event) => {
-              if (event.target.value === "") setFilter("search", "");
+              if (event.target.value === "") setParam("search", "");
             }}
             placeholder={t("products.searchPlaceholder")}
             aria-label={t("products.searchLabel")}
@@ -170,7 +160,7 @@ export function Products() {
           </div>
         )}
 
-        {data && <Pagination page={page} lastPage={data.meta.last_page} onChange={goToPage} />}
+        {data && <Pagination page={page} lastPage={data.meta.last_page} onChange={(p) => setParam("page", String(p))} />}
       </div>
     </>
   );

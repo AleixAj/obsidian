@@ -2,13 +2,11 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 /**
- * Legal pages — Privacy Policy and Terms of Service.
+ * The Privacy Policy and the Terms of Service.
  *
- * Both share one layout because they are plain prose documents; only the
- * heading and the section list differ. They are also the pages Google's
- * OAuth consent screen links to, so the privacy copy has to describe the
- * real data flow: Google sign-in stores name, email and avatar, and the
- * checkout is simulated (no payment data ever reaches the server).
+ * Both are just text, so they share one layout. Google's sign-in screen
+ * links to them, so the privacy text has to tell the truth: Google
+ * sign-in saves the name, email and photo, and there are no real payments.
  *
  * The texts live in legal.json. Each section there has a "title" and its
  * paragraphs as "p1", "p2"...

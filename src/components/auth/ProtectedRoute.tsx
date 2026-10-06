@@ -1,10 +1,9 @@
 /**
- * Route guard for pages that require a real Laravel/Sanctum session.
+ * Only lets signed-in users see the page inside it (the account pages).
  *
- * While React Query checks `/api/user`, we keep the user on a branded
- * loading card. If nobody is signed in (the user is null) or the check
- * failed, we redirect to `/auth` with a `returnTo` query param so login
- * can bring them back to the intended dashboard section.
+ * While we ask the API who is signed in, it shows a "checking" card.
+ * Nobody signed in → we go to /auth?returnTo=..., so after signing in
+ * the user comes back to the page they wanted.
  */
 
 import type { ReactNode } from "react";

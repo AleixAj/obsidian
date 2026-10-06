@@ -1,7 +1,4 @@
-/**
- * Small formatting helpers reused across the app.
- * Keeping them isolated makes them easy to test and tweak.
- */
+/** Small helpers to show prices and numbers. */
 import { currentLocale } from "../i18n";
 
 /**
@@ -25,7 +22,7 @@ export function formatPrice(value: number): string {
 }
 
 /**
- * Pads a number with a leading zero — used by the countdown.
+ * Adds a 0 in front of numbers under 10. Used by the countdown.
  *
  * @example pad(7) → "07"
  */

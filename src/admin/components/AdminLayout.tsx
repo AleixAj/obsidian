@@ -1,9 +1,7 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useLogout, useUser } from "../../hooks/queries";
-import { authKeys } from "../../hooks/queries/useAuth";
 import { mediaUrl } from "../../lib/api";
 import { useDashboard } from "../hooks";
 import { initials, ROLE_LABELS } from "../format";
@@ -28,7 +26,6 @@ export function AdminLayout() {
   const { data: user } = useUser();
   const logout = useLogout();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [menuOpen, setMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -41,9 +38,9 @@ export function AdminLayout() {
     "/admin/returns": dashboard?.badges.returns_to_review ?? 0,
   };
 
-  // If the session expires, src/lib/queryClient.ts forgets the user on any
-  // 401, and RequireStaff sends them back to the login page.
-
+  // RequireStaff already checked this. If the session expires later,
+  // src/lib/queryClient.ts forgets the user and RequireStaff sends them
+  // back to the login page.
   if (!user?.role) return null;
 
   const permissions = user.permissions;
@@ -54,14 +51,9 @@ export function AdminLayout() {
   }
 
   function handleLogout() {
-    // onSettled runs on success AND on error: if the session had already
-    // expired, the user is logged out anyway.
-    logout.mutate(undefined, {
-      onSettled: () => {
-        queryClient.setQueryData(authKeys.user, null);
-        navigate("/admin/login");
-      },
-    });
+    // useLogout forgets the user even if the request fails (e.g. the
+    // session had already expired), so we always go to the login page.
+    logout.mutate(undefined, { onSettled: () => navigate("/admin/login") });
   }
 
   function renderLink(item: NavItem) {
@@ -85,7 +77,6 @@ export function AdminLayout() {
             {badges[item.path]}
           </span>
         )}
-        {item.soon && <span className="adm-nav-soon">{t("nav.soon")}</span>}
       </NavLink>
     );
   }

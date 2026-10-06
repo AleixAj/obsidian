@@ -3,7 +3,6 @@
  *
  * `permission` must match the API permissions (App\Enums\Role in
  * obsidian-api). A section is only shown if the user's role has it.
- * `soon` marks sections planned for the next versions.
  * `label` is a translation key (admin.json), shown with t(item.label).
  */
 
@@ -14,7 +13,6 @@ export interface NavItem {
   label: string;
   icon: AdminIconName;
   permission: string;
-  soon?: boolean;
 }
 
 export const MAIN_NAV: NavItem[] = [

@@ -142,16 +142,6 @@
   border-radius: 10px;
 }
 
-.adm-nav-soon {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--fg-mute);
-  border: 1px solid var(--line-2);
-  padding: 1px 5px;
-}
-
 .adm-user {
   display: flex;
   align-items: center;

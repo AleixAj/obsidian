@@ -8,15 +8,13 @@ import { Marquee } from "../components/ui/Marquee";
 import { Placeholder } from "../components/ui/Placeholder";
 import { Reveal } from "../components/ui/Reveal";
 import { compareNewCollectionOrder } from "../constants/catalog";
-import { BRAND, TEMPLATES } from "../data/products";
+import { BRAND, TEMPLATES } from "../data/images";
 import { useProducts } from "../hooks/queries";
 import { pad } from "../utils/format";
 
 /**
- * Top hero with the campaign artwork, headline and the two CTAs.
- *
- * The `outline + gold-fill` treatment is the brand's signature — two
- * variants of the same word stacked on top of each other.
+ * The big first section: campaign photo, title and two buttons.
+ * The title mixes outlined words and gold words, the brand's style.
  */
 function Hero() {
   const { t } = useTranslation("shop");
@@ -75,7 +73,7 @@ function Hero() {
   );
 }
 
-/** Featured grid — the first 4 products of the catalogue. */
+/** The first 4 products of the new collection. */
 function FeaturedGrid() {
   const { t } = useTranslation("shop");
   const { data: products, isPending, isError, refetch } = useProducts("new");
@@ -178,11 +176,11 @@ function Lookbook() {
 }
 
 /**
- * Live countdown to the next drop.
+ * Countdown to the next drop (2 days, 14 hours and 38 minutes from now).
  *
- * The target date is locked-in on mount via `useMemo` — otherwise it
- * would be re-computed every tick and the distance would never shrink,
- * freezing the counter. The interval is cleared on unmount.
+ * The end date is calculated only once (useMemo). If it was calculated
+ * on every render, it would move forward every second and the counter
+ * would never go down.
  */
 function DropStrip() {
   const { t } = useTranslation("shop");
@@ -292,9 +290,8 @@ function Categories() {
 }
 
 /**
- * Full-bleed editorial section featuring the brand's signature street
- * shot. Sits between the lookbook and the countdown to break the
- * rhythm of grids with a single cinematic image.
+ * A full-width section with the street photo of the brand, between the
+ * lookbook and the countdown, so the page isn't only grids.
  */
 function BrandStatement() {
   const { t } = useTranslation("shop");
@@ -357,7 +354,7 @@ function QuoteStrip() {
   );
 }
 
-/** Composed home page. */
+/** The home page. */
 export function Home() {
   const { t } = useTranslation("shop");
   return (

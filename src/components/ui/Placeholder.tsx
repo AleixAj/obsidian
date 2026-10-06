@@ -1,17 +1,16 @@
 import type { CSSProperties } from "react";
 
 /**
- * A versatile image / image-placeholder element.
+ * A box with a photo as its background.
  *
- * If `img` is provided it renders the photo with an optional dark
- * gradient overlay (so light photos still look on-brand against a
- * black layout). Without `img` it falls back to a striped placeholder
- * — useful for category cards or while real assets aren't ready.
+ * With `img` it shows the photo, with a dark gradient on top so light
+ * photos don't look out of place on the black page. Without `img` it
+ * shows a striped box instead.
  */
 interface PlaceholderProps {
-  /** Optional label rendered in the bottom-left corner (mono caption). */
+  /** Small text in the bottom-left corner. */
   label?: string;
-  /** Visual palette hint for the fallback stripes. */
+  /** Colour of the stripes when there is no photo. */
   palette?: "warm" | "gold";
   /** Shows the small gold corner bracket. */
   corner?: boolean;
@@ -19,7 +18,7 @@ interface PlaceholderProps {
   style?: CSSProperties;
   /** When set, the URL becomes the background image. */
   img?: string | null;
-  /** Whether to overlay a dark gradient to anchor light photos. */
+  /** Puts the dark gradient on top of the photo. */
   tint?: boolean;
 }
 

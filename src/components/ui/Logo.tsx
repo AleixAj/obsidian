@@ -2,11 +2,8 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 /**
- * Brand logo lockup — the diamond mark designed by the brand owner
- * plus the "OBSIDIAN" wordmark. Always links to the home page.
- *
- * The image lives in `/public` so it is served as a static asset and
- * the URL works identically in `dev` and `build`.
+ * The logo: the diamond image and the word "OBSIDIAN".
+ * It always links to the home page.
  */
 interface LogoProps {
   /** When true, hides the wordmark and only shows the mark. */

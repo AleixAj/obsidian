@@ -1,9 +1,9 @@
 /**
- * Horizontal infinite-scroll marquee.
+ * A line of text that scrolls sideways without end.
  *
- * The trick: render the items twice and translate the row by -50% so
- * the second copy lines up exactly with the first when the animation
- * loops — giving a seamless infinite scroll using CSS only.
+ * The trick: we write the items twice, and the CSS animation moves the
+ * row by half its width. When it starts again, the second copy is exactly
+ * where the first one was, so you never see the jump.
  */
 interface MarqueeProps {
   items: string[];
